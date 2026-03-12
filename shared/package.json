@@ -8,10 +8,12 @@
     "exports": {
         ".": "./src/index.ts",
         "./contracts/machines": "./src/contracts/machines.ts",
+        "./contracts/templates": "./src/contracts/templates.ts",
         "./machines": "./src/machines.ts",
         "./messages": "./src/messages.ts",
         "./modes": "./src/modes.ts",
         "./schemas": "./src/schemas.ts",
+        "./templates": "./src/templates.ts",
         "./types": "./src/types.ts",
         "./voice": "./src/voice.ts"
     },

@@ -37,6 +37,15 @@ export type {
     MachineProviderStatusMap,
     RunnerState
 } from './machines'
+export type {
+    BuiltinTemplateOverridePatch,
+    RoleSlotTemplate,
+    RoomTemplateDefinition,
+    RoomTemplateSlot,
+    TemplateAgentFlavor,
+    TemplateCatalog,
+    TemplateOverrideState
+} from './templates'
 
 export type {
     AgentFlavor,

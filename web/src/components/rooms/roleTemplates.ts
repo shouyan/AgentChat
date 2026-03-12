@@ -1,15 +1,12 @@
+import type {
+  RoleSlotTemplate,
+  RoomTemplateDefinition,
+  RoomTemplateSlot,
+  TemplateAgentFlavor as AgentFlavor,
+  TemplateCatalog,
+  TemplateOverrideState,
+} from '@hapi/protocol/templates'
 import type { RoomMetadata } from '@/types/api'
-
-export type AgentFlavor = 'claude' | 'codex' | 'cursor' | 'gemini' | 'opencode'
-
-export type RoleSlotTemplate = {
-  key: string
-  label: string
-  description?: string
-  roleKey: string
-  roleLabel: string
-  preferredFlavor?: AgentFlavor
-}
 
 export type RoleTemplateRoleDraft = {
   key: string
@@ -29,34 +26,7 @@ export type RoleTemplateDraft = {
   roles: RoleTemplateRoleDraft[]
 }
 
-export type RoomTemplateSlot = {
-  enabled?: boolean
-  roleTemplateKey: string
-  agent?: AgentFlavor
-  model?: string
-  mentionKey?: string
-}
-
-export type RoomTemplateDefinition = {
-  key: string
-  label: string
-  description?: string
-  visibleInRoomCreator?: boolean
-  slots: RoomTemplateSlot[]
-}
-
-export type TemplateOverrideState = {
-  key: string
-  hidden: boolean
-  deleted: boolean
-}
-
-export type TemplateCatalog = {
-  customRoleTemplates: RoleSlotTemplate[]
-  customRoomTemplates: RoomTemplateDefinition[]
-  builtinRoleTemplateOverrides: TemplateOverrideState[]
-  builtinRoomTemplateOverrides: TemplateOverrideState[]
-}
+export type { AgentFlavor, RoleSlotTemplate, RoomTemplateDefinition, RoomTemplateSlot, TemplateCatalog, TemplateOverrideState }
 
 export const EMPTY_TEMPLATE_CATALOG: TemplateCatalog = {
   customRoleTemplates: [],

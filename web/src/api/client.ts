@@ -36,9 +36,9 @@ import type {
 import type {
     RoleSlotTemplate,
     RoomTemplateDefinition,
-    TemplateCatalog,
     TemplateOverrideState,
-} from '@/components/rooms/roleTemplates'
+} from '@hapi/protocol/templates'
+import type { TemplatesResponse } from '@hapi/protocol/contracts/templates'
 
 type ApiClientOptions = {
     baseUrl?: string
@@ -50,7 +50,7 @@ type ErrorPayload = {
     error?: unknown
 }
 
-export type TemplatesResponse = TemplateCatalog
+export type { TemplatesResponse }
 
 function parseErrorCode(bodyText: string): string | undefined {
     try {

@@ -1,50 +1,25 @@
 import { Hono } from 'hono'
-import { z } from 'zod'
+import {
+    BuiltinTemplateOverridePatchSchema,
+    RoleSlotTemplateSchema,
+    RoomTemplateDefinitionSchema,
+} from '@hapi/protocol/templates'
+import { TemplatesResponseSchema } from '@hapi/protocol/contracts/templates'
 import type { Store } from '../../store'
 import type { TemplateKind } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import type { SSEManager } from '../../sse/sseManager'
 
-const agentFlavorSchema = z.enum(['claude', 'codex', 'cursor', 'gemini', 'opencode'])
-
-const roleSlotTemplateSchema = z.object({
-    key: z.string().min(1),
-    label: z.string().min(1),
-    description: z.string().optional(),
-    roleKey: z.string().min(1),
-    roleLabel: z.string().min(1),
-    preferredFlavor: agentFlavorSchema.optional(),
-})
-
-const roomTemplateSchema = z.object({
-    key: z.string().min(1),
-    label: z.string().min(1),
-    description: z.string().optional(),
-    visibleInRoomCreator: z.boolean().optional(),
-    slots: z.array(z.object({
-        enabled: z.boolean().optional(),
-        roleTemplateKey: z.string().min(1),
-        agent: agentFlavorSchema.optional(),
-        model: z.string().optional(),
-        mentionKey: z.string().optional(),
-    })).default([]),
-})
-
-const builtinOverrideSchema = z.object({
-    hidden: z.boolean().optional(),
-    deleted: z.boolean().optional(),
-})
-
 function getTemplatesResponse(store: Store, namespace: string) {
-    return {
+    return TemplatesResponseSchema.parse({
         customRoleTemplates: store.templates
             .getSavedTemplates(namespace, 'role_slot')
-            .map((template) => roleSlotTemplateSchema.safeParse(template.payload))
+            .map((template) => RoleSlotTemplateSchema.safeParse(template.payload))
             .filter((result) => result.success)
             .map((result) => result.data),
         customRoomTemplates: store.templates
             .getSavedTemplates(namespace, 'room')
-            .map((template) => roomTemplateSchema.safeParse(template.payload))
+            .map((template) => RoomTemplateDefinitionSchema.safeParse(template.payload))
             .filter((result) => result.success)
             .map((result) => result.data),
         builtinRoleTemplateOverrides: store.templates
@@ -53,7 +28,7 @@ function getTemplatesResponse(store: Store, namespace: string) {
         builtinRoomTemplateOverrides: store.templates
             .getBuiltinTemplateOverrides(namespace, 'room')
             .map((item) => ({ key: item.key, hidden: item.hidden, deleted: item.deleted })),
-    }
+    })
 }
 
 function parseKind(kind: string): TemplateKind | null {
@@ -63,7 +38,7 @@ function parseKind(kind: string): TemplateKind | null {
 }
 
 function getSchemaForKind(kind: TemplateKind) {
-    return kind === 'role_slot' ? roleSlotTemplateSchema : roomTemplateSchema
+    return kind === 'role_slot' ? RoleSlotTemplateSchema : RoomTemplateDefinitionSchema
 }
 
 function broadcastTemplatesUpdated(sseManager: SSEManager | null, namespace: string, scope: 'all' | 'role_slot' | 'room') {
@@ -125,7 +100,7 @@ export function createTemplateRoutes(store: Store, getSseManager: () => SSEManag
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = builtinOverrideSchema.safeParse(body)
+        const parsed = BuiltinTemplateOverridePatchSchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
