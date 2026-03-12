@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from '@/api/client'
-import { useMachineDirectory } from '@/hooks/queries/useMachineDirectory'
+import { useMachineDirectory } from '@/features/machines/hooks/useMachineDirectory'
 import { useTranslation } from '@/lib/use-translation'
 import { Button } from '@/components/ui/button'
 import {

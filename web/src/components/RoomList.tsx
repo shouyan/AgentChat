@@ -3,7 +3,7 @@ import type { ApiClient } from '@/api/client'
 import type { Room, SessionSummary } from '@/types/api'
 import { AgentAvatar, hashStringToIndex, normalizeAgentFlavor } from '@/components/rooms/agentCatalog'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import { useRoomActions } from '@/hooks/mutations/useRoomActions'
+import { useRoomActions } from '@/features/rooms/hooks/useRoomActions'
 
 function isRoleOnline(role: Room['state']['roles'][number], sessions: SessionSummary[]): boolean {
   if (!role.assignedSessionId) return false

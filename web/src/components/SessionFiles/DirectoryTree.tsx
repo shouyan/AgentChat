@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import type { ApiClient } from '@/api/client'
 import { FileIcon } from '@/components/FileIcon'
-import { useSessionDirectory } from '@/hooks/queries/useSessionDirectory'
+import { useSessionDirectory } from '@/features/files/hooks/useSessionDirectory'
 
 function EditIcon(props: { className?: string }) {
     return (

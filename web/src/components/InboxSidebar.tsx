@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { ApiClient } from '@/api/client'
 import { BrandMark } from '@/components/BrandMark'
 import { ChatList } from '@/components/ChatList'
-import { useRooms } from '@/hooks/queries/useRooms'
+import { useRooms } from '@/features/rooms/hooks/useRooms'
 import { useSessions } from '@/hooks/queries/useSessions'
 
 function SettingsIcon(props: { className?: string }) {

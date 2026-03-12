@@ -2,7 +2,7 @@ import type { MutableRefObject } from 'react'
 import { AgentAvatar, hashStringToIndex, normalizeAgentFlavor } from '@/components/rooms/agentCatalog'
 import { OnlineBadge } from '@/features/rooms/components/OnlineBadge'
 import type { Room, RoomMessage, SessionSummary } from '@/types/api'
-import type { useRoomActions } from '@/hooks/mutations/useRoomActions'
+import type { useRoomActions } from '@/features/rooms/hooks/useRoomActions'
 import { getRoomComposerRoutingPreview } from '@hapi/protocol/roomRouting'
 import {
     formatRoomMessageTime,

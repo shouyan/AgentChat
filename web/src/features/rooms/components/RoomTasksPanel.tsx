@@ -1,5 +1,5 @@
 import type { Room, SessionSummary } from '@/types/api'
-import type { useRoomActions } from '@/hooks/mutations/useRoomActions'
+import type { useRoomActions } from '@/features/rooms/hooks/useRoomActions'
 
 type RoomActions = ReturnType<typeof useRoomActions>
 

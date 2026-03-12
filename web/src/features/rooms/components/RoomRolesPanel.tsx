@@ -1,5 +1,5 @@
 import type { Machine, Room, RoomRoleTemplate, SessionSummary } from '@/types/api'
-import type { useRoomActions } from '@/hooks/mutations/useRoomActions'
+import type { useRoomActions } from '@/features/rooms/hooks/useRoomActions'
 import { BUILTIN_ROLE_TEMPLATE_LIST, type RoleTemplateDraft } from '@/components/rooms/roleTemplates'
 import { OnlineBadge } from './OnlineBadge'
 
