@@ -1,0 +1,405 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - img "AgentChat" [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]: AgentChat
+            - generic [ref=e138]: Rooms and direct sessions in one inbox
+        - button "Settings" [ref=e139]:
+          - img [ref=e140]
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]: Chats
+            - generic [ref=e148]: 4 total
+          - generic [ref=e149]:
+            - button "Refresh" [ref=e150]
+            - button "Session" [ref=e151]:
+              - img [ref=e152]
+              - text: Session
+            - button "Room" [ref=e153]:
+              - img [ref=e154]
+              - text: Room
+        - generic [ref=e155]:
+          - button "Claude Code Codex Claude Code Codex +5 Web Room QA Planner · Coder · Coordinator · Implementer 0/9 online 0/9 assigned 0/0 tasks done @planner_cc_auto" [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]:
+                - img "Claude Code" [ref=e162]
+                - img "Codex" [ref=e167]
+                - img "Claude Code" [ref=e172]
+                - img "Codex" [ref=e177]
+                - generic [ref=e179]: "+5"
+              - generic [ref=e180]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]:
+                    - generic [ref=e183]: Web Room QA
+                    - generic [ref=e184]: Planner · Coder · Coordinator · Implementer
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: 0/9 online
+                    - button "Delete room" [ref=e187]:
+                      - img [ref=e188]
+                - generic [ref=e191]:
+                  - generic [ref=e192]: 0/9 assigned
+                  - generic [ref=e193]: 0/0 tasks done
+                  - generic [ref=e194]: "@planner_cc_auto"
+          - 'button "Codex agentchat-source Codex 10h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e195]':
+            - img "Codex" [ref=e199]
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: agentchat-source
+                  - generic [ref=e205]: Codex
+                - generic [ref=e206]:
+                  - generic [ref=e207]: 10h ago
+                  - button "Delete session" [ref=e208]:
+                    - img [ref=e209]
+              - generic [ref=e212]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e214]: "mode: default"
+          - 'button "Claude Code code Claude Code 10h ago /Users/zhf/Desktop/code/ mode: default" [ref=e215]':
+            - img "Claude Code" [ref=e219]
+            - generic [ref=e221]:
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - generic [ref=e224]: code
+                  - generic [ref=e225]: Claude Code
+                - generic [ref=e226]:
+                  - generic [ref=e227]: 10h ago
+                  - button "Delete session" [ref=e228]:
+                    - img [ref=e229]
+              - generic [ref=e232]: /Users/zhf/Desktop/code/
+              - generic [ref=e234]: "mode: default"
+          - 'button "Codex agentchat-source Codex 19h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e235]':
+            - img "Codex" [ref=e239]
+            - generic [ref=e241]:
+              - generic [ref=e242]:
+                - generic [ref=e243]:
+                  - generic [ref=e244]: agentchat-source
+                  - generic [ref=e245]: Codex
+                - generic [ref=e246]:
+                  - generic [ref=e247]: 19h ago
+                  - button "Delete session" [ref=e248]:
+                    - img [ref=e249]
+              - generic [ref=e252]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e254]: "mode: default"
+    - generic [ref=e257]:
+      - generic [ref=e259]:
+        - button [ref=e260]:
+          - img [ref=e261]
+        - generic [ref=e263]:
+          - generic [ref=e264]: AGENTS.md
+          - generic [ref=e265]: AGENTS.md
+      - generic [ref=e267]:
+        - img [ref=e268]
+        - generic [ref=e271]: AGENTS.md
+        - button "Copy path" [ref=e272]:
+          - img [ref=e273]
+      - generic [ref=e277]:
+        - button "Preview" [ref=e278]
+        - button "Source" [ref=e279]
+        - button "Edit" [ref=e280]
+        - button "Download" [ref=e282]
+      - generic [ref=e284]:
+        - generic [ref=e285]: "Diff unavailable: Command failed: git diff --no-ext-diff -- AGENTS.md warning: Not a git repository. Use --no-index to compare two paths outside a working tree usage: git diff --no-index [<options>] <path> <path> Diff output format options -p, --patch generate patch -s, --no-patch suppress diff output -u generate patch -U, --unified[=<n>] generate diffs with <n> lines context -W, --[no-]function-context generate diffs with <n> lines context --raw generate the diff in raw format --patch-with-raw synonym for '-p --raw' --patch-with-stat synonym for '-p --stat' --numstat machine friendly --stat --shortstat output only the last line of --stat -X, --dirstat[=<param1>,<param2>...] output the distribution of relative amount of changes for each sub-directory --cumulative synonym for --dirstat=cumulative --dirstat-by-file[=<param1>,<param2>...] synonym for --dirstat=files,<param1>,<param2>... --check warn if changes introduce conflict markers or whitespace errors --summary condensed summary such as creations, renames and mode changes --name-only show only names of changed files --name-status show only names and status of changed files --stat[=<width>[,<name-width>[,<count>]]] generate diffstat --stat-width <width> generate diffstat with a given width --stat-name-width <width> generate diffstat with a given name width --stat-graph-width <width> generate diffstat with a given graph width --stat-count <count> generate diffstat with limited lines --[no-]compact-summary generate compact summary in diffstat --binary output a binary diff that can be applied --[no-]full-index show full pre- and post-image object names on the \"index\" lines --[no-]color[=<when>] show colored diff --ws-error-highlight <kind> highlight whitespace errors in the 'context', 'old' or 'new' lines in the diff -z do not munge pathnames and use NULs as output field terminators in --raw or --numstat --[no-]abbrev[=<n>] use <n> digits to display object names --src-prefix <prefix> show the given source prefix instead of \"a/\" --dst-prefix <prefix> show the given destination prefix instead of \"b/\" --line-prefix <prefix> prepend an additional prefix to every line of output --no-prefix do not show any source or destination prefix --default-prefix use default prefixes a/ and b/ --inter-hunk-context <n> show context between diff hunks up to the specified number of lines --output-indicator-new <char> specify the character to indicate a new line instead of '+' --output-indicator-old <char> specify the character to indicate an old line instead of '-' --output-indicator-context <char> specify the character to indicate a context instead of ' ' Diff rename options -B, --break-rewrites[=<n>[/<m>]] break complete rewrite changes into pairs of delete and create -M, --find-renames[=<n>] detect renames -D, --irreversible-delete omit the preimage for deletes -C, --find-copies[=<n>] detect copies --[no-]find-copies-harder use unmodified files as source to find copies --no-renames disable rename detection --[no-]rename-empty use empty blobs as rename source --[no-]follow continue listing the history of a file beyond renames -l <n> prevent rename/copy detection if the number of rename/copy targets exceeds given limit Diff algorithm options --minimal produce the smallest possible diff -w, --ignore-all-space ignore whitespace when comparing lines -b, --ignore-space-change ignore changes in amount of whitespace --ignore-space-at-eol ignore changes in whitespace at EOL --ignore-cr-at-eol ignore carrier-return at the end of line --ignore-blank-lines ignore changes whose lines are all blank -I, --[no-]ignore-matching-lines <regex> ignore changes whose all lines match <regex> --[no-]indent-heuristic heuristic to shift diff hunk boundaries for easy reading --patience generate diff using the \"patience diff\" algorithm --histogram generate diff using the \"histogram diff\" algorithm --diff-algorithm <algorithm> choose a diff algorithm --anchored <text> generate diff using the \"anchored diff\" algorithm --word-diff[=<mode>] show word diff, using <mode> to delimit changed words --word-diff-regex <regex> use <regex> to decide what a word is --color-words[=<regex>] equivalent to --word-diff=color --word-diff-regex=<regex> --[no-]color-moved[=<mode>] moved lines of code are colored differently --[no-]color-moved-ws <mode> how white spaces are ignored in --color-moved Other diff options --[no-]relative[=<prefix>] when run from subdir, exclude changes outside and show relative paths -a, --[no-]text treat all files as text -R swap two inputs, reverse the diff --[no-]exit-code exit with 1 if there were differences, 0 otherwise --[no-]quiet disable all output of the program --[no-]ext-diff allow an external diff helper to be executed --[no-]textconv run external text conversion filters when comparing binary files --ignore-submodules[=<when>] ignore changes to submodules in the diff generation --submodule[=<format>] specify how differences in submodules are shown --ita-invisible-in-index hide 'git add -N' entries from the index --ita-visible-in-index treat 'git add -N' entries as real in the index -S <string> look for differences that change the number of occurrences of the specified string -G <regex> look for differences that change the number of occurrences of the specified regex --pickaxe-all show all changes in the changeset with -S or -G --pickaxe-regex treat <string> in -S as extended POSIX regular expression -O <file> control the order in which files appear in the output --rotate-to <path> show the change in the specified path first --skip-to <path> skip the output to the specified path --find-object <object-id> look for differences that change the number of occurrences of the specified object --diff-filter [(A|C|D|M|R|T|U|X|B)...[*]] select files by diff type --output <file> output to a specific file"
+        - generic [ref=e286]:
+          - heading "AGENTS.md" [level=1] [ref=e287]
+          - paragraph [ref=e288]: "Work style: telegraph; noun-phrases ok; drop grammar;"
+          - paragraph [ref=e289]: "Short guide for AI agents in this repo. Prefer progressive loading: start with the root README, then package READMEs as needed."
+          - heading "What is HAPI?" [level=2] [ref=e290]
+          - paragraph [ref=e291]: Local-first platform for running AI coding agents (Claude Code, Codex, Gemini) with remote control via web/phone. CLI wraps agents and connects to hub; hub serves web app and handles real-time sync.
+          - heading "Repo layout" [level=2] [ref=e292]
+          - code [ref=e294]: cli/ - CLI binary, agent wrappers, runner daemon hub/ - HTTP API + Socket.IO + SSE + Telegram bot web/ - React PWA for remote control shared/ - Common types, schemas, utilities docs/ - VitePress documentation site website/ - Marketing site
+          - paragraph [ref=e295]:
+            - text: Bun workspaces;
+            - code [ref=e296]: shared
+            - text: consumed by cli, hub, web.
+          - heading "Architecture overview" [level=2] [ref=e297]
+          - code [ref=e299]: ┌─────────┐ Socket.IO ┌─────────┐ SSE/REST ┌─────────┐ │ CLI │ ──────────── │ Hub │ ──────────── │ Web │ │ (agent) │ │ (server)│ │ (PWA) │ └─────────┘ └─────────┘ └─────────┘ │ │ │ ├─ Wraps Claude/Codex ├─ SQLite persistence ├─ TanStack Query ├─ Socket.IO client ├─ Session cache ├─ SSE for updates └─ RPC handlers ├─ RPC gateway └─ assistant-ui └─ Telegram bot
+          - paragraph [ref=e300]:
+            - strong [ref=e301]: "Data flow:"
+          - list [ref=e302]:
+            - listitem [ref=e303]: CLI spawns agent (claude/codex/gemini), connects to hub via Socket.IO
+            - listitem [ref=e304]:
+              - text: Agent events → CLI → hub (socket
+              - code [ref=e305]: message
+              - text: event) → DB + SSE broadcast
+            - listitem [ref=e306]:
+              - text: Web subscribes to SSE
+              - code [ref=e307]: /api/events
+              - text: ", receives live updates"
+            - listitem [ref=e308]: User actions → Web → hub REST API → RPC to CLI → agent
+          - heading "Reference docs" [level=2] [ref=e309]
+          - list [ref=e310]:
+            - listitem [ref=e311]:
+              - code [ref=e312]: README.md
+              - text: "- User overview, quick start"
+            - listitem [ref=e313]:
+              - code [ref=e314]: cli/README.md
+              - text: "- CLI commands, config, runner"
+            - listitem [ref=e315]:
+              - code [ref=e316]: hub/README.md
+              - text: "- Hub config, HTTP API, Socket.IO events"
+            - listitem [ref=e317]:
+              - code [ref=e318]: web/README.md
+              - text: "- Routes, components, hooks"
+            - listitem [ref=e319]:
+              - code [ref=e320]: docs/guide/
+              - text: "- User guides (installation, how-it-works, FAQ)"
+          - heading "Shared rules" [level=2] [ref=e321]
+          - list [ref=e322]:
+            - listitem [ref=e323]: "No backward compatibility: breaking old formats freely"
+            - listitem [ref=e324]: TypeScript strict; no untyped code
+            - listitem [ref=e325]:
+              - text: Bun workspaces; run
+              - code [ref=e326]: bun
+              - text: commands from repo root
+            - listitem [ref=e327]:
+              - text: Path alias
+              - code [ref=e328]: "@/*"
+              - text: maps to
+              - code [ref=e329]: ./src/*
+              - text: per package
+            - listitem [ref=e330]: Prefer 4-space indentation
+            - listitem [ref=e331]:
+              - text: Zod for runtime validation (schemas in
+              - code [ref=e332]: shared/src/schemas.ts
+              - text: )
+          - heading "Common commands (repo root)" [level=2] [ref=e333]
+          - code [ref=e335]: "bun typecheck # All packages bun run test # cli + hub tests bun run dev # hub + web concurrently bun run build:single-exe # All-in-one binary"
+          - heading "Key source dirs" [level=2] [ref=e336]
+          - heading "CLI (cli/src/)" [level=3] [ref=e337]:
+            - text: CLI (
+            - code [ref=e338]: cli/src/
+            - text: )
+          - list [ref=e339]:
+            - listitem [ref=e340]:
+              - code [ref=e341]: api/
+              - text: "- Hub connection (Socket.IO client, auth)"
+            - listitem [ref=e342]:
+              - code [ref=e343]: claude/
+              - text: "- Claude Code integration (wrapper, hooks)"
+            - listitem [ref=e344]:
+              - code [ref=e345]: codex/
+              - text: "- Codex mode integration"
+            - listitem [ref=e346]:
+              - code [ref=e347]: agent/
+              - text: "- Multi-agent support (Gemini via ACP)"
+            - listitem [ref=e348]:
+              - code [ref=e349]: runner/
+              - text: "- Background daemon for remote spawn"
+            - listitem [ref=e350]:
+              - code [ref=e351]: commands/
+              - text: "- CLI subcommands (auth, runner, doctor)"
+            - listitem [ref=e352]:
+              - code [ref=e353]: modules/
+              - text: "- Tool implementations (ripgrep, difftastic, git)"
+            - listitem [ref=e354]:
+              - code [ref=e355]: ui/
+              - text: "- Terminal UI (Ink components)"
+          - heading "Hub (hub/src/)" [level=3] [ref=e356]:
+            - text: Hub (
+            - code [ref=e357]: hub/src/
+            - text: )
+          - list [ref=e358]:
+            - listitem [ref=e359]:
+              - code [ref=e360]: web/routes/
+              - text: "- REST API endpoints"
+            - listitem [ref=e361]:
+              - code [ref=e362]: socket/
+              - text: "- Socket.IO setup"
+            - listitem [ref=e363]:
+              - code [ref=e364]: socket/handlers/cli/
+              - text: "- CLI event handlers (session, terminal, machine, RPC)"
+            - listitem [ref=e365]:
+              - code [ref=e366]: sync/
+              - text: "- Core logic (sessionCache, messageService, rpcGateway)"
+            - listitem [ref=e367]:
+              - code [ref=e368]: store/
+              - text: "- SQLite persistence (better-sqlite3)"
+            - listitem [ref=e369]:
+              - code [ref=e370]: sse/
+              - text: "- Server-Sent Events manager"
+            - listitem [ref=e371]:
+              - code [ref=e372]: telegram/
+              - text: "- Bot commands, callbacks"
+            - listitem [ref=e373]:
+              - code [ref=e374]: notifications/
+              - text: "- Push (VAPID) and Telegram notifications"
+            - listitem [ref=e375]:
+              - code [ref=e376]: config/
+              - text: "- Settings loading, token generation"
+            - listitem [ref=e377]:
+              - code [ref=e378]: visibility/
+              - text: "- Client visibility tracking"
+          - heading "Web (web/src/)" [level=3] [ref=e379]:
+            - text: Web (
+            - code [ref=e380]: web/src/
+            - text: )
+          - list [ref=e381]:
+            - listitem [ref=e382]:
+              - code [ref=e383]: routes/
+              - text: "- TanStack Router pages"
+            - listitem [ref=e384]:
+              - code [ref=e385]: routes/sessions/
+              - text: "- Session views (chat, files, terminal)"
+            - listitem [ref=e386]:
+              - code [ref=e387]: components/
+              - text: "- Reusable UI (SessionList, SessionChat, NewSession/)"
+            - listitem [ref=e388]:
+              - code [ref=e389]: hooks/queries/
+              - text: "- TanStack Query hooks"
+            - listitem [ref=e390]:
+              - code [ref=e391]: hooks/mutations/
+              - text: "- Mutation hooks"
+            - listitem [ref=e392]:
+              - code [ref=e393]: hooks/useSSE.ts
+              - text: "- SSE subscription"
+            - listitem [ref=e394]:
+              - code [ref=e395]: api/client.ts
+              - text: "- API client wrapper"
+          - heading "Shared (shared/src/)" [level=3] [ref=e396]:
+            - text: Shared (
+            - code [ref=e397]: shared/src/
+            - text: )
+          - list [ref=e398]:
+            - listitem [ref=e399]:
+              - code [ref=e400]: types.ts
+              - text: "- Core types (Session, Message, Machine)"
+            - listitem [ref=e401]:
+              - code [ref=e402]: schemas.ts
+              - text: "- Zod schemas for validation"
+            - listitem [ref=e403]:
+              - code [ref=e404]: socket.ts
+              - text: "- Socket.IO event types"
+            - listitem [ref=e405]:
+              - code [ref=e406]: messages.ts
+              - text: "- Message parsing utilities"
+            - listitem [ref=e407]:
+              - code [ref=e408]: modes.ts
+              - text: "- Permission/model mode definitions"
+          - heading "Testing" [level=2] [ref=e409]
+          - list [ref=e410]:
+            - listitem [ref=e411]:
+              - text: "Test framework: Vitest (via"
+              - code [ref=e412]: bun run test
+              - text: )
+            - listitem [ref=e413]:
+              - text: "Test files:"
+              - code [ref=e414]: "*.test.ts"
+              - text: next to source
+            - listitem [ref=e415]:
+              - text: "Run:"
+              - code [ref=e416]: bun run test
+              - text: (from root) or
+              - code [ref=e417]: bun run test
+              - text: (from package)
+            - listitem [ref=e418]:
+              - text: "Hub tests:"
+              - code [ref=e419]: hub/src/**/*.test.ts
+            - listitem [ref=e420]:
+              - text: "CLI tests:"
+              - code [ref=e421]: cli/src/**/*.test.ts
+            - listitem [ref=e422]: No web tests currently
+          - heading "Common tasks" [level=2] [ref=e423]
+          - table [ref=e424]:
+            - rowgroup [ref=e425]:
+              - row "Task Key files" [ref=e426]:
+                - columnheader "Task" [ref=e427]
+                - columnheader "Key files" [ref=e428]
+            - rowgroup [ref=e429]:
+              - row "Add CLI command cli/src/commands/, cli/src/index.ts" [ref=e430]:
+                - cell "Add CLI command" [ref=e431]
+                - cell "cli/src/commands/, cli/src/index.ts" [ref=e432]:
+                  - code [ref=e433]: cli/src/commands/
+                  - text: ","
+                  - code [ref=e434]: cli/src/index.ts
+              - row "Add API endpoint hub/src/web/routes/, register in hub/src/web/index.ts" [ref=e435]:
+                - cell "Add API endpoint" [ref=e436]
+                - cell "hub/src/web/routes/, register in hub/src/web/index.ts" [ref=e437]:
+                  - code [ref=e438]: hub/src/web/routes/
+                  - text: ", register in"
+                  - code [ref=e439]: hub/src/web/index.ts
+              - row "Add Socket.IO event hub/src/socket/handlers/cli/, shared/src/socket.ts" [ref=e440]:
+                - cell "Add Socket.IO event" [ref=e441]
+                - cell "hub/src/socket/handlers/cli/, shared/src/socket.ts" [ref=e442]:
+                  - code [ref=e443]: hub/src/socket/handlers/cli/
+                  - text: ","
+                  - code [ref=e444]: shared/src/socket.ts
+              - row "Add web route web/src/routes/, web/src/router.tsx" [ref=e445]:
+                - cell "Add web route" [ref=e446]
+                - cell "web/src/routes/, web/src/router.tsx" [ref=e447]:
+                  - code [ref=e448]: web/src/routes/
+                  - text: ","
+                  - code [ref=e449]: web/src/router.tsx
+              - row "Add web component web/src/components/" [ref=e450]:
+                - cell "Add web component" [ref=e451]
+                - cell "web/src/components/" [ref=e452]:
+                  - code [ref=e453]: web/src/components/
+              - row "Modify session logic hub/src/sync/sessionCache.ts, hub/src/sync/syncEngine.ts" [ref=e454]:
+                - cell "Modify session logic" [ref=e455]
+                - cell "hub/src/sync/sessionCache.ts, hub/src/sync/syncEngine.ts" [ref=e456]:
+                  - code [ref=e457]: hub/src/sync/sessionCache.ts
+                  - text: ","
+                  - code [ref=e458]: hub/src/sync/syncEngine.ts
+              - row "Modify message handling hub/src/sync/messageService.ts" [ref=e459]:
+                - cell "Modify message handling" [ref=e460]
+                - cell "hub/src/sync/messageService.ts" [ref=e461]:
+                  - code [ref=e462]: hub/src/sync/messageService.ts
+              - row "Add notification type hub/src/notifications/" [ref=e463]:
+                - cell "Add notification type" [ref=e464]
+                - cell "hub/src/notifications/" [ref=e465]:
+                  - code [ref=e466]: hub/src/notifications/
+              - row "Add shared type shared/src/types.ts, shared/src/schemas.ts" [ref=e467]:
+                - cell "Add shared type" [ref=e468]
+                - cell "shared/src/types.ts, shared/src/schemas.ts" [ref=e469]:
+                  - code [ref=e470]: shared/src/types.ts
+                  - text: ","
+                  - code [ref=e471]: shared/src/schemas.ts
+          - heading "Important patterns" [level=2] [ref=e472]
+          - list [ref=e473]:
+            - listitem [ref=e474]:
+              - strong [ref=e475]: RPC
+              - text: ": CLI registers handlers ("
+              - code [ref=e476]: rpc-register
+              - text: ), hub routes requests via
+              - code [ref=e477]: rpcGateway.ts
+            - listitem [ref=e478]:
+              - strong [ref=e479]: Versioned updates
+              - text: ": CLI sends"
+              - code [ref=e480]: update-metadata
+              - text: /
+              - code [ref=e481]: update-state
+              - text: with version; hub rejects stale
+            - listitem [ref=e482]:
+              - strong [ref=e483]: Session modes
+              - text: ":"
+              - code [ref=e484]: local
+              - text: (terminal) vs
+              - code [ref=e485]: remote
+              - text: (web-controlled); switchable mid-session
+            - listitem [ref=e486]:
+              - strong [ref=e487]: Permission modes
+              - text: ":"
+              - code [ref=e488]: default
+              - text: ","
+              - code [ref=e489]: acceptEdits
+              - text: ","
+              - code [ref=e490]: bypassPermissions
+              - text: ","
+              - code [ref=e491]: plan
+            - listitem [ref=e492]:
+              - strong [ref=e493]: Namespaces
+              - text: ": Multi-user isolation via"
+              - code [ref=e494]: CLI_API_TOKEN:<namespace>
+              - text: suffix
+          - heading "Critical Thinking" [level=2] [ref=e495]
+          - list [ref=e496]:
+            - listitem [ref=e497]: Fix root cause (not band-aid).
+            - listitem [ref=e498]: "Unsure: read more code; if still stuck, ask w/ short options."
+            - listitem [ref=e499]: "Conflicts: call out; pick safer path."
+            - listitem [ref=e500]: "Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user."
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

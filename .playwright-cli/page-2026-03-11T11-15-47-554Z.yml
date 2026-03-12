@@ -1,0 +1,180 @@
+- generic [ref=e2]:
+  - generic [ref=e399]:
+    - generic [ref=e401]:
+      - button [ref=e402]:
+        - img [ref=e403]
+      - generic [ref=e405]: Template Manager
+      - button "New room" [ref=e406]
+    - generic [ref=e408]:
+      - generic [ref=e409]:
+        - generic [ref=e410]: Role templates
+        - generic [ref=e411]: A role template defines what a single slot represents.
+        - generic [ref=e412]:
+          - generic [ref=e413]:
+            - generic [ref=e414]: Planner
+            - generic [ref=e415]: Break down the goal, assign work, and coordinate the team.
+            - generic [ref=e416]: "@planner · claude"
+          - generic [ref=e417]:
+            - generic [ref=e418]: Coordinator
+            - generic [ref=e419]: Keep the room aligned and make sure handoffs happen cleanly.
+            - generic [ref=e420]: "@coordinator · claude"
+          - generic [ref=e421]:
+            - generic [ref=e422]: Architect
+            - generic [ref=e423]: Own system design, interfaces, and structure decisions.
+            - generic [ref=e424]: "@architect · claude"
+          - generic [ref=e425]:
+            - generic [ref=e426]: Coder
+            - generic [ref=e427]: Implement the main code changes.
+            - generic [ref=e428]: "@coder · codex"
+          - generic [ref=e429]:
+            - generic [ref=e430]: Reviewer
+            - generic [ref=e431]: Review outputs, find risks, and request fixes.
+            - generic [ref=e432]: "@reviewer · claude"
+          - generic [ref=e433]:
+            - generic [ref=e434]: Researcher
+            - generic [ref=e435]: Collect evidence, compare sources, and surface findings.
+            - generic [ref=e436]: "@researcher · claude"
+          - generic [ref=e437]:
+            - generic [ref=e438]: Writer
+            - generic [ref=e439]: Turn findings into a clean written deliverable.
+            - generic [ref=e440]: "@writer · claude"
+          - generic [ref=e441]:
+            - generic [ref=e442]: Tester
+            - generic [ref=e443]: Validate behavior, write tests, and check quality.
+            - generic [ref=e444]: "@tester · cursor"
+        - generic [ref=e445]:
+          - generic [ref=e447]: Add custom role template
+          - generic [ref=e448]:
+            - textbox "Template title" [ref=e449]
+            - textbox "Mention key (optional)" [ref=e450]
+            - textbox "What this role does" [ref=e451]
+            - combobox [ref=e452]:
+              - option "claude" [selected]
+              - option "codex"
+              - option "cursor"
+              - option "gemini"
+              - option "opencode"
+          - button "Save role template" [ref=e454]
+      - generic [ref=e455]:
+        - generic [ref=e456]: Room templates
+        - generic [ref=e457]: Add, edit, hide, or delete room templates. Hidden templates stay here but will not appear on the new-room screen.
+        - generic [ref=e458]:
+          - generic [ref=e459]:
+            - generic [ref=e460]:
+              - generic [ref=e461]: Quick Duo
+              - generic [ref=e462]: Built-in
+            - generic [ref=e463]: Minimal two-slot setup for fast collaboration.
+            - generic [ref=e464]:
+              - generic [ref=e465]: Planner
+              - generic [ref=e466]: Coder
+          - generic [ref=e467]:
+            - generic [ref=e468]:
+              - generic [ref=e469]: Dev Trio
+              - generic [ref=e470]: Built-in
+            - generic [ref=e471]: Planner, coder, reviewer.
+            - generic [ref=e472]:
+              - generic [ref=e473]: Planner
+              - generic [ref=e474]: Coder
+              - generic [ref=e475]: Reviewer
+          - generic [ref=e476]:
+            - generic [ref=e477]:
+              - generic [ref=e478]: Full Build
+              - generic [ref=e479]: Built-in
+            - generic [ref=e480]: A broader engineering room with design and testing roles.
+            - generic [ref=e481]:
+              - generic [ref=e482]: Planner
+              - generic [ref=e483]: Architect
+              - generic [ref=e484]: Coder
+              - generic [ref=e485]: Tester
+              - generic [ref=e486]: Reviewer
+          - generic [ref=e487]:
+            - generic [ref=e488]:
+              - generic [ref=e489]: Research Duo
+              - generic [ref=e490]: Built-in
+            - generic [ref=e491]: One researcher and one writer/reviewer partner.
+            - generic [ref=e492]:
+              - generic [ref=e493]: Researcher
+              - generic [ref=e494]: Writer
+          - generic [ref=e495]:
+            - generic [ref=e496]:
+              - generic [ref=e497]: Research Team
+              - generic [ref=e498]: Built-in
+            - generic [ref=e499]: Lead, researcher, writer, reviewer.
+            - generic [ref=e500]:
+              - generic [ref=e501]: Coordinator
+              - generic [ref=e502]: Researcher
+              - generic [ref=e503]: Writer
+              - generic [ref=e504]: Reviewer
+        - generic [ref=e505]:
+          - generic [ref=e507]: Add custom room template
+          - generic [ref=e508]:
+            - textbox "Template title" [ref=e509]
+            - textbox "Description (optional)" [ref=e510]
+            - generic [ref=e511]:
+              - checkbox "Show in room creation screen" [checked] [ref=e512]
+              - text: Show in room creation screen
+            - generic [ref=e513]:
+              - generic [ref=e565]:
+                - generic [ref=e566]:
+                  - generic [ref=e567]:
+                    - checkbox "Slot 1" [checked] [ref=e568]
+                    - text: Slot 1
+                  - button "Remove" [ref=e569]
+                - generic [ref=e570]:
+                  - combobox [ref=e571]:
+                    - option "Planner" [selected]
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder"
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e572]:
+                    - option "claude" [selected]
+                    - option "codex"
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+              - generic [ref=e573]:
+                - generic [ref=e574]:
+                  - generic [ref=e575]:
+                    - checkbox "Slot 2" [checked] [ref=e576]
+                    - text: Slot 2
+                  - button "Remove" [ref=e577]
+                - generic [ref=e578]:
+                  - combobox [ref=e579]:
+                    - option "Planner"
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder" [selected]
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e580]:
+                    - option "claude"
+                    - option "codex" [selected]
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+            - generic [ref=e530]:
+              - button "+ Add slot" [ref=e531]
+              - button "Save room template" [active] [ref=e581]
+        - generic [ref=e534]:
+          - generic [ref=e535]:
+            - generic [ref=e537]:
+              - generic [ref=e538]: Template Flow Room template v2
+              - generic [ref=e539]: Visible in room creator
+            - generic [ref=e540]:
+              - button "Hide" [ref=e541]
+              - button "Edit" [ref=e542]
+              - button "Delete" [ref=e543]
+          - generic [ref=e544]:
+            - generic [ref=e545]: Planner
+            - generic [ref=e546]: Coder
+      - generic [ref=e582]: Updated room template "Template Flow Room template v2".
+  - generic [ref=e281]:
+    - img [ref=e283]
+    - button "Open Tanstack query devtools" [ref=e331] [cursor=pointer]:
+      - img [ref=e332]

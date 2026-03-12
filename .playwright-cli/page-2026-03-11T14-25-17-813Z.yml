@@ -1,0 +1,347 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - img "AgentChat" [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]: AgentChat
+            - generic [ref=e138]: Rooms and direct sessions in one inbox
+        - button "Settings" [ref=e139]:
+          - img [ref=e140]
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]: Chats
+            - generic [ref=e148]: 4 total
+          - generic [ref=e149]:
+            - button "Refresh" [ref=e150]
+            - button "Session" [ref=e151]:
+              - img [ref=e152]
+              - text: Session
+            - button "Room" [ref=e153]:
+              - img [ref=e154]
+              - text: Room
+        - generic [ref=e155]:
+          - button "Codex Codex Claude Code Codex +5 Web Room QA Planner · Coder · Coordinator · Implementer 1/9 online 1/9 assigned 1/4 tasks done @planner_cc_auto" [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]:
+                - img "Codex" [ref=e162]
+                - img "Codex" [ref=e167]
+                - img "Claude Code" [ref=e172]
+                - img "Codex" [ref=e177]
+                - generic [ref=e179]: "+5"
+              - generic [ref=e180]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]:
+                    - generic [ref=e183]: Web Room QA
+                    - generic [ref=e184]: Planner · Coder · Coordinator · Implementer
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: 1/9 online
+                    - button "Delete room" [ref=e187]:
+                      - img [ref=e188]
+                - generic [ref=e191]:
+                  - generic [ref=e192]: 1/9 assigned
+                  - generic [ref=e193]: 1/4 tasks done
+                  - generic [ref=e194]: "@planner_cc_auto"
+          - 'button "Codex agentchat-source Codex just now /Users/zhf/Desktop/code/agentchat-source mode: default thinking" [ref=e195]':
+            - img "Codex" [ref=e199]
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: agentchat-source
+                  - generic [ref=e205]: Codex
+                - generic [ref=e206]:
+                  - generic [ref=e207]: just now
+                  - button "Delete session" [ref=e208]:
+                    - img [ref=e209]
+              - generic [ref=e212]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e213]:
+                - generic [ref=e214]: "mode: default"
+                - generic [ref=e215]: thinking
+          - 'button "Claude Code code Claude Code 10h ago /Users/zhf/Desktop/code/ mode: default" [ref=e216]':
+            - img "Claude Code" [ref=e220]
+            - generic [ref=e222]:
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - generic [ref=e225]: code
+                  - generic [ref=e226]: Claude Code
+                - generic [ref=e227]:
+                  - generic [ref=e228]: 10h ago
+                  - button "Delete session" [ref=e229]:
+                    - img [ref=e230]
+              - generic [ref=e233]: /Users/zhf/Desktop/code/
+              - generic [ref=e235]: "mode: default"
+          - 'button "Codex agentchat-source Codex 19h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e236]':
+            - img "Codex" [ref=e240]
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: agentchat-source
+                  - generic [ref=e246]: Codex
+                - generic [ref=e247]:
+                  - generic [ref=e248]: 19h ago
+                  - button "Delete session" [ref=e249]:
+                    - img [ref=e250]
+              - generic [ref=e253]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e255]: "mode: default"
+    - generic [ref=e258]:
+      - generic [ref=e259]:
+        - generic [ref=e260]:
+          - generic [ref=e262]: Web Room QA
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: "Status:"
+              - generic [ref=e266]: Wake
+              - switch "Archive all online room agents" [checked] [ref=e267]
+            - button "auto-dispatch on" [ref=e269]
+            - generic [ref=e270]: 1/9 online
+            - generic [ref=e271]: 1/9 roles assigned
+            - generic [ref=e272]: 1/4 tasks done
+            - button "Delete" [ref=e273]
+        - generic [ref=e274]:
+          - button "chat" [ref=e275]
+          - button "tasks" [active] [ref=e276]
+          - button "roles" [ref=e277]
+      - generic [ref=e383]:
+        - generic [ref=e384]:
+          - generic [ref=e385]: New task
+          - generic [ref=e386]: Planner/coordinator should create and assign tasks here. Assignees can then claim, report blockers, hand off, and complete.
+          - textbox "Task title" [ref=e387]
+          - combobox [ref=e388]:
+            - option "Unassigned" [selected]
+            - option "Planner"
+            - option "Coder"
+            - option "Coordinator"
+            - option "Implementer"
+            - option "Reviewer"
+            - option "Planner"
+            - option "Architect"
+            - option "Coder"
+            - option "Tester"
+          - button "Create task" [ref=e390]
+        - generic [ref=e391]:
+          - generic [ref=e392]:
+            - generic [ref=e393]: pending
+            - generic [ref=e394]: 2 tasks
+          - generic [ref=e395]:
+            - generic [ref=e396]: in_progress
+            - generic [ref=e397]: 0 tasks
+          - generic [ref=e398]:
+            - generic [ref=e399]: blocked
+            - generic [ref=e400]: 1 task
+          - generic [ref=e401]:
+            - generic [ref=e402]: completed
+            - generic [ref=e403]: 1 task
+        - generic [ref=e404]:
+          - generic [ref=e405]:
+            - generic [ref=e406]: pending
+            - generic [ref=e407]: 2 items
+          - generic [ref=e408]:
+            - generic [ref=e409]:
+              - generic [ref=e410]:
+                - generic [ref=e412]: Sprint3 pending validation
+                - generic [ref=e413]: pending
+              - generic [ref=e414]:
+                - generic [ref=e415]: "current owner: @planner_cc_auto"
+                - generic [ref=e416]: "role: Planner"
+              - generic [ref=e417]:
+                - generic [ref=e418]:
+                  - generic [ref=e419]: Assign / current working role
+                  - combobox [ref=e420]:
+                    - option "Unassigned"
+                    - option "Planner (@planner_cc_auto)" [selected]
+                    - option "Coder (@coder_cdx_auto)"
+                    - option "Coordinator (@coordinator)"
+                    - option "Implementer (@implementer)"
+                    - option "Reviewer (@reviewer)"
+                    - option "Planner (@planner)"
+                    - option "Architect (@architect)"
+                    - option "Coder (@coder)"
+                    - option "Tester (@tester)"
+                - generic [ref=e421]:
+                  - generic [ref=e422]: Workflow note / summary / blocker
+                  - textbox "Used for assignment notes, blocker reason, handoff context, or completion summary" [ref=e423]
+                - generic [ref=e424]:
+                  - generic [ref=e425]: Handoff target
+                  - combobox [ref=e426]:
+                    - option "Choose next role" [selected]
+                    - option "Coder (@coder_cdx_auto)"
+                    - option "Coordinator (@coordinator)"
+                    - option "Implementer (@implementer)"
+                    - option "Reviewer (@reviewer)"
+                    - option "Planner (@planner)"
+                    - option "Architect (@architect)"
+                    - option "Coder (@coder)"
+                    - option "Tester (@tester)"
+              - generic [ref=e427]:
+                - button "Assign" [ref=e428]
+                - button "Claim / start" [ref=e429]
+                - button "Blocked" [disabled] [ref=e430]
+                - button "Handoff" [disabled] [ref=e431]
+                - button "Complete" [ref=e432]
+              - generic [ref=e433]:
+                - button "pending" [ref=e434]
+                - button "in_progress" [ref=e435]
+                - button "blocked" [ref=e436]
+                - button "completed" [ref=e437]
+            - generic [ref=e438]:
+              - generic [ref=e439]:
+                - generic [ref=e440]:
+                  - generic [ref=e441]: Review Sprint3 validation state
+                  - generic [ref=e442]: Inspect the completed Sprint3 validation outcome, confirm whether the remaining pending/blocked Sprint3 tasks are stale or still actionable, and recommend closeout vs additional verification.
+                - generic [ref=e443]: pending
+              - generic [ref=e444]:
+                - generic [ref=e445]: "current owner: @reviewer"
+                - generic [ref=e446]: "role: Reviewer"
+              - generic [ref=e447]:
+                - generic [ref=e448]:
+                  - generic [ref=e449]: Assign / current working role
+                  - combobox [ref=e450]:
+                    - option "Unassigned"
+                    - option "Planner (@planner_cc_auto)"
+                    - option "Coder (@coder_cdx_auto)"
+                    - option "Coordinator (@coordinator)"
+                    - option "Implementer (@implementer)"
+                    - option "Reviewer (@reviewer)" [selected]
+                    - option "Planner (@planner)"
+                    - option "Architect (@architect)"
+                    - option "Coder (@coder)"
+                    - option "Tester (@tester)"
+                - generic [ref=e451]:
+                  - generic [ref=e452]: Workflow note / summary / blocker
+                  - textbox "Used for assignment notes, blocker reason, handoff context, or completion summary" [ref=e453]
+                - generic [ref=e454]:
+                  - generic [ref=e455]: Handoff target
+                  - combobox [ref=e456]:
+                    - option "Choose next role" [selected]
+                    - option "Planner (@planner_cc_auto)"
+                    - option "Coder (@coder_cdx_auto)"
+                    - option "Coordinator (@coordinator)"
+                    - option "Implementer (@implementer)"
+                    - option "Planner (@planner)"
+                    - option "Architect (@architect)"
+                    - option "Coder (@coder)"
+                    - option "Tester (@tester)"
+              - generic [ref=e457]:
+                - button "Assign" [ref=e458]
+                - button "Claim / start" [ref=e459]
+                - button "Blocked" [disabled] [ref=e460]
+                - button "Handoff" [disabled] [ref=e461]
+                - button "Complete" [ref=e462]
+              - generic [ref=e463]:
+                - button "pending" [ref=e464]
+                - button "in_progress" [ref=e465]
+                - button "blocked" [ref=e466]
+                - button "completed" [ref=e467]
+        - generic [ref=e468]:
+          - generic [ref=e469]:
+            - generic [ref=e470]: in_progress
+            - generic [ref=e471]: 0 items
+          - generic [ref=e472]: No in progress tasks.
+        - generic [ref=e473]:
+          - generic [ref=e474]:
+            - generic [ref=e475]: blocked
+            - generic [ref=e476]: 1 item
+          - generic [ref=e478]:
+            - generic [ref=e479]:
+              - generic [ref=e481]: Sprint3 blocked validation
+              - generic [ref=e482]: blocked
+            - generic [ref=e483]:
+              - generic [ref=e484]: "current owner: @planner_cc_auto"
+              - generic [ref=e485]: "role: Planner"
+            - generic [ref=e486]:
+              - generic [ref=e487]:
+                - generic [ref=e488]: Assign / current working role
+                - combobox [ref=e489]:
+                  - option "Unassigned"
+                  - option "Planner (@planner_cc_auto)" [selected]
+                  - option "Coder (@coder_cdx_auto)"
+                  - option "Coordinator (@coordinator)"
+                  - option "Implementer (@implementer)"
+                  - option "Reviewer (@reviewer)"
+                  - option "Planner (@planner)"
+                  - option "Architect (@architect)"
+                  - option "Coder (@coder)"
+                  - option "Tester (@tester)"
+              - generic [ref=e490]:
+                - generic [ref=e491]: Workflow note / summary / blocker
+                - textbox "Used for assignment notes, blocker reason, handoff context, or completion summary" [ref=e492]
+              - generic [ref=e493]:
+                - generic [ref=e494]: Handoff target
+                - combobox [ref=e495]:
+                  - option "Choose next role" [selected]
+                  - option "Coder (@coder_cdx_auto)"
+                  - option "Coordinator (@coordinator)"
+                  - option "Implementer (@implementer)"
+                  - option "Reviewer (@reviewer)"
+                  - option "Planner (@planner)"
+                  - option "Architect (@architect)"
+                  - option "Coder (@coder)"
+                  - option "Tester (@tester)"
+            - generic [ref=e496]:
+              - button "Assign" [ref=e497]
+              - button "Claim / start" [ref=e498]
+              - button "Blocked" [disabled] [ref=e499]
+              - button "Handoff" [disabled] [ref=e500]
+              - button "Complete" [ref=e501]
+            - generic [ref=e502]:
+              - button "pending" [ref=e503]
+              - button "in_progress" [ref=e504]
+              - button "blocked" [ref=e505]
+              - button "completed" [ref=e506]
+        - generic [ref=e507]:
+          - generic [ref=e508]:
+            - generic [ref=e509]: completed
+            - generic [ref=e510]: 1 item
+          - generic [ref=e512]:
+            - generic [ref=e513]:
+              - generic [ref=e515]: Sprint3 completed validation
+              - generic [ref=e516]: completed
+            - generic [ref=e517]:
+              - generic [ref=e518]: "current owner: @planner_cc_auto"
+              - generic [ref=e519]: "role: Planner"
+            - generic [ref=e520]:
+              - generic [ref=e521]:
+                - generic [ref=e522]: Assign / current working role
+                - combobox [ref=e523]:
+                  - option "Unassigned"
+                  - option "Planner (@planner_cc_auto)" [selected]
+                  - option "Coder (@coder_cdx_auto)"
+                  - option "Coordinator (@coordinator)"
+                  - option "Implementer (@implementer)"
+                  - option "Reviewer (@reviewer)"
+                  - option "Planner (@planner)"
+                  - option "Architect (@architect)"
+                  - option "Coder (@coder)"
+                  - option "Tester (@tester)"
+              - generic [ref=e524]:
+                - generic [ref=e525]: Workflow note / summary / blocker
+                - textbox "Used for assignment notes, blocker reason, handoff context, or completion summary" [ref=e526]
+              - generic [ref=e527]:
+                - generic [ref=e528]: Handoff target
+                - combobox [ref=e529]:
+                  - option "Choose next role" [selected]
+                  - option "Coder (@coder_cdx_auto)"
+                  - option "Coordinator (@coordinator)"
+                  - option "Implementer (@implementer)"
+                  - option "Reviewer (@reviewer)"
+                  - option "Planner (@planner)"
+                  - option "Architect (@architect)"
+                  - option "Coder (@coder)"
+                  - option "Tester (@tester)"
+            - generic [ref=e530]:
+              - button "Assign" [ref=e531]
+              - button "Claim / start" [ref=e532]
+              - button "Blocked" [disabled] [ref=e533]
+              - button "Handoff" [disabled] [ref=e534]
+              - button "Complete" [ref=e535]
+            - generic [ref=e536]:
+              - button "pending" [ref=e537]
+              - button "in_progress" [ref=e538]
+              - button "blocked" [ref=e539]
+              - button "completed" [ref=e540]
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

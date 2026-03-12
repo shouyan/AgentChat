@@ -1,0 +1,10 @@
+- generic [ref=e2]:
+  - generic [ref=e809]:
+    - generic [ref=e810]:
+      - strong [ref=e811]: Something went wrong!
+      - button "Hide Error" [ref=e812]
+    - code [ref=e816]: Message is only available inside <ThreadPrimitive.Messages />
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

@@ -1,0 +1,434 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - generic:
+                    - generic: AgentChat
+                    - generic: Rooms and direct sessions in one inbox
+                - button:
+                  - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Chats
+                    - generic: 4 total
+                  - generic:
+                    - button: Refresh
+                    - button:
+                      - img
+                      - text: Session
+                    - button:
+                      - img
+                      - text: Room
+                - generic:
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 4m ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: code
+                          - generic: Claude Code
+                        - generic:
+                          - generic: 31m ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Web Room QA
+                            - generic: Planner · Coder
+                          - generic:
+                            - generic: 0/2 online
+                            - button:
+                              - img
+                        - generic:
+                          - generic: 0/2 assigned
+                          - generic: 0/0 tasks done
+                          - generic: "@planner_cc_auto"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 9h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - button:
+                    - img
+                  - generic:
+                    - generic: Project Files
+                    - generic: /Users/zhf/Desktop/code/agentchat-source
+                  - button:
+                    - img
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                    - textbox:
+                      - /placeholder: Search files in current directory
+                  - generic:
+                    - button: New File
+                    - button: New Folder
+              - tablist:
+                - generic:
+                  - tab: Changes
+                  - tab [selected]: Directory Tree
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - button:
+                          - img
+                          - img
+                          - generic:
+                            - generic: agentchat-source
+                      - generic:
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: .github
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: .playwright-cli
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: cli
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: docs
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: hub
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: node_modules
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: output
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                          - generic:
+                            - generic:
+                              - generic:
+                                - button:
+                                  - img
+                                  - img
+                                  - generic:
+                                    - generic: playwright
+                                - generic:
+                                  - button:
+                                    - img
+                                  - button:
+                                    - img
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - button:
+                                      - img
+                                      - img
+                                      - generic:
+                                        - generic: session-files-smoke
+                                    - generic:
+                                      - button:
+                                        - img
+                                      - button:
+                                        - img
+                                  - generic:
+                                    - generic: Empty directory.
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: shared
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: web
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - generic:
+                            - button:
+                              - img
+                              - img
+                              - generic:
+                                - generic: website
+                            - generic:
+                              - button:
+                                - img
+                              - button:
+                                - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: .gitignore
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: agentchat
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: AGENTS.md
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: bun.lock
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: CONTRIBUTING.md
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: LICENSE
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: package.json
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: pnpm-lock.yaml
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: pnpm-workspace.yaml
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: README.md
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+                        - generic:
+                          - button:
+                            - img
+                            - generic:
+                              - generic: tsconfig.base.json
+                          - generic:
+                            - button:
+                              - img
+                            - button:
+                              - img
+                            - button:
+                              - img
+    - generic:
+      - generic:
+        - img
+      - button:
+        - img
+  - dialog "Delete folder?" [ref=e778]:
+    - generic [ref=e779]:
+      - heading "Delete folder?" [level=2] [ref=e780]
+      - paragraph [ref=e781]: Delete output/playwright/session-files-smoke and everything inside it? This cannot be undone.
+    - generic [ref=e782]:
+      - button "Cancel" [active] [ref=e783]
+      - button "Delete folder" [ref=e784]

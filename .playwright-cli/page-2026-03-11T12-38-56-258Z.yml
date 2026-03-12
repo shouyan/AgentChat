@@ -1,0 +1,254 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - button [ref=e131]:
+        - img [ref=e132]
+      - generic [ref=e134]: Template Manager
+      - button "New room" [ref=e135]
+    - generic [ref=e137]:
+      - generic [ref=e138]:
+        - generic [ref=e139]: Role templates
+        - generic [ref=e140]: Built-ins can now be hidden, deleted, and restored per namespace.
+        - generic [ref=e141]:
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e146]: Planner
+              - generic [ref=e147]: Break down the goal, assign work, and coordinate the team.
+              - generic [ref=e148]: "@planner · claude"
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - checkbox "Show" [checked] [ref=e151]
+                - text: Show
+              - button "Delete built-in role template Planner" [ref=e152]:
+                - img [ref=e153]
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - generic [ref=e160]: Coordinator
+              - generic [ref=e161]: Keep the room aligned and make sure handoffs happen cleanly.
+              - generic [ref=e162]: "@coordinator · claude"
+            - generic [ref=e163]:
+              - generic [ref=e164]:
+                - checkbox "Show" [checked] [ref=e165]
+                - text: Show
+              - button "Delete built-in role template Coordinator" [ref=e166]:
+                - img [ref=e167]
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e174]: Architect
+              - generic [ref=e175]: Own system design, interfaces, and structure decisions.
+              - generic [ref=e176]: "@architect · claude"
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - checkbox "Show" [checked] [ref=e179]
+                - text: Show
+              - button "Delete built-in role template Architect" [ref=e180]:
+                - img [ref=e181]
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - generic [ref=e188]: Coder
+              - generic [ref=e189]: Implement the main code changes.
+              - generic [ref=e190]: "@coder · codex"
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - checkbox "Show" [checked] [ref=e193]
+                - text: Show
+              - button "Delete built-in role template Coder" [ref=e194]:
+                - img [ref=e195]
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - generic [ref=e202]: Reviewer
+              - generic [ref=e203]: Review outputs, find risks, and request fixes.
+              - generic [ref=e204]: "@reviewer · claude"
+            - generic [ref=e205]:
+              - generic [ref=e206]:
+                - checkbox "Show" [checked] [ref=e207]
+                - text: Show
+              - button "Delete built-in role template Reviewer" [ref=e208]:
+                - img [ref=e209]
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - generic [ref=e216]: Researcher
+              - generic [ref=e217]: Collect evidence, compare sources, and surface findings.
+              - generic [ref=e218]: "@researcher · claude"
+            - generic [ref=e219]:
+              - generic [ref=e220]:
+                - checkbox "Show" [checked] [ref=e221]
+                - text: Show
+              - button "Delete built-in role template Researcher" [ref=e222]:
+                - img [ref=e223]
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - generic [ref=e230]: Writer
+              - generic [ref=e231]: Turn findings into a clean written deliverable.
+              - generic [ref=e232]: "@writer · claude"
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - checkbox "Show" [checked] [ref=e235]
+                - text: Show
+              - button "Delete built-in role template Writer" [ref=e236]:
+                - img [ref=e237]
+          - generic [ref=e241]:
+            - generic [ref=e242]:
+              - generic [ref=e244]: Tester
+              - generic [ref=e245]: Validate behavior, write tests, and check quality.
+              - generic [ref=e246]: "@tester · cursor"
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - checkbox "Show" [checked] [ref=e249]
+                - text: Show
+              - button "Delete built-in role template Tester" [ref=e250]:
+                - img [ref=e251]
+        - generic [ref=e254]:
+          - generic [ref=e256]: Add custom role template
+          - generic [ref=e257]:
+            - textbox "Template title" [ref=e258]
+            - textbox "Mention key (optional)" [ref=e259]
+            - textbox "What this role does" [ref=e260]
+            - combobox [ref=e261]:
+              - option "claude" [selected]
+              - option "codex"
+              - option "cursor"
+              - option "gemini"
+              - option "opencode"
+          - button "Save role template" [ref=e263]
+      - generic [ref=e264]:
+        - generic [ref=e265]: Room templates
+        - generic [ref=e266]: Custom templates sync through the hub. Built-ins can be hidden, deleted, and restored per namespace.
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - generic [ref=e270]:
+                - generic [ref=e272]: Quick Duo
+                - generic [ref=e273]: Minimal two-slot setup for fast collaboration.
+              - generic [ref=e274]:
+                - generic [ref=e275]:
+                  - checkbox "Show" [checked] [ref=e276]
+                  - text: Show
+                - button "Delete built-in room template Quick Duo" [ref=e277]:
+                  - img [ref=e278]
+            - generic [ref=e281]:
+              - generic [ref=e282]: Planner
+              - generic [ref=e283]: Coder
+          - generic [ref=e284]:
+            - generic [ref=e285]:
+              - generic [ref=e286]:
+                - generic [ref=e288]: Dev Trio
+                - generic [ref=e289]: Planner, coder, reviewer.
+              - generic [ref=e290]:
+                - generic [ref=e291]:
+                  - checkbox "Show" [checked] [ref=e292]
+                  - text: Show
+                - button "Delete built-in room template Dev Trio" [ref=e293]:
+                  - img [ref=e294]
+            - generic [ref=e297]:
+              - generic [ref=e298]: Planner
+              - generic [ref=e299]: Coder
+              - generic [ref=e300]: Reviewer
+          - generic [ref=e301]:
+            - generic [ref=e302]:
+              - generic [ref=e303]:
+                - generic [ref=e305]: Full Build
+                - generic [ref=e306]: A broader engineering room with design and testing roles.
+              - generic [ref=e307]:
+                - generic [ref=e308]:
+                  - checkbox "Show" [checked] [ref=e309]
+                  - text: Show
+                - button "Delete built-in room template Full Build" [ref=e310]:
+                  - img [ref=e311]
+            - generic [ref=e314]:
+              - generic [ref=e315]: Planner
+              - generic [ref=e316]: Architect
+              - generic [ref=e317]: Coder
+              - generic [ref=e318]: Tester
+              - generic [ref=e319]: Reviewer
+          - generic [ref=e320]:
+            - generic [ref=e321]:
+              - generic [ref=e322]:
+                - generic [ref=e324]: Research Duo
+                - generic [ref=e325]: One researcher and one writer/reviewer partner.
+              - generic [ref=e326]:
+                - generic [ref=e327]:
+                  - checkbox "Show" [checked] [ref=e328]
+                  - text: Show
+                - button "Delete built-in room template Research Duo" [ref=e329]:
+                  - img [ref=e330]
+            - generic [ref=e333]:
+              - generic [ref=e334]: Researcher
+              - generic [ref=e335]: Writer
+          - generic [ref=e336]:
+            - generic [ref=e337]:
+              - generic [ref=e338]:
+                - generic [ref=e340]: Research Team
+                - generic [ref=e341]: Lead, researcher, writer, reviewer.
+              - generic [ref=e342]:
+                - generic [ref=e343]:
+                  - checkbox "Show" [checked] [ref=e344]
+                  - text: Show
+                - button "Delete built-in room template Research Team" [ref=e345]:
+                  - img [ref=e346]
+            - generic [ref=e349]:
+              - generic [ref=e350]: Coordinator
+              - generic [ref=e351]: Researcher
+              - generic [ref=e352]: Writer
+              - generic [ref=e353]: Reviewer
+        - generic [ref=e354]:
+          - generic [ref=e356]: Add custom room template
+          - generic [ref=e357]:
+            - textbox "Template title" [ref=e358]
+            - textbox "Description (optional)" [ref=e359]
+            - generic [ref=e360]:
+              - checkbox "Show in room creation screen" [checked] [ref=e361]
+              - text: Show in room creation screen
+            - generic [ref=e362]:
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - generic [ref=e365]:
+                    - checkbox "Slot 1" [checked] [ref=e366]
+                    - text: Slot 1
+                  - button "Remove" [ref=e367]
+                - generic [ref=e368]:
+                  - combobox [ref=e369]:
+                    - option "Planner" [selected]
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder"
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e370]:
+                    - option "claude" [selected]
+                    - option "codex"
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+              - generic [ref=e371]:
+                - generic [ref=e372]:
+                  - generic [ref=e373]:
+                    - checkbox "Slot 2" [checked] [ref=e374]
+                    - text: Slot 2
+                  - button "Remove" [ref=e375]
+                - generic [ref=e376]:
+                  - combobox [ref=e377]:
+                    - option "Planner"
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder" [selected]
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e378]:
+                    - option "claude"
+                    - option "codex" [selected]
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+            - generic [ref=e379]:
+              - button "+ Add slot" [ref=e380]
+              - button "Save room template" [ref=e381]
+      - generic [ref=e394]: Custom role template removed.
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

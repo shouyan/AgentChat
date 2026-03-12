@@ -1,0 +1,197 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - generic:
+                    - generic: AgentChat
+                    - generic: Rooms and direct sessions in one inbox
+                - button:
+                  - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Chats
+                    - generic: 4 total
+                  - generic:
+                    - button: Refresh
+                    - button:
+                      - img
+                      - text: Session
+                    - button:
+                      - img
+                      - text: Room
+                - generic:
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 9h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: code
+                          - generic: Claude Code
+                        - generic:
+                          - generic: 9h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Web Room QA
+                            - generic: Planner · Coder
+                          - generic:
+                            - generic: 0/2 online
+                            - button:
+                              - img
+                        - generic:
+                          - generic: 0/2 assigned
+                          - generic: 0/0 tasks done
+                          - generic: "@planner_cc_auto"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 18h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - button:
+                  - img
+                - generic: Create Session
+              - generic:
+                - generic:
+                  - generic: Machine
+                  - combobox
+                - generic:
+                  - generic: Directory
+                  - generic:
+                    - generic:
+                      - textbox:
+                        - /placeholder: /path/to/project
+                      - button: Browse
+                - generic:
+                  - generic: Session type
+                  - generic:
+                    - generic:
+                      - generic:
+                        - radio [checked]
+                        - generic: Simple
+                        - generic: Use selected directory as-is
+                    - generic:
+                      - generic:
+                        - radio
+                        - generic:
+                          - generic:
+                            - generic: Worktree
+                            - generic: Create a new worktree next to repo
+                - generic:
+                  - generic: Agent
+                  - generic:
+                    - generic:
+                      - radio [checked]
+                      - generic: claude
+                    - generic:
+                      - radio
+                      - generic: codex
+                    - generic:
+                      - radio
+                      - generic: cursor
+                    - generic:
+                      - radio
+                      - generic: gemini
+                    - generic:
+                      - radio
+                      - generic: opencode
+                - generic:
+                  - generic:
+                    - text: Model
+                    - generic: (optional)
+                  - combobox
+                - generic:
+                  - generic: YOLO mode
+                  - generic:
+                    - generic:
+                      - generic: Bypass approvals and sandbox
+                      - generic: Uses dangerous agent flags when spawning.
+                    - generic:
+                      - checkbox
+                - generic:
+                  - button: Cancel
+                  - button [disabled]: Create
+    - generic:
+      - generic:
+        - img
+      - button:
+        - img
+  - dialog "Choose directory" [ref=e312]:
+    - generic [ref=e313]:
+      - heading "Choose directory" [level=2] [ref=e314]
+      - paragraph [ref=e315]: Browse folders on the selected machine, or keep typing a path manually.
+    - generic [ref=e316]:
+      - generic [ref=e317]:
+        - button "Home" [disabled]:
+          - img
+          - text: Home
+        - button "Up" [disabled]:
+          - img
+          - text: Up
+      - generic [ref=e318]:
+        - generic [ref=e319]: Current directory
+        - generic [ref=e320]: —
+      - generic [ref=e322]: No subdirectories here.
+      - generic [ref=e323]:
+        - button "Cancel" [active] [ref=e324]
+        - button "Use current directory" [disabled]

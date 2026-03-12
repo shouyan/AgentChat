@@ -1,0 +1,292 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - generic:
+                    - generic: AgentChat
+                    - generic: Rooms and direct sessions in one inbox
+                - button:
+                  - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Chats
+                    - generic: 4 total
+                  - generic:
+                    - button: Refresh
+                    - button:
+                      - img
+                      - text: Session
+                    - button:
+                      - img
+                      - text: Room
+                - generic:
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 7h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: code
+                          - generic: Claude Code
+                        - generic:
+                          - generic: 7h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Web Room QA
+                            - generic: Planner · Coder
+                          - generic:
+                            - generic: 0/2 online
+                            - button:
+                              - img
+                        - generic:
+                          - generic: 0/2 assigned
+                          - generic: 0/0 tasks done
+                          - generic: "@planner_cc_auto"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 16h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: New room
+                - button: Close
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Quick room setup
+                        - generic: "Start simple: choose a room template, keep the slots you want, then pick a role template, agent, model, and mention key for each slot."
+                    - generic:
+                      - generic:
+                        - generic: Room name
+                        - textbox:
+                          - /placeholder: Launch coordination room
+                          - text: Template Flow Room
+                      - generic:
+                        - generic:
+                          - checkbox [checked]
+                          - text: Enable planner auto-dispatch nudges
+                        - generic:
+                          - checkbox [checked]
+                          - text: Auto launch agents after room creation
+                    - generic:
+                      - generic:
+                        - generic: Goal (optional)
+                        - generic: Leave blank to start quietly and wait for your first room message.
+                      - textbox:
+                        - /placeholder: "Optional: describe the shared objective"
+                    - generic:
+                      - generic: Launch defaults
+                      - generic: All enabled slots will be spawned immediately with the selected agent type, model, machine, and working directory.
+                      - generic:
+                        - generic:
+                          - generic: Machine
+                          - combobox
+                        - generic:
+                          - generic: Working directory
+                          - textbox:
+                            - /placeholder: /path/to/project
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Room templates
+                        - generic: These prefill the slot list below. You can still edit the slots after choosing one.
+                      - generic:
+                        - generic: 2 active slots
+                        - button: Add template
+                        - button: Manage templates
+                    - generic:
+                      - button:
+                        - generic:
+                          - generic: Quick Duo
+                          - generic: 2 slots
+                        - generic: Minimal two-slot setup for fast collaboration.
+                        - generic:
+                          - generic: Planner
+                          - generic: Coder
+                      - button:
+                        - generic:
+                          - generic: Dev Trio
+                          - generic: 3 slots
+                        - generic: Planner, coder, reviewer.
+                        - generic:
+                          - generic: Planner
+                          - generic: Coder
+                          - generic: Reviewer
+                      - button:
+                        - generic:
+                          - generic: Full Build
+                          - generic: 5 slots
+                        - generic: A broader engineering room with design and testing roles.
+                        - generic:
+                          - generic: Planner
+                          - generic: Architect
+                          - generic: Coder
+                          - generic: Tester
+                          - generic: Reviewer
+                      - button:
+                        - generic:
+                          - generic: Research Duo
+                          - generic: 2 slots
+                        - generic: One researcher and one writer/reviewer partner.
+                        - generic:
+                          - generic: Researcher
+                          - generic: Writer
+                      - button:
+                        - generic:
+                          - generic: Research Team
+                          - generic: 4 slots
+                        - generic: Lead, researcher, writer, reviewer.
+                        - generic:
+                          - generic: Coordinator
+                          - generic: Researcher
+                          - generic: Writer
+                          - generic: Reviewer
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Slots
+                        - generic: Each slot now includes its role template, agent, model, mention key, and avatar preview.
+                      - button: + Add slot
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - checkbox [checked]
+                            - generic:
+                              - generic:
+                                - img
+                            - generic:
+                              - generic:
+                                - generic: Slot 1
+                                - generic: "@planner_cc_auto"
+                              - generic: Planner · Claude Code · auto
+                              - generic: Enabled · Break down the goal, assign work, and coordinate the team.
+                        - generic:
+                          - generic:
+                            - generic: Role template
+                            - combobox
+                          - generic:
+                            - generic: Agent
+                            - combobox
+                          - generic:
+                            - generic: Model
+                            - combobox
+                          - generic:
+                            - generic:
+                              - generic: Mention key
+                              - generic: Auto
+                            - textbox:
+                              - /placeholder: coder_cc_opus4_6
+                              - text: planner_cc_auto
+                            - generic: Use this as the room mention, for example @planner_cc_auto.
+                      - generic:
+                        - generic:
+                          - generic:
+                            - checkbox [checked]
+                            - generic:
+                              - generic:
+                                - img
+                            - generic:
+                              - generic:
+                                - generic: Slot 2
+                                - generic: "@coder_cdx_auto"
+                              - generic: Coder · Codex · auto
+                              - generic: Enabled · Implement the main code changes.
+                        - generic:
+                          - generic:
+                            - generic: Role template
+                            - combobox
+                          - generic:
+                            - generic: Agent
+                            - combobox
+                          - generic:
+                            - generic: Model
+                            - combobox
+                          - generic:
+                            - generic:
+                              - generic: Mention key
+                              - generic: Auto
+                            - textbox:
+                              - /placeholder: coder_cc_opus4_6
+                              - text: coder_cdx_auto
+                            - generic: Use this as the room mention, for example @coder_cdx_auto.
+                  - generic:
+                    - button: Cancel
+                    - button: Create room
+    - generic:
+      - generic:
+        - img
+      - button:
+        - img
+  - dialog "Save room template" [ref=e381]:
+    - generic [ref=e382]:
+      - heading "Save room template" [level=2] [ref=e383]
+      - paragraph [ref=e384]: Save the current slot setup as a reusable room template.
+    - generic [ref=e385]:
+      - textbox "Template title" [active] [ref=e386]: Template Flow Room template
+      - textbox "Description (optional)" [ref=e387]
+      - generic [ref=e388]:
+        - button "Cancel" [ref=e389]
+        - button "Save template" [ref=e390]

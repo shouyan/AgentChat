@@ -1,0 +1,53 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*'
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+            - run: bun install
+            - run: bun run build:single-exe:all
+            - name: Package release artifacts
+              run: |
+                  cd cli/dist-exe
+                  mkdir -p ../release-artifacts
+
+                  for dir in bun-*/; do
+                      target="${dir%/}"
+                      # bun-darwin-arm64 -> hapi-darwin-arm64
+                      name="hapi-${target#bun-}"
+                      name="${name/windows/win32}"
+
+                      if [[ "$target" == *"windows"* ]]; then
+                          zip -j "../release-artifacts/${name}.zip" "$target"/hapi.exe
+                      else
+                          tar -czvf "../release-artifacts/${name}.tar.gz" -C "$target" hapi
+                      fi
+                  done
+
+                  cd ../release-artifacts
+                  sha256sum * > checksums.txt
+            - name: Create Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh release create "${GITHUB_REF#refs/tags/}" \
+                      --title "Release ${GITHUB_REF#refs/tags/}" \
+                      --generate-notes \
+                      cli/release-artifacts/*
+            - name: Update Homebrew formula
+              continue-on-error: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+              run: |
+                  VERSION="${GITHUB_REF#refs/tags/v}"
+                  cd cli && bun run update-homebrew-formula --version "$VERSION" --push

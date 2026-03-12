@@ -1,0 +1,25 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - button "Language" [ref=e6]:
+      - img [ref=e7]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - img "AgentChat" [ref=e15]
+        - generic [ref=e16]: AgentChat
+        - generic [ref=e17]: Vibe Coding Anytime, Anywhere
+      - generic [ref=e18]:
+        - textbox "Access token" [disabled] [ref=e20]: test-token
+        - button "Signing in…" [disabled] [ref=e127]:
+          - img [ref=e128]
+          - text: Signing in…
+      - generic [ref=e22]:
+        - link "Needs help?" [ref=e23] [cursor=pointer]:
+          - /url: https://github.com/tiann/hapi
+        - button "Hub (Default)" [ref=e24]
+    - generic [ref=e25]:
+      - generic [ref=e26]: Designed with ♥ for Vibe Coding
+      - generic [ref=e27]: © 2026 AgentChat
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

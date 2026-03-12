@@ -1,0 +1,7 @@
+packages:
+  - cli
+  - shared
+  - hub
+  - web
+  - website
+  - docs

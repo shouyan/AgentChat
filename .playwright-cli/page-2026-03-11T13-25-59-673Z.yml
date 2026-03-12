@@ -1,0 +1,367 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - generic:
+                    - generic: AgentChat
+                    - generic: Rooms and direct sessions in one inbox
+                - button:
+                  - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Chats
+                    - generic: 4 total
+                  - generic:
+                    - button: Refresh
+                    - button:
+                      - img
+                      - text: Session
+                    - button:
+                      - img
+                      - text: Room
+                - generic:
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 9h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: code
+                          - generic: Claude Code
+                        - generic:
+                          - generic: 9h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/
+                      - generic:
+                        - generic: "mode: default"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Web Room QA
+                            - generic: Planner · Coder
+                          - generic:
+                            - generic: 0/2 online
+                            - button:
+                              - img
+                        - generic:
+                          - generic: 0/2 assigned
+                          - generic: 0/0 tasks done
+                          - generic: "@planner_cc_auto"
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: agentchat-source
+                          - generic: Codex
+                        - generic:
+                          - generic: 18h ago
+                          - button:
+                            - img
+                      - generic: /Users/zhf/Desktop/code/agentchat-source
+                      - generic:
+                        - generic: "mode: default"
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - button:
+                  - img
+                - generic: Create Session
+              - generic:
+                - generic:
+                  - generic: Machine
+                  - combobox
+                - generic:
+                  - generic: Directory
+                  - generic:
+                    - generic:
+                      - textbox:
+                        - /placeholder: /path/to/project
+                      - button: Browse
+                - generic:
+                  - generic: Session type
+                  - generic:
+                    - generic:
+                      - generic:
+                        - radio [checked]
+                        - generic: Simple
+                        - generic: Use selected directory as-is
+                    - generic:
+                      - generic:
+                        - radio
+                        - generic:
+                          - generic:
+                            - generic: Worktree
+                            - generic: Create a new worktree next to repo
+                - generic:
+                  - generic: Agent
+                  - generic:
+                    - generic:
+                      - radio [checked]
+                      - generic: claude
+                    - generic:
+                      - radio
+                      - generic: codex
+                    - generic:
+                      - radio
+                      - generic: cursor
+                    - generic:
+                      - radio
+                      - generic: gemini
+                    - generic:
+                      - radio
+                      - generic: opencode
+                - generic:
+                  - generic:
+                    - text: Model
+                    - generic: (optional)
+                  - combobox
+                - generic:
+                  - generic: YOLO mode
+                  - generic:
+                    - generic:
+                      - generic: Bypass approvals and sandbox
+                      - generic: Uses dangerous agent flags when spawning.
+                    - generic:
+                      - checkbox
+                - generic:
+                  - button: Cancel
+                  - button [disabled]: Create
+    - generic:
+      - generic:
+        - img
+      - button:
+        - img
+  - dialog "Choose directory" [ref=e312]:
+    - generic [ref=e313]:
+      - heading "Choose directory" [level=2] [ref=e314]
+      - paragraph [ref=e315]: Browse folders on the selected machine, or keep typing a path manually.
+    - generic [ref=e316]:
+      - generic [ref=e317]:
+        - button "Home" [ref=e318]:
+          - img [ref=e319]
+          - text: Home
+        - button "Up" [ref=e323]:
+          - img [ref=e324]
+          - text: Up
+      - generic [ref=e326]:
+        - generic [ref=e327]: Current directory
+        - generic [ref=e328]: /Users/zhf
+      - generic [ref=e330]:
+        - generic [ref=e331]:
+          - button ".agentchat" [ref=e332]:
+            - img [ref=e333]
+            - generic [ref=e335]: .agentchat
+          - button "Select" [ref=e336]
+        - generic [ref=e337]:
+          - button ".antigravity" [ref=e338]:
+            - img [ref=e339]
+            - generic [ref=e341]: .antigravity
+          - button "Select" [ref=e342]
+        - generic [ref=e343]:
+          - button ".bun" [ref=e344]:
+            - img [ref=e345]
+            - generic [ref=e347]: .bun
+          - button "Select" [ref=e348]
+        - generic [ref=e349]:
+          - button ".cache" [ref=e350]:
+            - img [ref=e351]
+            - generic [ref=e353]: .cache
+          - button "Select" [ref=e354]
+        - generic [ref=e355]:
+          - button ".claude" [ref=e356]:
+            - img [ref=e357]
+            - generic [ref=e359]: .claude
+          - button "Select" [ref=e360]
+        - generic [ref=e361]:
+          - button ".codex" [ref=e362]:
+            - img [ref=e363]
+            - generic [ref=e365]: .codex
+          - button "Select" [ref=e366]
+        - generic [ref=e367]:
+          - button ".config" [ref=e368]:
+            - img [ref=e369]
+            - generic [ref=e371]: .config
+          - button "Select" [ref=e372]
+        - generic [ref=e373]:
+          - button ".cursor" [ref=e374]:
+            - img [ref=e375]
+            - generic [ref=e377]: .cursor
+          - button "Select" [ref=e378]
+        - generic [ref=e379]:
+          - button ".gemini" [ref=e380]:
+            - img [ref=e381]
+            - generic [ref=e383]: .gemini
+          - button "Select" [ref=e384]
+        - generic [ref=e385]:
+          - button ".hapi" [ref=e386]:
+            - img [ref=e387]
+            - generic [ref=e389]: .hapi
+          - button "Select" [ref=e390]
+        - generic [ref=e391]:
+          - button ".happy" [ref=e392]:
+            - img [ref=e393]
+            - generic [ref=e395]: .happy
+          - button "Select" [ref=e396]
+        - generic [ref=e397]:
+          - button ".kimi" [ref=e398]:
+            - img [ref=e399]
+            - generic [ref=e401]: .kimi
+          - button "Select" [ref=e402]
+        - generic [ref=e403]:
+          - button ".local" [ref=e404]:
+            - img [ref=e405]
+            - generic [ref=e407]: .local
+          - button "Select" [ref=e408]
+        - generic [ref=e409]:
+          - button ".matplotlib" [ref=e410]:
+            - img [ref=e411]
+            - generic [ref=e413]: .matplotlib
+          - button "Select" [ref=e414]
+        - generic [ref=e415]:
+          - button ".npm" [ref=e416]:
+            - img [ref=e417]
+            - generic [ref=e419]: .npm
+          - button "Select" [ref=e420]
+        - generic [ref=e421]:
+          - button ".oh-my-zsh" [ref=e422]:
+            - img [ref=e423]
+            - generic [ref=e425]: .oh-my-zsh
+          - button "Select" [ref=e426]
+        - generic [ref=e427]:
+          - button ".openclaw" [ref=e428]:
+            - img [ref=e429]
+            - generic [ref=e431]: .openclaw
+          - button "Select" [ref=e432]
+        - generic [ref=e433]:
+          - button ".qoder" [ref=e434]:
+            - img [ref=e435]
+            - generic [ref=e437]: .qoder
+          - button "Select" [ref=e438]
+        - generic [ref=e439]:
+          - button ".ssh" [ref=e440]:
+            - img [ref=e441]
+            - generic [ref=e443]: .ssh
+          - button "Select" [ref=e444]
+        - generic [ref=e445]:
+          - button ".Trash" [ref=e446]:
+            - img [ref=e447]
+            - generic [ref=e449]: .Trash
+          - button "Select" [ref=e450]
+        - generic [ref=e451]:
+          - button ".vscode" [ref=e452]:
+            - img [ref=e453]
+            - generic [ref=e455]: .vscode
+          - button "Select" [ref=e456]
+        - generic [ref=e457]:
+          - button ".zsh_sessions" [ref=e458]:
+            - img [ref=e459]
+            - generic [ref=e461]: .zsh_sessions
+          - button "Select" [ref=e462]
+        - generic [ref=e463]:
+          - button "Applications" [ref=e464]:
+            - img [ref=e465]
+            - generic [ref=e467]: Applications
+          - button "Select" [ref=e468]
+        - generic [ref=e469]:
+          - button "bin" [ref=e470]:
+            - img [ref=e471]
+            - generic [ref=e473]: bin
+          - button "Select" [ref=e474]
+        - generic [ref=e475]:
+          - button "CMLD" [ref=e476]:
+            - img [ref=e477]
+            - generic [ref=e479]: CMLD
+          - button "Select" [ref=e480]
+        - generic [ref=e481]:
+          - button "Desktop" [ref=e482]:
+            - img [ref=e483]
+            - generic [ref=e485]: Desktop
+          - button "Select" [ref=e486]
+        - generic [ref=e487]:
+          - button "Documents" [ref=e488]:
+            - img [ref=e489]
+            - generic [ref=e491]: Documents
+          - button "Select" [ref=e492]
+        - generic [ref=e493]:
+          - button "Downloads" [ref=e494]:
+            - img [ref=e495]
+            - generic [ref=e497]: Downloads
+          - button "Select" [ref=e498]
+        - generic [ref=e499]:
+          - button "ECO_paper" [ref=e500]:
+            - img [ref=e501]
+            - generic [ref=e503]: ECO_paper
+          - button "Select" [ref=e504]
+        - generic [ref=e505]:
+          - button "Library" [ref=e506]:
+            - img [ref=e507]
+            - generic [ref=e509]: Library
+          - button "Select" [ref=e510]
+        - generic [ref=e511]:
+          - button "Movies" [ref=e512]:
+            - img [ref=e513]
+            - generic [ref=e515]: Movies
+          - button "Select" [ref=e516]
+        - generic [ref=e517]:
+          - button "Music" [ref=e518]:
+            - img [ref=e519]
+            - generic [ref=e521]: Music
+          - button "Select" [ref=e522]
+        - generic [ref=e523]:
+          - button "Pictures" [ref=e524]:
+            - img [ref=e525]
+            - generic [ref=e527]: Pictures
+          - button "Select" [ref=e528]
+        - generic [ref=e529]:
+          - button "Public" [ref=e530]:
+            - img [ref=e531]
+            - generic [ref=e533]: Public
+          - button "Select" [ref=e534]
+      - generic [ref=e535]:
+        - button "Cancel" [active] [ref=e536]
+        - button "Use current directory" [ref=e537]

@@ -1,0 +1,179 @@
+- generic [ref=e2]:
+  - generic [ref=e861]:
+    - generic [ref=e863]:
+      - button [ref=e864]:
+        - img [ref=e865]
+      - generic [ref=e867]: Template Manager
+      - button "New room" [ref=e868]
+    - generic [ref=e870]:
+      - generic [ref=e871]:
+        - generic [ref=e872]: Role templates
+        - generic [ref=e873]: A role template defines what a single slot represents.
+        - generic [ref=e874]:
+          - generic [ref=e875]:
+            - generic [ref=e876]: Planner
+            - generic [ref=e877]: Break down the goal, assign work, and coordinate the team.
+            - generic [ref=e878]: "@planner · claude"
+          - generic [ref=e879]:
+            - generic [ref=e880]: Coordinator
+            - generic [ref=e881]: Keep the room aligned and make sure handoffs happen cleanly.
+            - generic [ref=e882]: "@coordinator · claude"
+          - generic [ref=e883]:
+            - generic [ref=e884]: Architect
+            - generic [ref=e885]: Own system design, interfaces, and structure decisions.
+            - generic [ref=e886]: "@architect · claude"
+          - generic [ref=e887]:
+            - generic [ref=e888]: Coder
+            - generic [ref=e889]: Implement the main code changes.
+            - generic [ref=e890]: "@coder · codex"
+          - generic [ref=e891]:
+            - generic [ref=e892]: Reviewer
+            - generic [ref=e893]: Review outputs, find risks, and request fixes.
+            - generic [ref=e894]: "@reviewer · claude"
+          - generic [ref=e895]:
+            - generic [ref=e896]: Researcher
+            - generic [ref=e897]: Collect evidence, compare sources, and surface findings.
+            - generic [ref=e898]: "@researcher · claude"
+          - generic [ref=e899]:
+            - generic [ref=e900]: Writer
+            - generic [ref=e901]: Turn findings into a clean written deliverable.
+            - generic [ref=e902]: "@writer · claude"
+          - generic [ref=e903]:
+            - generic [ref=e904]: Tester
+            - generic [ref=e905]: Validate behavior, write tests, and check quality.
+            - generic [ref=e906]: "@tester · cursor"
+        - generic [ref=e907]:
+          - generic [ref=e909]: Add custom role template
+          - generic [ref=e910]:
+            - textbox "Template title" [ref=e911]
+            - textbox "Mention key (optional)" [ref=e912]
+            - textbox "What this role does" [ref=e913]
+            - combobox [ref=e914]:
+              - option "claude" [selected]
+              - option "codex"
+              - option "cursor"
+              - option "gemini"
+              - option "opencode"
+          - button "Save role template" [ref=e916]
+      - generic [ref=e917]:
+        - generic [ref=e918]: Room templates
+        - generic [ref=e919]: Add, edit, hide, or delete room templates. Hidden templates stay here but will not appear on the new-room screen.
+        - generic [ref=e920]:
+          - generic [ref=e921]:
+            - generic [ref=e922]:
+              - generic [ref=e923]: Quick Duo
+              - generic [ref=e924]: Built-in
+            - generic [ref=e925]: Minimal two-slot setup for fast collaboration.
+            - generic [ref=e926]:
+              - generic [ref=e927]: Planner
+              - generic [ref=e928]: Coder
+          - generic [ref=e929]:
+            - generic [ref=e930]:
+              - generic [ref=e931]: Dev Trio
+              - generic [ref=e932]: Built-in
+            - generic [ref=e933]: Planner, coder, reviewer.
+            - generic [ref=e934]:
+              - generic [ref=e935]: Planner
+              - generic [ref=e936]: Coder
+              - generic [ref=e937]: Reviewer
+          - generic [ref=e938]:
+            - generic [ref=e939]:
+              - generic [ref=e940]: Full Build
+              - generic [ref=e941]: Built-in
+            - generic [ref=e942]: A broader engineering room with design and testing roles.
+            - generic [ref=e943]:
+              - generic [ref=e944]: Planner
+              - generic [ref=e945]: Architect
+              - generic [ref=e946]: Coder
+              - generic [ref=e947]: Tester
+              - generic [ref=e948]: Reviewer
+          - generic [ref=e949]:
+            - generic [ref=e950]:
+              - generic [ref=e951]: Research Duo
+              - generic [ref=e952]: Built-in
+            - generic [ref=e953]: One researcher and one writer/reviewer partner.
+            - generic [ref=e954]:
+              - generic [ref=e955]: Researcher
+              - generic [ref=e956]: Writer
+          - generic [ref=e957]:
+            - generic [ref=e958]:
+              - generic [ref=e959]: Research Team
+              - generic [ref=e960]: Built-in
+            - generic [ref=e961]: Lead, researcher, writer, reviewer.
+            - generic [ref=e962]:
+              - generic [ref=e963]: Coordinator
+              - generic [ref=e964]: Researcher
+              - generic [ref=e965]: Writer
+              - generic [ref=e966]: Reviewer
+        - generic [ref=e967]:
+          - generic [ref=e969]: Add custom room template
+          - generic [ref=e970]:
+            - textbox "Template title" [ref=e971]
+            - textbox "Description (optional)" [ref=e972]
+            - generic [ref=e973]:
+              - checkbox "Show in room creation screen" [checked] [ref=e974]
+              - text: Show in room creation screen
+            - generic [ref=e975]:
+              - generic [ref=e976]:
+                - generic [ref=e977]:
+                  - generic [ref=e978]:
+                    - checkbox "Slot 1" [checked] [ref=e979]
+                    - text: Slot 1
+                  - button "Remove" [ref=e980]
+                - generic [ref=e981]:
+                  - combobox [ref=e982]:
+                    - option "Planner" [selected]
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder"
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e983]:
+                    - option "claude" [selected]
+                    - option "codex"
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+              - generic [ref=e984]:
+                - generic [ref=e985]:
+                  - generic [ref=e986]:
+                    - checkbox "Slot 2" [checked] [ref=e987]
+                    - text: Slot 2
+                  - button "Remove" [ref=e988]
+                - generic [ref=e989]:
+                  - combobox [ref=e990]:
+                    - option "Planner"
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder" [selected]
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                  - combobox [ref=e991]:
+                    - option "claude"
+                    - option "codex" [selected]
+                    - option "cursor"
+                    - option "gemini"
+                    - option "opencode"
+            - generic [ref=e992]:
+              - button "+ Add slot" [ref=e993]
+              - button "Save room template" [ref=e994]
+        - generic [ref=e996]:
+          - generic [ref=e997]:
+            - generic [ref=e999]:
+              - generic [ref=e1000]: Template Flow Room template v2
+              - generic [ref=e1001]: Hidden from room creator
+            - generic [ref=e1002]:
+              - button "Show" [ref=e1003]
+              - button "Edit" [ref=e1004]
+              - button "Delete" [ref=e1005]
+          - generic [ref=e1006]:
+            - generic [ref=e1007]: Planner
+            - generic [ref=e1008]: Coder
+  - generic [ref=e281]:
+    - img [ref=e283]
+    - button "Open Tanstack query devtools" [ref=e331] [cursor=pointer]:
+      - img [ref=e332]

@@ -1,0 +1,149 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - img "AgentChat" [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]: AgentChat
+            - generic [ref=e138]: Rooms and direct sessions in one inbox
+        - button "Settings" [ref=e139]:
+          - img [ref=e140]
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]: Chats
+            - generic [ref=e148]: 4 total
+          - generic [ref=e149]:
+            - button "Refresh" [ref=e150]
+            - button "Session" [ref=e151]:
+              - img [ref=e152]
+              - text: Session
+            - button "Room" [ref=e153]:
+              - img [ref=e154]
+              - text: Room
+        - generic [ref=e155]:
+          - 'button "Codex agentchat-source Codex 9h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e156]':
+            - img "Codex" [ref=e160]
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - generic [ref=e164]:
+                  - generic [ref=e165]: agentchat-source
+                  - generic [ref=e166]: Codex
+                - generic [ref=e167]:
+                  - generic [ref=e168]: 9h ago
+                  - button "Delete session" [ref=e169]:
+                    - img [ref=e170]
+              - generic [ref=e173]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e175]: "mode: default"
+          - 'button "Claude Code code Claude Code 9h ago /Users/zhf/Desktop/code/ mode: default" [ref=e176]':
+            - img "Claude Code" [ref=e180]
+            - generic [ref=e182]:
+              - generic [ref=e183]:
+                - generic [ref=e184]:
+                  - generic [ref=e185]: code
+                  - generic [ref=e186]: Claude Code
+                - generic [ref=e187]:
+                  - generic [ref=e188]: 9h ago
+                  - button "Delete session" [ref=e189]:
+                    - img [ref=e190]
+              - generic [ref=e193]: /Users/zhf/Desktop/code/
+              - generic [ref=e195]: "mode: default"
+          - button "Claude Code Codex Web Room QA Planner · Coder 0/2 online 0/2 assigned 0/0 tasks done @planner_cc_auto" [ref=e196]:
+            - generic [ref=e197]:
+              - generic [ref=e198]:
+                - img "Claude Code" [ref=e202]
+                - img "Codex" [ref=e207]
+              - generic [ref=e209]:
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - generic [ref=e212]: Web Room QA
+                    - generic [ref=e213]: Planner · Coder
+                  - generic [ref=e214]:
+                    - generic [ref=e215]: 0/2 online
+                    - button "Delete room" [ref=e216]:
+                      - img [ref=e217]
+                - generic [ref=e220]:
+                  - generic [ref=e221]: 0/2 assigned
+                  - generic [ref=e222]: 0/0 tasks done
+                  - generic [ref=e223]: "@planner_cc_auto"
+          - 'button "Codex agentchat-source Codex 18h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e224]':
+            - img "Codex" [ref=e228]
+            - generic [ref=e230]:
+              - generic [ref=e231]:
+                - generic [ref=e232]:
+                  - generic [ref=e233]: agentchat-source
+                  - generic [ref=e234]: Codex
+                - generic [ref=e235]:
+                  - generic [ref=e236]: 18h ago
+                  - button "Delete session" [ref=e237]:
+                    - img [ref=e238]
+              - generic [ref=e241]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e243]: "mode: default"
+    - generic [ref=e246]:
+      - generic [ref=e247]:
+        - button [ref=e248]:
+          - img [ref=e249]
+        - generic [ref=e251]: Create Session
+      - generic [ref=e252]:
+        - generic [ref=e253]:
+          - generic [ref=e254]: Machine
+          - combobox [ref=e255]:
+            - option "No machines available" [selected]
+        - generic [ref=e256]:
+          - generic [ref=e257]: Directory
+          - generic [ref=e259]:
+            - textbox "/path/to/project" [ref=e260]
+            - button "Browse" [disabled]
+        - generic [ref=e261]:
+          - generic [ref=e262]: Session type
+          - generic [ref=e263]:
+            - generic [ref=e265] [cursor=pointer]:
+              - radio "Simple Use selected directory as-is" [checked] [ref=e266]
+              - generic [ref=e267]: Simple
+              - generic [ref=e268]: Use selected directory as-is
+            - generic [ref=e270]:
+              - radio "Worktree" [ref=e271]
+              - generic [ref=e273]:
+                - generic [ref=e274] [cursor=pointer]: Worktree
+                - generic [ref=e275]: Create a new worktree next to repo
+        - generic [ref=e276]:
+          - generic [ref=e277]: Agent
+          - generic [ref=e278]:
+            - generic [ref=e279] [cursor=pointer]:
+              - radio "claude" [checked] [ref=e280]
+              - generic [ref=e281]: claude
+            - generic [ref=e282] [cursor=pointer]:
+              - radio "codex" [ref=e283]
+              - generic [ref=e284]: codex
+            - generic [ref=e285] [cursor=pointer]:
+              - radio "cursor" [ref=e286]
+              - generic [ref=e287]: cursor
+            - generic [ref=e288] [cursor=pointer]:
+              - radio "gemini" [ref=e289]
+              - generic [ref=e290]: gemini
+            - generic [ref=e291] [cursor=pointer]:
+              - radio "opencode" [ref=e292]
+              - generic [ref=e293]: opencode
+        - generic [ref=e294]:
+          - generic [ref=e295]:
+            - text: Model
+            - generic [ref=e296]: (optional)
+          - combobox [ref=e297]:
+            - option "Auto" [selected]
+            - option "Opus"
+            - option "Sonnet"
+        - generic [ref=e298]:
+          - generic [ref=e299]: YOLO mode
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - generic [ref=e302]: Bypass approvals and sandbox
+              - generic [ref=e303]: Uses dangerous agent flags when spawning.
+            - checkbox [ref=e305]
+        - generic [ref=e308]:
+          - button "Cancel" [ref=e309]
+          - button "Create" [disabled]
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

@@ -1,0 +1,284 @@
+- generic [ref=e2]:
+  - generic [ref=e1011]:
+    - generic [ref=e1013]:
+      - generic [ref=e1015]:
+        - generic [ref=e1016]:
+          - img "AgentChat" [ref=e1018]
+          - generic [ref=e1019]:
+            - generic [ref=e1020]: AgentChat
+            - generic [ref=e1021]: Rooms and direct sessions in one inbox
+        - button "Settings" [ref=e1022]:
+          - img [ref=e1023]
+      - generic [ref=e1027]:
+        - generic [ref=e1028]:
+          - generic [ref=e1029]:
+            - generic [ref=e1030]: Chats
+            - generic [ref=e1031]: 4 total
+          - generic [ref=e1032]:
+            - button "Refresh" [ref=e1033]
+            - button "Session" [ref=e1034]:
+              - img [ref=e1035]
+              - text: Session
+            - button "Room" [ref=e1036]:
+              - img [ref=e1037]
+              - text: Room
+        - generic [ref=e1038]:
+          - 'button "Codex agentchat-source Codex 7h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e1039]':
+            - img "Codex" [ref=e1043]
+            - generic [ref=e1045]:
+              - generic [ref=e1046]:
+                - generic [ref=e1047]:
+                  - generic [ref=e1048]: agentchat-source
+                  - generic [ref=e1049]: Codex
+                - generic [ref=e1050]:
+                  - generic [ref=e1051]: 7h ago
+                  - button "Delete session" [ref=e1052]:
+                    - img [ref=e1053]
+              - generic [ref=e1056]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e1058]: "mode: default"
+          - 'button "Claude Code code Claude Code 7h ago /Users/zhf/Desktop/code/ mode: default" [ref=e1059]':
+            - img "Claude Code" [ref=e1063]
+            - generic [ref=e1065]:
+              - generic [ref=e1066]:
+                - generic [ref=e1067]:
+                  - generic [ref=e1068]: code
+                  - generic [ref=e1069]: Claude Code
+                - generic [ref=e1070]:
+                  - generic [ref=e1071]: 7h ago
+                  - button "Delete session" [ref=e1072]:
+                    - img [ref=e1073]
+              - generic [ref=e1076]: /Users/zhf/Desktop/code/
+              - generic [ref=e1078]: "mode: default"
+          - button "Claude Code Codex Web Room QA Planner · Coder 0/2 online 0/2 assigned 0/0 tasks done @planner_cc_auto" [ref=e1079]:
+            - generic [ref=e1080]:
+              - generic [ref=e1081]:
+                - img "Claude Code" [ref=e1085]
+                - img "Codex" [ref=e1090]
+              - generic [ref=e1092]:
+                - generic [ref=e1093]:
+                  - generic [ref=e1094]:
+                    - generic [ref=e1095]: Web Room QA
+                    - generic [ref=e1096]: Planner · Coder
+                  - generic [ref=e1097]:
+                    - generic [ref=e1098]: 0/2 online
+                    - button "Delete room" [ref=e1099]:
+                      - img [ref=e1100]
+                - generic [ref=e1103]:
+                  - generic [ref=e1104]: 0/2 assigned
+                  - generic [ref=e1105]: 0/0 tasks done
+                  - generic [ref=e1106]: "@planner_cc_auto"
+          - 'button "Codex agentchat-source Codex 16h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e1107]':
+            - img "Codex" [ref=e1111]
+            - generic [ref=e1113]:
+              - generic [ref=e1114]:
+                - generic [ref=e1115]:
+                  - generic [ref=e1116]: agentchat-source
+                  - generic [ref=e1117]: Codex
+                - generic [ref=e1118]:
+                  - generic [ref=e1119]: 16h ago
+                  - button "Delete session" [ref=e1120]:
+                    - img [ref=e1121]
+              - generic [ref=e1124]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e1126]: "mode: default"
+    - generic [ref=e1129]:
+      - generic [ref=e1130]:
+        - generic [ref=e1131]: New room
+        - button "Close" [ref=e1132]
+      - generic [ref=e1134]:
+        - generic [ref=e1135]:
+          - generic [ref=e1137]:
+            - generic [ref=e1138]: Quick room setup
+            - generic [ref=e1139]: "Start simple: choose a room template, keep the slots you want, then pick a role template, agent, model, and mention key for each slot."
+          - generic [ref=e1140]:
+            - generic [ref=e1141]:
+              - generic [ref=e1142]: Room name
+              - textbox "Launch coordination room" [ref=e1143]
+            - generic [ref=e1144]:
+              - generic [ref=e1145]:
+                - checkbox "Enable planner auto-dispatch nudges" [checked] [ref=e1146]
+                - text: Enable planner auto-dispatch nudges
+              - generic [ref=e1147]:
+                - checkbox "Auto launch agents after room creation" [checked] [ref=e1148]
+                - text: Auto launch agents after room creation
+          - generic [ref=e1149]:
+            - generic [ref=e1150]:
+              - generic [ref=e1151]: Goal (optional)
+              - generic [ref=e1152]: Leave blank to start quietly and wait for your first room message.
+            - 'textbox "Optional: describe the shared objective" [ref=e1153]'
+          - generic [ref=e1154]:
+            - generic [ref=e1155]: Launch defaults
+            - generic [ref=e1156]: All enabled slots will be spawned immediately with the selected agent type, model, machine, and working directory.
+            - generic [ref=e1157]:
+              - generic [ref=e1158]:
+                - generic [ref=e1159]: Machine
+                - combobox [ref=e1160]:
+                  - option "Select machine"
+                  - option "zhfs-MacBook-Air.local" [selected]
+              - generic [ref=e1161]:
+                - generic [ref=e1162]: Working directory
+                - textbox "/path/to/project" [ref=e1163]
+        - generic [ref=e1164]:
+          - generic [ref=e1165]:
+            - generic [ref=e1166]:
+              - generic [ref=e1167]: Room templates
+              - generic [ref=e1168]: These prefill the slot list below. You can still edit the slots after choosing one.
+            - generic [ref=e1169]:
+              - generic [ref=e1170]: 2 active slots
+              - button "Add template" [ref=e1171]
+              - button "Manage templates" [ref=e1172]
+          - generic [ref=e1173]:
+            - button "Quick Duo 2 slots Minimal two-slot setup for fast collaboration. Planner Coder" [ref=e1174]:
+              - generic [ref=e1175]:
+                - generic [ref=e1176]: Quick Duo
+                - generic [ref=e1177]: 2 slots
+              - generic [ref=e1178]: Minimal two-slot setup for fast collaboration.
+              - generic [ref=e1179]:
+                - generic [ref=e1180]: Planner
+                - generic [ref=e1181]: Coder
+            - button "Dev Trio 3 slots Planner, coder, reviewer. Planner Coder Reviewer" [ref=e1182]:
+              - generic [ref=e1183]:
+                - generic [ref=e1184]: Dev Trio
+                - generic [ref=e1185]: 3 slots
+              - generic [ref=e1186]: Planner, coder, reviewer.
+              - generic [ref=e1187]:
+                - generic [ref=e1188]: Planner
+                - generic [ref=e1189]: Coder
+                - generic [ref=e1190]: Reviewer
+            - button "Full Build 5 slots A broader engineering room with design and testing roles. Planner Architect Coder Tester Reviewer" [ref=e1191]:
+              - generic [ref=e1192]:
+                - generic [ref=e1193]: Full Build
+                - generic [ref=e1194]: 5 slots
+              - generic [ref=e1195]: A broader engineering room with design and testing roles.
+              - generic [ref=e1196]:
+                - generic [ref=e1197]: Planner
+                - generic [ref=e1198]: Architect
+                - generic [ref=e1199]: Coder
+                - generic [ref=e1200]: Tester
+                - generic [ref=e1201]: Reviewer
+            - button "Research Duo 2 slots One researcher and one writer/reviewer partner. Researcher Writer" [ref=e1202]:
+              - generic [ref=e1203]:
+                - generic [ref=e1204]: Research Duo
+                - generic [ref=e1205]: 2 slots
+              - generic [ref=e1206]: One researcher and one writer/reviewer partner.
+              - generic [ref=e1207]:
+                - generic [ref=e1208]: Researcher
+                - generic [ref=e1209]: Writer
+            - button "Research Team 4 slots Lead, researcher, writer, reviewer. Coordinator Researcher Writer Reviewer" [ref=e1210]:
+              - generic [ref=e1211]:
+                - generic [ref=e1212]: Research Team
+                - generic [ref=e1213]: 4 slots
+              - generic [ref=e1214]: Lead, researcher, writer, reviewer.
+              - generic [ref=e1215]:
+                - generic [ref=e1216]: Coordinator
+                - generic [ref=e1217]: Researcher
+                - generic [ref=e1218]: Writer
+                - generic [ref=e1219]: Reviewer
+            - button "Template Flow Room template v2 2 slots Planner Coder" [ref=e1220]:
+              - generic [ref=e1221]:
+                - generic [ref=e1222]: Template Flow Room template v2
+                - generic [ref=e1223]: 2 slots
+              - generic [ref=e1224]:
+                - generic [ref=e1225]: Planner
+                - generic [ref=e1226]: Coder
+        - generic [ref=e1227]:
+          - generic [ref=e1228]:
+            - generic [ref=e1229]:
+              - generic [ref=e1230]: Slots
+              - generic [ref=e1231]: Each slot now includes its role template, agent, model, mention key, and avatar preview.
+            - button "+ Add slot" [ref=e1232]
+          - generic [ref=e1233]:
+            - generic [ref=e1234]:
+              - generic [ref=e1236]:
+                - checkbox [checked] [ref=e1237]
+                - img "Claude Code" [ref=e1240]
+                - generic [ref=e1241]:
+                  - generic [ref=e1242]:
+                    - generic [ref=e1243]: Slot 1
+                    - generic [ref=e1244]: "@planner_cc_auto"
+                  - generic [ref=e1245]: Planner · Claude Code · auto
+                  - generic [ref=e1246]: Enabled · Break down the goal, assign work, and coordinate the team.
+              - generic [ref=e1247]:
+                - generic [ref=e1248]:
+                  - generic [ref=e1249]: Role template
+                  - combobox [ref=e1250]:
+                    - option "Planner" [selected]
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder"
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                - generic [ref=e1251]:
+                  - generic [ref=e1252]: Agent
+                  - combobox [ref=e1253]:
+                    - option "Claude Code" [selected]
+                    - option "Codex"
+                    - option "Cursor"
+                    - option "Gemini"
+                    - option "OpenCode"
+                - generic [ref=e1254]:
+                  - generic [ref=e1255]: Model
+                  - combobox [ref=e1256]:
+                    - option "Auto" [selected]
+                    - option "Opus"
+                    - option "Sonnet"
+                - generic [ref=e1257]:
+                  - generic [ref=e1258]:
+                    - generic [ref=e1259]: Mention key
+                    - generic [ref=e1260]: Auto
+                  - textbox "coder_cc_opus4_6" [ref=e1261]: planner_cc_auto
+                  - generic [ref=e1262]: Use this as the room mention, for example @planner_cc_auto.
+            - generic [ref=e1263]:
+              - generic [ref=e1265]:
+                - checkbox [checked] [ref=e1266]
+                - img "Codex" [ref=e1269]
+                - generic [ref=e1270]:
+                  - generic [ref=e1271]:
+                    - generic [ref=e1272]: Slot 2
+                    - generic [ref=e1273]: "@coder_cdx_auto"
+                  - generic [ref=e1274]: Coder · Codex · auto
+                  - generic [ref=e1275]: Enabled · Implement the main code changes.
+              - generic [ref=e1276]:
+                - generic [ref=e1277]:
+                  - generic [ref=e1278]: Role template
+                  - combobox [ref=e1279]:
+                    - option "Planner"
+                    - option "Coordinator"
+                    - option "Architect"
+                    - option "Coder" [selected]
+                    - option "Reviewer"
+                    - option "Researcher"
+                    - option "Writer"
+                    - option "Tester"
+                - generic [ref=e1280]:
+                  - generic [ref=e1281]: Agent
+                  - combobox [ref=e1282]:
+                    - option "Claude Code"
+                    - option "Codex" [selected]
+                    - option "Cursor"
+                    - option "Gemini"
+                    - option "OpenCode"
+                - generic [ref=e1283]:
+                  - generic [ref=e1284]: Model
+                  - combobox [ref=e1285]:
+                    - option "Auto" [selected]
+                    - option "GPT-5.4"
+                    - option "GPT-5.3 Codex"
+                    - option "GPT-5.2 Codex"
+                    - option "GPT-5.2"
+                    - option "GPT-5.1 Codex Max"
+                    - option "GPT-5.1 Codex Mini"
+                - generic [ref=e1286]:
+                  - generic [ref=e1287]:
+                    - generic [ref=e1288]: Mention key
+                    - generic [ref=e1289]: Auto
+                  - textbox "coder_cc_opus4_6" [ref=e1290]: coder_cdx_auto
+                  - generic [ref=e1291]: Use this as the room mention, for example @coder_cdx_auto.
+        - generic [ref=e1292]:
+          - button "Cancel" [ref=e1293]
+          - button "Create room" [ref=e1294]
+  - generic [ref=e281]:
+    - img [ref=e283]
+    - button "Open Tanstack query devtools" [ref=e331] [cursor=pointer]:
+      - img [ref=e332]

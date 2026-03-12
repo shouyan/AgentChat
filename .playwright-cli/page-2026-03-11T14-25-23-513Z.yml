@@ -1,0 +1,448 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - img "AgentChat" [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]: AgentChat
+            - generic [ref=e138]: Rooms and direct sessions in one inbox
+        - button "Settings" [ref=e139]:
+          - img [ref=e140]
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]: Chats
+            - generic [ref=e148]: 4 total
+          - generic [ref=e149]:
+            - button "Refresh" [ref=e150]
+            - button "Session" [ref=e151]:
+              - img [ref=e152]
+              - text: Session
+            - button "Room" [ref=e153]:
+              - img [ref=e154]
+              - text: Room
+        - generic [ref=e155]:
+          - button "Codex Codex Claude Code Codex +5 Web Room QA Planner · Coder · Coordinator · Implementer 1/9 online 1/9 assigned 1/4 tasks done @planner_cc_auto" [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]:
+                - img "Codex" [ref=e162]
+                - img "Codex" [ref=e167]
+                - img "Claude Code" [ref=e172]
+                - img "Codex" [ref=e177]
+                - generic [ref=e179]: "+5"
+              - generic [ref=e180]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]:
+                    - generic [ref=e183]: Web Room QA
+                    - generic [ref=e184]: Planner · Coder · Coordinator · Implementer
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: 1/9 online
+                    - button "Delete room" [ref=e187]:
+                      - img [ref=e188]
+                - generic [ref=e191]:
+                  - generic [ref=e192]: 1/9 assigned
+                  - generic [ref=e193]: 1/4 tasks done
+                  - generic [ref=e194]: "@planner_cc_auto"
+          - 'button "Codex agentchat-source Codex just now /Users/zhf/Desktop/code/agentchat-source mode: default thinking" [ref=e195]':
+            - img "Codex" [ref=e199]
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: agentchat-source
+                  - generic [ref=e205]: Codex
+                - generic [ref=e206]:
+                  - generic [ref=e207]: just now
+                  - button "Delete session" [ref=e208]:
+                    - img [ref=e209]
+              - generic [ref=e212]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e213]:
+                - generic [ref=e214]: "mode: default"
+                - generic [ref=e215]: thinking
+          - 'button "Claude Code code Claude Code 10h ago /Users/zhf/Desktop/code/ mode: default" [ref=e216]':
+            - img "Claude Code" [ref=e220]
+            - generic [ref=e222]:
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - generic [ref=e225]: code
+                  - generic [ref=e226]: Claude Code
+                - generic [ref=e227]:
+                  - generic [ref=e228]: 10h ago
+                  - button "Delete session" [ref=e229]:
+                    - img [ref=e230]
+              - generic [ref=e233]: /Users/zhf/Desktop/code/
+              - generic [ref=e235]: "mode: default"
+          - 'button "Codex agentchat-source Codex 19h ago /Users/zhf/Desktop/code/agentchat-source mode: default" [ref=e236]':
+            - img "Codex" [ref=e240]
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: agentchat-source
+                  - generic [ref=e246]: Codex
+                - generic [ref=e247]:
+                  - generic [ref=e248]: 19h ago
+                  - button "Delete session" [ref=e249]:
+                    - img [ref=e250]
+              - generic [ref=e253]: /Users/zhf/Desktop/code/agentchat-source
+              - generic [ref=e255]: "mode: default"
+    - generic [ref=e258]:
+      - generic [ref=e259]:
+        - generic [ref=e260]:
+          - generic [ref=e262]: Web Room QA
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: "Status:"
+              - generic [ref=e266]: Wake
+              - switch "Archive all online room agents" [checked] [ref=e267]
+            - button "auto-dispatch on" [ref=e269]
+            - generic [ref=e270]: 1/9 online
+            - generic [ref=e271]: 1/9 roles assigned
+            - generic [ref=e272]: 1/4 tasks done
+            - button "Delete" [ref=e273]
+        - generic [ref=e274]:
+          - button "chat" [ref=e275]
+          - button "tasks" [ref=e276]
+          - button "roles" [active] [ref=e277]
+      - generic [ref=e542]:
+        - generic [ref=e544]:
+          - generic [ref=e545]:
+            - generic [ref=e546]: Invite agent into this room
+            - generic [ref=e547]: After a room is created, you can add a new role and immediately bind an existing session or spawn a fresh agent into it.
+          - button "Open invite form" [ref=e549]
+        - generic [ref=e550]:
+          - generic [ref=e551]:
+            - generic [ref=e552]:
+              - generic [ref=e553]: Role templates
+              - generic [ref=e554]: Apply built-in templates into this room, or save the current room role layout as a reusable room-level template.
+            - generic [ref=e555]: "Saved in this room: 0"
+          - generic [ref=e556]:
+            - generic [ref=e557]:
+              - generic [ref=e558]: Dev Trio
+              - generic [ref=e559]:
+                - generic [ref=e560]: "@coordinator"
+                - generic [ref=e561]: "@implementer"
+                - generic [ref=e562]: "@reviewer"
+              - button "Apply preset" [ref=e564]
+            - generic [ref=e565]:
+              - generic [ref=e566]: Full Build
+              - generic [ref=e567]:
+                - generic [ref=e568]: "@planner"
+                - generic [ref=e569]: "@architect"
+                - generic [ref=e570]: "@coder"
+                - generic [ref=e571]: "@tester"
+                - generic [ref=e572]: "@reviewer"
+              - button "Apply preset" [ref=e574]
+            - generic [ref=e575]:
+              - generic [ref=e576]: Research
+              - generic [ref=e577]:
+                - generic [ref=e578]: "@lead"
+                - generic [ref=e579]: "@researcher"
+                - generic [ref=e580]: "@writer"
+                - generic [ref=e581]: "@reviewer"
+              - button "Apply preset" [ref=e583]
+          - generic [ref=e584]:
+            - generic [ref=e585]: Save current room roles as template
+            - generic [ref=e586]:
+              - textbox "Template name" [ref=e587]
+              - textbox "Short description (optional)" [ref=e588]
+            - generic [ref=e589]:
+              - generic [ref=e590]: Saves a snapshot of the current room role definitions into room metadata.
+              - button "Save template" [ref=e591]
+        - generic [ref=e592]:
+          - generic [ref=e593]:
+            - generic [ref=e594]:
+              - generic [ref=e595]:
+                - generic [ref=e596]: Planner
+                - generic [ref=e597]: online
+              - generic [ref=e599]: Break down the goal, assign work, and coordinate the team.
+              - generic [ref=e600]: Mention as @planner_cc_auto
+              - generic [ref=e601]: "Current session: b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+              - generic [ref=e602]:
+                - button "Open chat" [ref=e603]
+                - button "Files" [ref=e604]
+                - button "Terminal" [ref=e605]
+            - generic [ref=e606]:
+              - button "Offline" [ref=e607]
+              - button "Kick" [ref=e608]
+          - generic [ref=e609]:
+            - generic [ref=e610]:
+              - generic [ref=e611]: Bind existing session
+              - combobox [ref=e612]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e614]
+            - generic [ref=e615]:
+              - generic [ref=e616]: Spawn new session
+              - combobox [ref=e617]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e618]:
+                - option "Claude" [selected]
+                - option "Codex"
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e619]
+              - button "Spawn & bind" [ref=e621]
+        - generic [ref=e622]:
+          - generic [ref=e623]:
+            - generic [ref=e624]:
+              - generic [ref=e625]:
+                - generic [ref=e626]: Coder
+                - generic [ref=e627]: offline
+              - generic [ref=e629]: Implement the main code changes.
+              - generic [ref=e630]: Mention as @coder_cdx_auto
+              - generic [ref=e631]: "Current session: Unassigned"
+            - button "Kick" [ref=e633]
+          - generic [ref=e634]:
+            - generic [ref=e635]:
+              - generic [ref=e636]: Bind existing session
+              - combobox [ref=e637]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e639]
+            - generic [ref=e640]:
+              - generic [ref=e641]: Spawn new session
+              - combobox [ref=e642]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e643]:
+                - option "Claude"
+                - option "Codex" [selected]
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e644]
+              - button "Spawn & bind" [ref=e646]
+        - generic [ref=e647]:
+          - generic [ref=e648]:
+            - generic [ref=e649]:
+              - generic [ref=e650]:
+                - generic [ref=e651]: Coordinator
+                - generic [ref=e652]: offline
+              - generic [ref=e654]: Break down work, assign tasks, and keep the team aligned.
+              - generic [ref=e655]: Mention as @coordinator
+              - generic [ref=e656]: "Current session: Unassigned"
+            - button "Kick" [ref=e658]
+          - generic [ref=e659]:
+            - generic [ref=e660]:
+              - generic [ref=e661]: Bind existing session
+              - combobox [ref=e662]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e664]
+            - generic [ref=e665]:
+              - generic [ref=e666]: Spawn new session
+              - combobox [ref=e667]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e668]:
+                - option "Claude" [selected]
+                - option "Codex"
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e669]
+              - button "Spawn & bind" [ref=e671]
+        - generic [ref=e672]:
+          - generic [ref=e673]:
+            - generic [ref=e674]:
+              - generic [ref=e675]:
+                - generic [ref=e676]: Implementer
+                - generic [ref=e677]: offline
+              - generic [ref=e679]: Write and refine the main implementation.
+              - generic [ref=e680]: Mention as @implementer
+              - generic [ref=e681]: "Current session: Unassigned"
+            - button "Kick" [ref=e683]
+          - generic [ref=e684]:
+            - generic [ref=e685]:
+              - generic [ref=e686]: Bind existing session
+              - combobox [ref=e687]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e689]
+            - generic [ref=e690]:
+              - generic [ref=e691]: Spawn new session
+              - combobox [ref=e692]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e693]:
+                - option "Claude"
+                - option "Codex" [selected]
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e694]
+              - button "Spawn & bind" [ref=e696]
+        - generic [ref=e697]:
+          - generic [ref=e698]:
+            - generic [ref=e699]:
+              - generic [ref=e700]:
+                - generic [ref=e701]: Reviewer
+                - generic [ref=e702]: offline
+              - generic [ref=e704]: Review changes, risks, and test coverage.
+              - generic [ref=e705]: Mention as @reviewer
+              - generic [ref=e706]: "Current session: Unassigned"
+            - button "Kick" [ref=e708]
+          - generic [ref=e709]:
+            - generic [ref=e710]:
+              - generic [ref=e711]: Bind existing session
+              - combobox [ref=e712]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e714]
+            - generic [ref=e715]:
+              - generic [ref=e716]: Spawn new session
+              - combobox [ref=e717]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e718]:
+                - option "Claude" [selected]
+                - option "Codex"
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e719]
+              - button "Spawn & bind" [ref=e721]
+        - generic [ref=e722]:
+          - generic [ref=e723]:
+            - generic [ref=e724]:
+              - generic [ref=e725]:
+                - generic [ref=e726]: Planner
+                - generic [ref=e727]: offline
+              - generic [ref=e729]: Turn the goal into a concrete execution plan.
+              - generic [ref=e730]: Mention as @planner
+              - generic [ref=e731]: "Current session: Unassigned"
+            - button "Kick" [ref=e733]
+          - generic [ref=e734]:
+            - generic [ref=e735]:
+              - generic [ref=e736]: Bind existing session
+              - combobox [ref=e737]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e739]
+            - generic [ref=e740]:
+              - generic [ref=e741]: Spawn new session
+              - combobox [ref=e742]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e743]:
+                - option "Claude" [selected]
+                - option "Codex"
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e744]
+              - button "Spawn & bind" [ref=e746]
+        - generic [ref=e747]:
+          - generic [ref=e748]:
+            - generic [ref=e749]:
+              - generic [ref=e750]:
+                - generic [ref=e751]: Architect
+                - generic [ref=e752]: offline
+              - generic [ref=e754]: Own structure, interfaces, and design constraints.
+              - generic [ref=e755]: Mention as @architect
+              - generic [ref=e756]: "Current session: Unassigned"
+            - button "Kick" [ref=e758]
+          - generic [ref=e759]:
+            - generic [ref=e760]:
+              - generic [ref=e761]: Bind existing session
+              - combobox [ref=e762]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e764]
+            - generic [ref=e765]:
+              - generic [ref=e766]: Spawn new session
+              - combobox [ref=e767]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e768]:
+                - option "Claude" [selected]
+                - option "Codex"
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e769]
+              - button "Spawn & bind" [ref=e771]
+        - generic [ref=e772]:
+          - generic [ref=e773]:
+            - generic [ref=e774]:
+              - generic [ref=e775]:
+                - generic [ref=e776]: Coder
+                - generic [ref=e777]: offline
+              - generic [ref=e779]: Implement the core changes.
+              - generic [ref=e780]: Mention as @coder
+              - generic [ref=e781]: "Current session: Unassigned"
+            - button "Kick" [ref=e783]
+          - generic [ref=e784]:
+            - generic [ref=e785]:
+              - generic [ref=e786]: Bind existing session
+              - combobox [ref=e787]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e789]
+            - generic [ref=e790]:
+              - generic [ref=e791]: Spawn new session
+              - combobox [ref=e792]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e793]:
+                - option "Claude"
+                - option "Codex" [selected]
+                - option "Cursor"
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e794]
+              - button "Spawn & bind" [ref=e796]
+        - generic [ref=e797]:
+          - generic [ref=e798]:
+            - generic [ref=e799]:
+              - generic [ref=e800]:
+                - generic [ref=e801]: Tester
+                - generic [ref=e802]: offline
+              - generic [ref=e804]: Add or update tests and verify behavior.
+              - generic [ref=e805]: Mention as @tester
+              - generic [ref=e806]: "Current session: Unassigned"
+            - button "Kick" [ref=e808]
+          - generic [ref=e809]:
+            - generic [ref=e810]:
+              - generic [ref=e811]: Bind existing session
+              - combobox [ref=e812]:
+                - option "Select session" [selected]
+                - option "b23ba4eb-eb83-43b0-b3d8-9f382d7cf2dc"
+                - option "a9e1fd2f-ebfa-4ae1-b616-0b2b85142eab"
+                - option "8bd08c17-8f25-42a1-8eea-0e28b14c3021"
+              - button "Assign" [ref=e814]
+            - generic [ref=e815]:
+              - generic [ref=e816]: Spawn new session
+              - combobox [ref=e817]:
+                - option "Select machine" [selected]
+                - option "zhfs-MacBook-Air.local"
+              - combobox [ref=e818]:
+                - option "Claude"
+                - option "Codex"
+                - option "Cursor" [selected]
+                - option "Gemini"
+                - option "OpenCode"
+              - textbox "/path/to/project" [ref=e819]
+              - button "Spawn & bind" [ref=e821]
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

@@ -1,0 +1,65 @@
+- generic [ref=e2]:
+  - generic [ref=e128]:
+    - generic [ref=e130]:
+      - button [ref=e131]:
+        - img [ref=e132]
+      - generic [ref=e134]: Machines & providers
+      - button "Refresh" [ref=e135]
+      - button "Settings" [ref=e136]
+    - generic [ref=e139]:
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - heading "zhfs-MacBook-Air.local" [level=3] [ref=e143]
+          - paragraph [ref=e144]: darwin · 68d6f923-3354-4f15-b6fb-01c5418ba8c2
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]: "Runner:"
+            - text: running
+          - generic [ref=e148]:
+            - generic [ref=e149]: "Sessions:"
+            - text: "3"
+          - generic [ref=e150]:
+            - generic [ref=e151]: "PID:"
+            - text: "95451"
+      - generic [ref=e152]:
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - generic [ref=e155]: Host
+            - generic [ref=e156]: zhfs-MacBook-Air.local
+          - generic [ref=e157]:
+            - generic [ref=e158]: Runner started
+            - generic [ref=e159]: 3/11/2026, 9:38:03 PM
+          - generic [ref=e160]:
+            - generic [ref=e161]: Control port
+            - generic [ref=e162]: "49812"
+          - generic [ref=e163]:
+            - generic [ref=e164]: Workspace home
+            - generic [ref=e165]: /tmp/agentchat-home
+        - generic [ref=e166]:
+          - generic [ref=e167]: Provider status
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - generic [ref=e170]:
+                - generic [ref=e171]: Claude
+                - generic [ref=e172]: Configured
+              - generic [ref=e173]:
+                - generic [ref=e174]: "Auth: auth-token"
+                - generic [ref=e175]: "Base URL: https://jimmie.zeabur.app"
+            - generic [ref=e177]:
+              - generic [ref=e178]: Codex
+              - generic [ref=e179]: Not configured
+            - generic [ref=e181]:
+              - generic [ref=e182]: Gemini
+              - generic [ref=e183]: Not configured
+            - generic [ref=e184]:
+              - generic [ref=e185]:
+                - generic [ref=e186]: Cursor
+                - generic [ref=e187]: Configured
+              - generic [ref=e189]: Local Cursor CLI
+            - generic [ref=e191]:
+              - generic [ref=e192]: OpenCode
+              - generic [ref=e193]: Not configured
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - button "Open Tanstack query devtools" [ref=e78] [cursor=pointer]:
+      - img [ref=e79]

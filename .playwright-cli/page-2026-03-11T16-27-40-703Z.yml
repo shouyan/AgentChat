@@ -1,0 +1,8 @@
+- generic [ref=e2]:
+  - status [ref=e4]:
+    - img [ref=e5]
+    - generic [ref=e8]: Authorizing…
+  - generic [ref=e9]:
+    - img [ref=e11]
+    - button "Open Tanstack query devtools" [ref=e59] [cursor=pointer]:
+      - img [ref=e60]
