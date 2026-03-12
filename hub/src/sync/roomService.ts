@@ -5,8 +5,18 @@ import {
   uniqueRoomStrings,
 } from '@hapi/protocol/roomRouting'
 import type { Store } from '../store'
+import { RoomAutomationService } from './roomAutomationService'
 import type { EventPublisher } from './eventPublisher'
 import type { MessageService } from './messageService'
+import {
+  buildRoomAppendSystemPrompt,
+  buildRoomMessageMeta,
+  describeRoomSender,
+  formatForwardedRoomMessage,
+  formatRoleBriefing,
+  formatTaskBriefing,
+  roomHasGoal,
+} from './roomFormatting'
 import type { Session } from './syncEngine'
 
 type RoomDeliveryMode = 'broadcast' | 'coordinator' | 'mention' | 'explicit_role' | 'explicit_session'
@@ -73,35 +83,26 @@ function uniqueStrings(values: Array<string | null | undefined>): string[] {
   return uniqueRoomStrings(values)
 }
 
-const ROOM_EXECUTION_TOOL_NAMES = [
-  'room_get_context',
-  'room_list_tasks',
-  'room_send_message',
-  'room_claim_task',
-  'room_block_task',
-  'room_handoff_task',
-  'room_complete_task',
-]
-
-const ROOM_COORDINATOR_TOOL_NAMES = [
-  ...ROOM_EXECUTION_TOOL_NAMES,
-  'room_create_task',
-  'room_assign_task',
-]
-
-function roleMatchesHints(role: Pick<RoomRole, 'key' | 'label'>, hints: string[]): boolean {
-  const haystack = `${role.key} ${role.label}`.toLowerCase()
-  return hints.some((hint) => haystack.includes(hint.toLowerCase()))
-}
-
 export class RoomService {
+  private readonly automationService: RoomAutomationService
+
   constructor(
     private readonly store: Store,
     private readonly publisher: EventPublisher,
     private readonly messageService: MessageService,
     private readonly resolveSession: (sessionId: string, namespace: string) => Session | undefined,
     private readonly clearSessionRoomLink: (sessionId: string, namespace: string, roomId: string) => Promise<void>
-  ) {}
+  ) {
+    this.automationService = new RoomAutomationService({
+      sendRoomMessage: (roomId, namespace, payload) => this.sendRoomMessage(roomId, namespace, payload),
+      sendRoomAwareDirectMessage: (sessionId, roomId, namespace, text, extraMeta) => this.sendRoomAwareDirectMessage(sessionId, roomId, namespace, text, extraMeta),
+      hasRecentProtocolEvent: (roomId, namespace, eventType, options) => this.hasRecentProtocolEvent(roomId, namespace, eventType, options),
+      getRoom: (roomId, namespace) => this.toProtocolRoom(roomId, namespace),
+      findCoordinatorRoleKey: (roomId, namespace) => this.findCoordinatorRoleKey(roomId, namespace),
+      findCoordinatorSessionId: (roomId, namespace) => this.findCoordinatorSessionId(roomId, namespace),
+      uniqueStrings,
+    })
+  }
 
   getRoomsByNamespace(namespace: string): Room[] {
     return this.store.rooms.getRoomsByNamespace(namespace).map((room) => this.toProtocolRoom(room.id, namespace)).filter(Boolean) as Room[]
@@ -273,7 +274,7 @@ export class RoomService {
     assigneeSessionId?: string | null
   }): Room {
     const created = this.store.rooms.createRoomTask(roomId, namespace, task)
-    void this.sendTaskProtocolMessage(roomId, namespace, {
+    void this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: `New task created: "${created.title}".${created.assigneeRoleKey ? ` Assigned to @${created.assigneeRoleKey}.` : ''}`,
       eventType: 'task_assigned',
       task: created,
@@ -282,7 +283,8 @@ export class RoomService {
     })
     const targetSessionId = created.assigneeSessionId ?? (created.assigneeRoleKey ? this.findAssignedSessionIdForRole(roomId, created.assigneeRoleKey, namespace) : null)
     if (targetSessionId) {
-      void this.sendRoomAwareDirectMessage(targetSessionId, roomId, namespace, this.formatTaskBriefing(roomId, namespace, created))
+      const roomName = this.toProtocolRoom(roomId, namespace)?.metadata.name ?? roomId
+      void this.sendRoomAwareDirectMessage(targetSessionId, roomId, namespace, formatTaskBriefing(roomName, created))
     }
     return this.emitRoomUpdated(roomId, namespace)
   }
@@ -330,7 +332,7 @@ export class RoomService {
       throw new Error('Task not found')
     }
 
-    await this.sendTaskProtocolMessage(roomId, namespace, {
+    await this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: payload.assigneeRoleKey
         ? `Task "${updated.title}" assigned to @${payload.assigneeRoleKey}.${payload.note ? `\n\nNote: ${payload.note}` : ''}`
         : `Task "${updated.title}" was moved back to the unassigned queue.${payload.note ? `\n\nNote: ${payload.note}` : ''}`,
@@ -343,7 +345,7 @@ export class RoomService {
     })
 
     if (updated.assigneeSessionId) {
-      await this.notifyTaskAssignee(roomId, namespace, updated, 'task_assigned', payload.note)
+      await this.automationService.notifyTaskAssignee(roomId, namespace, updated, 'task_assigned', payload.note)
     }
 
     return this.emitRoomUpdated(roomId, namespace)
@@ -377,7 +379,7 @@ export class RoomService {
       throw new Error('Task not found')
     }
 
-    await this.sendTaskProtocolMessage(roomId, namespace, {
+    await this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: `${nextRoleKey ? `@${nextRoleKey}` : 'An assignee'} claimed task "${updated.title}" and started working on it.${payload.note ? `\n\nUpdate: ${payload.note}` : ''}`,
       eventType: 'task_claimed',
       task: updated,
@@ -412,7 +414,7 @@ export class RoomService {
     }
 
     const coordinatorKey = this.findCoordinatorRoleKey(roomId, namespace)
-    await this.sendTaskProtocolMessage(roomId, namespace, {
+    await this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: `${payload.roleKey ? `@${payload.roleKey}` : 'The assignee'} marked task "${updated.title}" as blocked.\n\nBlocker: ${payload.reason}`,
       eventType: 'task_blocked',
       task: updated,
@@ -434,7 +436,7 @@ export class RoomService {
     }
 
     if (this.isAutoDispatchEnabled(roomId, namespace)) {
-      await this.sendBlockedTaskPlannerNudge(roomId, namespace, updated, payload)
+      await this.automationService.sendBlockedTaskPlannerNudge(roomId, namespace, updated, payload)
     }
 
     return this.emitRoomUpdated(roomId, namespace)
@@ -465,7 +467,7 @@ export class RoomService {
       throw new Error('Task not found')
     }
 
-    await this.sendTaskProtocolMessage(roomId, namespace, {
+    await this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: `Task "${updated.title}" was handed off${payload.fromRoleKey ? ` from @${payload.fromRoleKey}` : ''} to @${payload.toRoleKey}.${payload.note ? `\n\nHandoff note: ${payload.note}` : ''}`,
       eventType: 'task_handoff',
       task: updated,
@@ -476,7 +478,7 @@ export class RoomService {
     })
 
     if (updated.assigneeSessionId) {
-      await this.notifyTaskAssignee(roomId, namespace, updated, 'task_handoff', payload.note, payload.fromRoleKey)
+      await this.automationService.notifyTaskAssignee(roomId, namespace, updated, 'task_handoff', payload.note, payload.fromRoleKey)
     }
 
     return this.emitRoomUpdated(roomId, namespace)
@@ -504,7 +506,7 @@ export class RoomService {
     }
 
     const coordinatorKey = this.findCoordinatorRoleKey(roomId, namespace)
-    await this.sendTaskProtocolMessage(roomId, namespace, {
+    await this.automationService.sendTaskProtocolMessage(roomId, namespace, {
       text: `${payload.roleKey ? `@${payload.roleKey}` : 'The assignee'} completed task "${updated.title}".${payload.summary ? `\n\nSummary: ${payload.summary}` : ''}`,
       eventType: 'task_completed',
       task: updated,
@@ -526,7 +528,7 @@ export class RoomService {
     }
 
     if (this.isAutoDispatchEnabled(roomId, namespace)) {
-      await this.sendCompletionPlannerNudge(roomId, namespace, updated, payload)
+      await this.automationService.sendCompletionPlannerNudge(roomId, namespace, updated, payload)
     }
 
     return this.emitRoomUpdated(roomId, namespace)
@@ -735,19 +737,21 @@ export class RoomService {
         !(payload.senderType === 'session' && payload.senderId === targetSessionId)
       )
       for (const targetSessionId of forwardedTargetSessionIds) {
+        const targetRole = this.findRoleByAssignedSession(room, targetSessionId)
         await this.messageService.sendMessage(
           targetSessionId,
           {
-            text: this.formatForwardedRoomMessage(
+            text: formatForwardedRoomMessage(
               room,
               payload.content.text,
               routing,
-              this.describeRoomSender(payload),
-              this.findRoleKeyByAssignedSession(room, targetSessionId)
+              describeRoomSender(payload),
+              targetRole?.key
             ),
-            meta: this.buildRoomMessageMeta(
+            meta: this.automationService.buildRoomMessageMeta(
               room,
-              this.findRoleByAssignedSession(room, targetSessionId)
+              targetRole,
+              targetRole ? this.isCoordinatorRole(room, targetRole.key) : false
             ),
           }
         )
@@ -763,7 +767,7 @@ export class RoomService {
     if (!room || !role || !role.assignedSessionId) {
       return
     }
-    await this.sendRoomAwareDirectMessage(role.assignedSessionId, roomId, namespace, this.formatRoleBriefing(room, role))
+    await this.sendRoomAwareDirectMessage(role.assignedSessionId, roomId, namespace, formatRoleBriefing(room, role))
     await this.sendRoomMessage(roomId, namespace, {
       senderType: 'system',
       senderId: 'system',
@@ -777,7 +781,7 @@ export class RoomService {
       forwardToAgent: false,
     })
     if (this.isCoordinatorRole(room, role.key)) {
-      await this.maybeSendPlannerBootstrap(room, namespace, role)
+      await this.automationService.maybeSendPlannerBootstrap(room, namespace, role)
     }
   }
 
@@ -1071,135 +1075,6 @@ export class RoomService {
     }
   }
 
-  private formatForwardedRoomMessage(
-    room: Room,
-    text: string,
-    routing: ResolvedRoomRouting,
-    senderLabel: string,
-    receivingRoleKey?: string
-  ): string {
-    const receivingRoleLabel = receivingRoleKey
-      ? room.state.roles.find((role) => role.key === receivingRoleKey)?.label ?? receivingRoleKey
-      : null
-    const mentionSummary = routing.mentionAll
-      ? '@all'
-      : routing.mentions.length > 0
-        ? routing.mentions.map((item) => `@${item}`).join(', ')
-        : null
-
-    const deliveryLine =
-      routing.deliveryMode === 'coordinator'
-        ? 'Routing: no @mention found, so this was sent to the room coordinator.'
-        : routing.deliveryMode === 'broadcast'
-          ? 'Routing: broadcast to everyone in the room.'
-          : routing.deliveryMode === 'mention'
-            ? 'Routing: delivered because your role was mentioned in the room chat.'
-            : routing.deliveryMode === 'explicit_role'
-              ? 'Routing: delivered to a specific room role.'
-              : 'Routing: delivered to a specific session.'
-
-    const lines = [
-      `[Room: ${room.metadata.name}]`,
-      room.metadata.goal ? `Goal: ${room.metadata.goal}` : null,
-      `Sender: ${senderLabel}`,
-      deliveryLine,
-      mentionSummary ? `Mentions: ${mentionSummary}` : null,
-      receivingRoleLabel ? `You are receiving this as: ${receivingRoleLabel}` : null,
-      '',
-      text,
-      '',
-      'If you need another role to act, reply with room_send_message and use @mentions.',
-    ].filter(Boolean)
-    return lines.join('\n')
-  }
-
-  private formatRoleBriefing(room: Room, role: { label: string; key: string; description?: string | null; assignedSessionId?: string | null }): string {
-    const roleLines = room.state.roles.map((item) => {
-      const assigned = item.assignedSessionId ? `session ${item.assignedSessionId}` : 'unassigned'
-      return `- ${item.label} (${item.key}): ${assigned}`
-    })
-    const hasGoal = this.roomHasGoal(room)
-    return [
-      `You are joining room: ${room.metadata.name}`,
-      hasGoal ? `Room goal: ${room.metadata.goal}` : null,
-      `Your role: ${role.label}`,
-      role.description ? `Responsibilities: ${role.description}` : null,
-      !hasGoal ? 'Quiet startup mode is active because the room has no goal yet.' : null,
-      !hasGoal ? 'This join notice is informational only. Do not reply in the room or announce that you are online.' : null,
-      !hasGoal ? 'Stay idle until the user sends the first room message, you are explicitly @mentioned, or a task is assigned to you.' : null,
-      '',
-      'Current roles:',
-      ...roleLines,
-      '',
-      'Room collaboration protocol:',
-      '1. Everyone can read room chat, but only act immediately when you are @mentioned or assigned a task.',
-      '2. If a room message has no @mention, the coordinator/planner is expected to react first.',
-      '3. When you start work, report progress; if blocked, explain the blocker; when done, hand off clearly to the next role.',
-      '4. Use room_get_context first when you need the latest room state, then coordinate through room_send_message.',
-      '',
-      hasGoal
-        ? 'Work within your assigned role unless explicitly reassigned.'
-        : 'Until the room gets its first real instruction, do not send any message just to acknowledge this briefing.',
-    ].filter(Boolean).join('\n')
-  }
-
-  private formatTaskBriefing(roomId: string, namespace: string, task: { title: string; description?: string | null; assigneeRoleKey?: string | null }): string {
-    const room = this.toProtocolRoom(roomId, namespace)
-    const roomName = room?.metadata.name ?? roomId
-    return [
-      `[Room Task: ${roomName}]`,
-      `Task: ${task.title}`,
-      task.description ? `Details: ${task.description}` : null,
-      task.assigneeRoleKey ? `Assigned role: ${task.assigneeRoleKey}` : null,
-    ].filter(Boolean).join('\n')
-  }
-
-  private describeRoomSender(payload: Pick<SendRoomMessageInput, 'senderType' | 'senderId' | 'roleKey'>): string {
-    if (payload.senderType === 'user') {
-      return 'User'
-    }
-    if (payload.senderType === 'system') {
-      return 'System'
-    }
-    return payload.roleKey ? `@${payload.roleKey}` : `Session ${payload.senderId}`
-  }
-
-  private roomHasGoal(room: Pick<Room, 'metadata'>): boolean {
-    return typeof room.metadata.goal === 'string' && room.metadata.goal.trim().length > 0
-  }
-
-  private buildRoomAppendSystemPrompt(room: Room, role: Pick<RoomRole, 'key' | 'label' | 'description'>): string {
-    const toolNames = this.isCoordinatorRole(room, role.key)
-      ? ROOM_COORDINATOR_TOOL_NAMES
-      : ROOM_EXECUTION_TOOL_NAMES
-    const hasGoal = this.roomHasGoal(room)
-    return [
-      `You are participating in room "${room.metadata.name}" as @${role.key} (${role.label}).`,
-      hasGoal ? `Shared goal: ${room.metadata.goal}` : null,
-      role.description ? `Role responsibilities: ${role.description}` : null,
-      'Treat the room as a multi-agent group chat: everyone can read everything, but you should only take the lead when you are @mentioned, directly assigned a task, or you are the coordinator responding to an unmentioned room message.',
-      'Before acting on room work, prefer room_get_context and room_list_tasks to confirm the latest shared state.',
-      hasGoal
-        ? 'Keep the room updated with room_send_message. When work starts, claim it; when blocked, report the blocker; when done, hand off or complete the task explicitly.'
-        : 'If the room has no goal yet, do not send any greeting, status update, or acknowledgment after joining. Stay quiet until the user speaks first, you are explicitly @mentioned, or a task is assigned.',
-      this.isCoordinatorRole(room, role.key)
-        ? hasGoal
-          ? 'As coordinator/planner, you are responsible for decomposing goals, creating tasks, and assigning them to the right roles.'
-          : 'As coordinator/planner, wait for the first user message when the room has no goal, then coordinate and assign work from that conversation.'
-        : 'Do not impersonate the planner or other roles; collaborate through @mentions, task updates, and clear handoffs.',
-      `Relevant room tools: ${toolNames.join(', ')}.`,
-    ].filter(Boolean).join('\n')
-  }
-
-  private buildRoomMessageMeta(room: Room, role?: Pick<RoomRole, 'key' | 'label' | 'description'>): Record<string, unknown> | undefined {
-    if (!role) {
-      return undefined
-    }
-    return {
-      appendSystemPrompt: this.buildRoomAppendSystemPrompt(room, role),
-    }
-  }
-
   private async sendRoomAwareDirectMessage(
     sessionId: string,
     roomId: string,
@@ -1209,7 +1084,9 @@ export class RoomService {
   ): Promise<void> {
     const room = this.toProtocolRoom(roomId, namespace)
     const role = room ? this.findRoleByAssignedSession(room, sessionId) : undefined
-    const baseMeta = room ? this.buildRoomMessageMeta(room, role) : undefined
+    const baseMeta = room
+      ? this.automationService.buildRoomMessageMeta(room, role, role ? this.isCoordinatorRole(room, role.key) : false)
+      : undefined
     await this.messageService.sendMessage(sessionId, {
       text,
       meta: {
@@ -1217,288 +1094,5 @@ export class RoomService {
         ...(extraMeta ?? {}),
       },
     })
-  }
-
-  private async maybeSendPlannerBootstrap(
-    room: Room,
-    namespace: string,
-    role: Pick<RoomRole, 'id' | 'key' | 'label' | 'assignedSessionId'>
-  ): Promise<void> {
-    if (!role.assignedSessionId) {
-      return
-    }
-    if (!this.roomHasGoal(room)) {
-      return
-    }
-    if (room.state.tasks.length > 0) {
-      return
-    }
-    if (this.hasRecentProtocolEvent(room.id, namespace, 'planner_bootstrap')) {
-      return
-    }
-
-    const bootstrapText = [
-      `[Room Planner Bootstrap: ${room.metadata.name}]`,
-      `You are the coordinator for this room.${room.metadata.goal ? ` Goal: ${room.metadata.goal}` : ''}`,
-      'Please turn the room goal into an initial task board now.',
-      'Suggested flow:',
-      '1. Call room_get_context.',
-      '2. Break the goal into concrete tasks.',
-      '3. Create tasks with room_create_task.',
-      '4. Assign each task with room_assign_task.',
-      '5. Announce the initial plan in the room and use @mentions for the roles that should act next.',
-    ].join('\n')
-
-    await this.sendRoomAwareDirectMessage(role.assignedSessionId, room.id, namespace, bootstrapText)
-    await this.sendRoomMessage(room.id, namespace, {
-      senderType: 'system',
-      senderId: 'system',
-      roleKey: role.key,
-      content: {
-        type: 'system',
-        text: `Planner bootstrap sent to @${role.key}. The coordinator should create the initial task board for this room.`,
-        mentions: [role.key],
-        deliveryMode: 'explicit_role',
-        meta: {
-          protocol: 'room-automation',
-          eventType: 'planner_bootstrap',
-        },
-      },
-      forwardToAgent: false,
-    })
-  }
-
-  private async sendBlockedTaskPlannerNudge(
-    roomId: string,
-    namespace: string,
-    task: {
-      id: string
-      title: string
-      assigneeRoleKey?: string | null
-    },
-    payload: {
-      roleKey?: string
-      reason: string
-    }
-  ): Promise<void> {
-    if (this.hasRecentProtocolEvent(roomId, namespace, 'task_blocked_followup', { taskId: task.id })) {
-      return
-    }
-    const room = this.toProtocolRoom(roomId, namespace)
-    const coordinatorKey = this.findCoordinatorRoleKey(roomId, namespace)
-    const coordinatorSessionId = this.findCoordinatorSessionId(roomId, namespace)
-    if (room && coordinatorKey) {
-      await this.sendRoomMessage(roomId, namespace, {
-        senderType: 'system',
-        senderId: 'system',
-        roleKey: coordinatorKey,
-        content: {
-          type: 'system',
-          text: `Planner follow-up: @${coordinatorKey} should resolve blocker for "${task.title}" by replying in the room or reassigning the task.`,
-          mentions: uniqueStrings([coordinatorKey, payload.roleKey]),
-          deliveryMode: 'explicit_role',
-          targetRoleKey: coordinatorKey,
-          meta: {
-            protocol: 'room-automation',
-            eventType: 'task_blocked_followup',
-            taskId: task.id,
-          },
-        },
-        forwardToAgent: false,
-      })
-    }
-    if (!coordinatorSessionId) {
-      return
-    }
-    await this.sendRoomAwareDirectMessage(coordinatorSessionId, roomId, namespace, [
-      `[Planner Follow-up: ${room?.metadata.name ?? roomId}]`,
-      `Blocked task: ${task.title}`,
-      task.assigneeRoleKey ? `Current owner: @${task.assigneeRoleKey}` : null,
-      payload.roleKey ? `Reported by: @${payload.roleKey}` : null,
-      `Reason: ${payload.reason}`,
-      '',
-      'Please inspect room_get_context / room_list_tasks, then either unblock the task, reassign it, or post new instructions in the room.',
-    ].filter(Boolean).join('\n'))
-  }
-
-  private suggestFollowUpRole(
-    room: Room,
-    completedByRoleKey?: string
-  ): RoomRole | null {
-    const candidates = room.state.roles.filter((role) => role.key !== completedByRoleKey)
-    if (candidates.length === 0) {
-      return null
-    }
-
-    const currentRole = room.state.roles.find((role) => role.key === completedByRoleKey)
-    const isBuildRole = currentRole ? roleMatchesHints(currentRole, ['coder', 'implementer', 'developer', 'architect', 'researcher', 'writer']) : false
-    const isTestRole = currentRole ? roleMatchesHints(currentRole, ['tester', 'test', 'qa', 'verify']) : false
-
-    const priorityGroups = isBuildRole
-      ? [
-          ['tester', 'test', 'qa', 'verify'],
-          ['reviewer', 'review', 'critic'],
-          ['planner', 'coordinator', 'lead'],
-        ]
-      : isTestRole
-        ? [
-            ['reviewer', 'review', 'critic'],
-            ['planner', 'coordinator', 'lead'],
-          ]
-        : [
-            ['reviewer', 'review', 'critic'],
-            ['tester', 'test', 'qa', 'verify'],
-            ['planner', 'coordinator', 'lead'],
-          ]
-
-    for (const group of priorityGroups) {
-      const matched = candidates.find((role) => roleMatchesHints(role, group))
-      if (matched) {
-        return matched
-      }
-    }
-
-    return candidates[0] ?? null
-  }
-
-  private async sendCompletionPlannerNudge(
-    roomId: string,
-    namespace: string,
-    task: {
-      id: string
-      title: string
-      assigneeRoleKey?: string | null
-    },
-    payload: {
-      roleKey?: string
-      summary?: string
-    }
-  ): Promise<void> {
-    if (this.hasRecentProtocolEvent(roomId, namespace, 'task_followup_suggested', { taskId: task.id })) {
-      return
-    }
-    const room = this.toProtocolRoom(roomId, namespace)
-    if (!room) {
-      return
-    }
-    const coordinatorKey = this.findCoordinatorRoleKey(roomId, namespace)
-    const coordinatorSessionId = this.findCoordinatorSessionId(roomId, namespace)
-    const suggestedRole = this.suggestFollowUpRole(room, payload.roleKey)
-    const suggestionText = suggestedRole
-      ? `Suggested next step: @${coordinatorKey ?? suggestedRole.key} should consider routing "${task.title}" to @${suggestedRole.key} next.`
-      : `Suggested next step: @${coordinatorKey ?? payload.roleKey ?? 'coordinator'} should review the completed task and decide what happens next.`
-
-    await this.sendRoomMessage(roomId, namespace, {
-      senderType: 'system',
-      senderId: 'system',
-      roleKey: coordinatorKey ?? payload.roleKey,
-      content: {
-        type: 'system',
-        text: suggestionText,
-        mentions: uniqueStrings([coordinatorKey, suggestedRole?.key, payload.roleKey]),
-        deliveryMode: coordinatorKey ? 'explicit_role' : 'broadcast',
-        targetRoleKey: coordinatorKey ?? undefined,
-        meta: {
-          protocol: 'room-automation',
-          eventType: 'task_followup_suggested',
-          taskId: task.id,
-          suggestedRoleKey: suggestedRole?.key ?? null,
-        },
-      },
-      forwardToAgent: false,
-    })
-
-    if (!coordinatorSessionId) {
-      return
-    }
-
-    await this.sendRoomAwareDirectMessage(coordinatorSessionId, roomId, namespace, [
-      `[Planner Follow-up: ${room.metadata.name}]`,
-      `Completed task: ${task.title}`,
-      payload.roleKey ? `Completed by: @${payload.roleKey}` : null,
-      payload.summary ? `Summary: ${payload.summary}` : null,
-      suggestedRole ? `Recommended next role: @${suggestedRole.key} (${suggestedRole.label})` : null,
-      '',
-      'Review the room state, then decide whether to assign a follow-up task, request review/testing, or close out the work.',
-    ].filter(Boolean).join('\n'))
-  }
-
-  private async sendTaskProtocolMessage(
-    roomId: string,
-    namespace: string,
-    payload: {
-      text: string
-      eventType: 'task_assigned' | 'task_claimed' | 'task_blocked' | 'task_handoff' | 'task_completed'
-      task: {
-        id: string
-        title: string
-        status: 'pending' | 'in_progress' | 'blocked' | 'completed'
-        assigneeRoleKey?: string | null
-        assigneeSessionId?: string | null
-      }
-      actorRoleKey?: string
-      targetRoleKey?: string
-      note?: string
-      mentions?: string[]
-    }
-  ): Promise<void> {
-    await this.sendRoomMessage(roomId, namespace, {
-      senderType: 'system',
-      senderId: 'system',
-      roleKey: payload.actorRoleKey,
-      content: {
-        type: 'system',
-        text: payload.text,
-        targetRoleKey: payload.targetRoleKey,
-        mentions: payload.mentions,
-        deliveryMode: payload.targetRoleKey ? 'explicit_role' : 'broadcast',
-        meta: {
-          protocol: 'task-lifecycle',
-          eventType: payload.eventType,
-          taskId: payload.task.id,
-          taskTitle: payload.task.title,
-          taskStatus: payload.task.status,
-          assigneeRoleKey: payload.task.assigneeRoleKey ?? null,
-          assigneeSessionId: payload.task.assigneeSessionId ?? null,
-          actorRoleKey: payload.actorRoleKey ?? null,
-          note: payload.note ?? null,
-        }
-      },
-      forwardToAgent: false,
-    })
-  }
-
-  private async notifyTaskAssignee(
-    roomId: string,
-    namespace: string,
-    task: {
-      id: string
-      title: string
-      description?: string | null
-      status: 'pending' | 'in_progress' | 'blocked' | 'completed'
-      assigneeRoleKey?: string | null
-      assigneeSessionId?: string | null
-    },
-    eventType: 'task_assigned' | 'task_handoff',
-    note?: string,
-    fromRoleKey?: string
-  ): Promise<void> {
-    if (!task.assigneeSessionId) {
-      return
-    }
-    const room = this.toProtocolRoom(roomId, namespace)
-    const lines = [
-      `[Room Task: ${room?.metadata.name ?? roomId}]`,
-      eventType === 'task_handoff' ? 'You have received a task handoff.' : 'A task has been assigned to you.',
-      `Task: ${task.title}`,
-      task.assigneeRoleKey ? `Your role: @${task.assigneeRoleKey}` : null,
-      fromRoleKey ? `Handoff from: @${fromRoleKey}` : null,
-      task.description ? `Details: ${task.description}` : null,
-      note ? `Context: ${note}` : null,
-      '',
-      'Please acknowledge in the room, then either start work, report blockers, or hand off when finished.',
-    ].filter(Boolean)
-
-    await this.sendRoomAwareDirectMessage(task.assigneeSessionId, roomId, namespace, lines.join('\n'))
   }
 }

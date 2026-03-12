@@ -13,6 +13,7 @@ import type { Store } from '../store'
 import type { RpcRegistry } from '../socket/rpcRegistry'
 import type { SSEManager } from '../sse/sseManager'
 import { EventPublisher, type SyncEventListener } from './eventPublisher'
+import { MachineAdminService } from './machineAdminService'
 import { MachineCache, type Machine } from './machineCache'
 import { MessageService } from './messageService'
 import { RoomService, type CreateRoomInput } from './roomService'
@@ -30,7 +31,7 @@ import {
     type RpcUploadFileResponse
 } from './rpcGateway'
 import { SessionCache } from './sessionCache'
-import { planMachineSessionCleanup } from './machineMaintenance'
+import { SessionWorkspaceService } from './sessionWorkspaceService'
 
 export type { Session, SyncEvent } from '@hapi/protocol/types'
 export type { Room, RoomMessage } from '@hapi/protocol/types'
@@ -61,6 +62,8 @@ export class SyncEngine {
     private readonly messageService: MessageService
     private readonly rpcGateway: RpcGateway
     private readonly roomService: RoomService
+    private readonly machineAdminService: MachineAdminService
+    private readonly sessionWorkspaceService: SessionWorkspaceService
     private inactivityTimer: NodeJS.Timeout | null = null
 
     constructor(
@@ -82,6 +85,17 @@ export class SyncEngine {
             (sessionId, namespace) => this.getSessionByNamespace(sessionId, namespace),
             (sessionId, namespace, roomId) => this.clearSessionRoomLink(sessionId, namespace, roomId)
         )
+        this.machineAdminService = new MachineAdminService({
+            rpcGateway: this.rpcGateway,
+            getMachineByNamespace: (machineId, namespace) => this.getMachineByNamespace(machineId, namespace),
+            getSessionsByNamespace: (namespace) => this.getSessionsByNamespace(namespace),
+            getSessionByNamespace: (sessionId, namespace) => this.getSessionByNamespace(sessionId, namespace),
+            endSession: (sessionId) => this.handleSessionEnd({ sid: sessionId, time: Date.now() }),
+            deleteSession: async (sessionId, namespace) => {
+                await this.sessionCache.deleteSession(sessionId, { namespace, allowActive: true })
+            },
+        })
+        this.sessionWorkspaceService = new SessionWorkspaceService(this.rpcGateway)
         this.reloadAll()
         void this.backfillRoomSpawnedSessionMetadata()
         this.inactivityTimer = setInterval(() => this.expireInactive(), 5_000)
@@ -794,30 +808,18 @@ export class SyncEngine {
     }
 
     async checkPathsExist(machineId: string, paths: string[]): Promise<Record<string, boolean>> {
-        return await this.rpcGateway.checkPathsExist(machineId, paths)
+        return await this.machineAdminService.checkPathsExist(machineId, paths)
     }
 
     async listMachineDirectory(
         machineId: string,
         path?: string
     ): Promise<import('./rpcGateway').RpcListMachineDirectoryResponse> {
-        return await this.rpcGateway.listMachineDirectory(machineId, path)
+        return await this.machineAdminService.listMachineDirectory(machineId, path)
     }
 
     async restartRunner(machineId: string, namespace: string): Promise<{ ok: true; message: string }> {
-        const machine = this.getMachineByNamespace(machineId, namespace)
-        if (!machine) {
-            throw new Error('Machine not found')
-        }
-        if (!machine.active) {
-            throw new Error('Machine is offline')
-        }
-
-        const result = await this.rpcGateway.restartRunner(machineId)
-        return {
-            ok: true,
-            message: result.message ?? 'Runner restart requested'
-        }
+        return await this.machineAdminService.restartRunner(machineId, namespace)
     }
 
     async cleanupDeadSessions(machineId: string, namespace: string): Promise<{
@@ -827,107 +829,59 @@ export class SyncEngine {
         deadProcessSessionIds: string[]
         aliveProcessSessionIds: string[]
     }> {
-        const machine = this.getMachineByNamespace(machineId, namespace)
-        if (!machine) {
-            throw new Error('Machine not found')
-        }
-        if (!machine.active) {
-            throw new Error('Machine is offline')
-        }
-
-        const relatedSessions = this.getSessionsByNamespace(namespace).filter((session) => session.metadata?.machineId === machineId)
-        const hostPids = Array.from(
-            new Set(
-                relatedSessions
-                    .map((session) => session.metadata?.hostPid)
-                    .filter((pid): pid is number => typeof pid === 'number' && Number.isFinite(pid) && pid > 0)
-            )
-        )
-        const aliveByPid = new Map<number, boolean>(
-            Object.entries(await this.rpcGateway.checkMachinePids(machineId, hostPids)).map(([pid, alive]) => [Number(pid), alive === true])
-        )
-        const plan = planMachineSessionCleanup(relatedSessions, aliveByPid)
-
-        for (const sessionId of plan.deletedSessionIds) {
-            const session = this.getSessionByNamespace(sessionId, namespace)
-            if (!session) {
-                continue
-            }
-            if (session.active) {
-                this.handleSessionEnd({ sid: sessionId, time: Date.now() })
-            }
-            await this.sessionCache.deleteSession(sessionId, { namespace, allowActive: true })
-        }
-
-        return {
-            ...plan,
-            aliveProcessSessionIds: relatedSessions
-                .filter((session) => {
-                    const pid = session.metadata?.hostPid
-                    return typeof pid === 'number' && aliveByPid.get(pid) === true
-                })
-                .map((session) => session.id)
-        }
+        return await this.machineAdminService.cleanupDeadSessions(machineId, namespace)
     }
 
     async checkProviderHealth(machineId: string, namespace: string): Promise<RpcProviderHealthResponse> {
-        const machine = this.getMachineByNamespace(machineId, namespace)
-        if (!machine) {
-            throw new Error('Machine not found')
-        }
-        if (!machine.active) {
-            throw new Error('Machine is offline')
-        }
-
-        return await this.rpcGateway.checkProviderHealth(machineId)
+        return await this.machineAdminService.checkProviderHealth(machineId, namespace)
     }
 
     async getGitStatus(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
-        return await this.rpcGateway.getGitStatus(sessionId, cwd)
+        return await this.sessionWorkspaceService.getGitStatus(sessionId, cwd)
     }
 
     async getGitDiffNumstat(sessionId: string, options: { cwd?: string; staged?: boolean }): Promise<RpcCommandResponse> {
-        return await this.rpcGateway.getGitDiffNumstat(sessionId, options)
+        return await this.sessionWorkspaceService.getGitDiffNumstat(sessionId, options)
     }
 
     async getGitDiffFile(sessionId: string, options: { cwd?: string; filePath: string; staged?: boolean }): Promise<RpcCommandResponse> {
-        return await this.rpcGateway.getGitDiffFile(sessionId, options)
+        return await this.sessionWorkspaceService.getGitDiffFile(sessionId, options)
     }
 
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
-        return await this.rpcGateway.readSessionFile(sessionId, path)
+        return await this.sessionWorkspaceService.readSessionFile(sessionId, path)
     }
 
     async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string | null): Promise<RpcWriteFileResponse> {
-        return await this.rpcGateway.writeSessionFile(sessionId, path, content, expectedHash)
+        return await this.sessionWorkspaceService.writeSessionFile(sessionId, path, content, expectedHash)
     }
 
     async listDirectory(sessionId: string, path: string): Promise<RpcListDirectoryResponse> {
-        return await this.rpcGateway.listDirectory(sessionId, path)
+        return await this.sessionWorkspaceService.listDirectory(sessionId, path)
     }
 
     async createDirectory(sessionId: string, path: string): Promise<RpcPathMutationResponse> {
-        return await this.rpcGateway.createDirectory(sessionId, path)
+        return await this.sessionWorkspaceService.createDirectory(sessionId, path)
     }
 
     async renameSessionPath(sessionId: string, path: string, nextPath: string): Promise<RpcPathMutationResponse> {
-        return await this.rpcGateway.renameSessionPath(sessionId, path, nextPath)
+        return await this.sessionWorkspaceService.renameSessionPath(sessionId, path, nextPath)
     }
 
     async deleteSessionPath(sessionId: string, path: string, recursive?: boolean): Promise<RpcPathMutationResponse> {
-        return await this.rpcGateway.deleteSessionPath(sessionId, path, recursive)
+        return await this.sessionWorkspaceService.deleteSessionPath(sessionId, path, recursive)
     }
 
     async uploadFile(sessionId: string, filename: string, content: string, mimeType: string): Promise<RpcUploadFileResponse> {
-        return await this.rpcGateway.uploadFile(sessionId, filename, content, mimeType)
+        return await this.sessionWorkspaceService.uploadFile(sessionId, filename, content, mimeType)
     }
 
     async deleteUploadFile(sessionId: string, path: string): Promise<RpcDeleteUploadResponse> {
-        return await this.rpcGateway.deleteUploadFile(sessionId, path)
+        return await this.sessionWorkspaceService.deleteUploadFile(sessionId, path)
     }
 
     async runRipgrep(sessionId: string, args: string[], cwd?: string): Promise<RpcCommandResponse> {
-        return await this.rpcGateway.runRipgrep(sessionId, args, cwd)
+        return await this.sessionWorkspaceService.runRipgrep(sessionId, args, cwd)
     }
 
     async listSlashCommands(sessionId: string, agent: string): Promise<{
@@ -935,7 +889,7 @@ export class SyncEngine {
         commands?: Array<{ name: string; description?: string; source: 'builtin' | 'user' | 'plugin' | 'project' }>
         error?: string
     }> {
-        return await this.rpcGateway.listSlashCommands(sessionId, agent)
+        return await this.sessionWorkspaceService.listSlashCommands(sessionId, agent)
     }
 
     async listSkills(sessionId: string): Promise<{
@@ -943,6 +897,6 @@ export class SyncEngine {
         skills?: Array<{ name: string; description?: string }>
         error?: string
     }> {
-        return await this.rpcGateway.listSkills(sessionId)
+        return await this.sessionWorkspaceService.listSkills(sessionId)
     }
 }

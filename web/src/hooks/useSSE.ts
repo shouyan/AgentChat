@@ -1,184 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { isObject, toSessionSummary } from '@hapi/protocol'
-import type {
-    Machine,
-    MachinesResponse,
-    Room,
-    RoomMessage,
-    Session,
-    SessionResponse,
-    SessionsResponse,
-    SessionSummary,
-    SyncEvent
-} from '@/types/api'
-import { queryKeys } from '@/lib/query-keys'
-import { clearMessageWindow, ingestIncomingMessages } from '@/lib/message-window-store'
+import { isObject } from '@hapi/protocol'
+import type { SyncEvent } from '@/types/api'
+import { createSyncEventHandler } from './sse/eventHandler'
+import { SSEInvalidationQueue } from './sse/invalidationQueue'
+import {
+    buildEventsUrl,
+    getVisibilityState,
+    HEARTBEAT_STALE_MS,
+    HEARTBEAT_WATCHDOG_INTERVAL_MS,
+    RECONNECT_BASE_DELAY_MS,
+    RECONNECT_JITTER_MS,
+    RECONNECT_MAX_DELAY_MS,
+} from './sse/transport'
+import type { SSESubscription, ToastEvent } from './sse/types'
 
-type SSESubscription = {
-    all?: boolean
-    sessionId?: string
-    machineId?: string
-    roomId?: string
-}
-
-type VisibilityState = 'visible' | 'hidden'
-
-type ToastEvent = Extract<SyncEvent, { type: 'toast' }>
-
-const HEARTBEAT_STALE_MS = 90_000
-const HEARTBEAT_WATCHDOG_INTERVAL_MS = 10_000
-const RECONNECT_BASE_DELAY_MS = 1_000
-const RECONNECT_MAX_DELAY_MS = 30_000
-const RECONNECT_JITTER_MS = 500
-const INVALIDATION_BATCH_MS = 16
-
-type SessionPatch = Partial<Pick<Session, 'active' | 'thinking' | 'activeAt' | 'updatedAt' | 'permissionMode' | 'modelMode'>>
-
-function sortSessionSummaries(left: SessionSummary, right: SessionSummary): number {
-    if (left.active !== right.active) {
-        return left.active ? -1 : 1
-    }
-    if (left.active && left.pendingRequestsCount !== right.pendingRequestsCount) {
-        return right.pendingRequestsCount - left.pendingRequestsCount
-    }
-    return right.updatedAt - left.updatedAt
-}
-
-function hasRecordShape(value: unknown): value is Record<string, unknown> {
-    return isObject(value)
-}
-
-function isSessionRecord(value: unknown): value is Session {
-    if (!hasRecordShape(value)) {
-        return false
-    }
-    return typeof value.id === 'string'
-        && typeof value.active === 'boolean'
-        && typeof value.activeAt === 'number'
-        && typeof value.updatedAt === 'number'
-        && typeof value.thinking === 'boolean'
-}
-
-function getSessionPatch(value: unknown): SessionPatch | null {
-    if (!hasRecordShape(value)) {
-        return null
-    }
-
-    const patch: SessionPatch = {}
-    let hasKnownPatch = false
-
-    if (typeof value.active === 'boolean') {
-        patch.active = value.active
-        hasKnownPatch = true
-    }
-    if (typeof value.thinking === 'boolean') {
-        patch.thinking = value.thinking
-        hasKnownPatch = true
-    }
-    if (typeof value.activeAt === 'number') {
-        patch.activeAt = value.activeAt
-        hasKnownPatch = true
-    }
-    if (typeof value.updatedAt === 'number') {
-        patch.updatedAt = value.updatedAt
-        hasKnownPatch = true
-    }
-    if (typeof value.permissionMode === 'string') {
-        patch.permissionMode = value.permissionMode as Session['permissionMode']
-        hasKnownPatch = true
-    }
-    if (typeof value.modelMode === 'string') {
-        patch.modelMode = value.modelMode as Session['modelMode']
-        hasKnownPatch = true
-    }
-
-    return hasKnownPatch ? patch : null
-}
-
-function hasUnknownSessionPatchKeys(value: unknown): boolean {
-    if (!hasRecordShape(value)) {
-        return false
-    }
-    const knownKeys = new Set(['active', 'thinking', 'activeAt', 'updatedAt', 'permissionMode', 'modelMode'])
-    return Object.keys(value).some((key) => !knownKeys.has(key))
-}
-
-function isMachineMetadata(value: unknown): value is Machine['metadata'] {
-    if (value === null) {
-        return true
-    }
-    if (!hasRecordShape(value)) {
-        return false
-    }
-    return typeof value.host === 'string'
-        && typeof value.platform === 'string'
-        && typeof value.happyCliVersion === 'string'
-}
-
-function isMachineRecord(value: unknown): value is Machine {
-    if (!hasRecordShape(value)) {
-        return false
-    }
-    return typeof value.id === 'string'
-        && typeof value.active === 'boolean'
-        && isMachineMetadata(value.metadata)
-}
-
-function isRoomRecord(value: unknown): value is Room {
-    if (!hasRecordShape(value)) {
-        return false
-    }
-    return typeof value.id === 'string'
-        && typeof value.namespace === 'string'
-        && typeof value.createdAt === 'number'
-        && typeof value.updatedAt === 'number'
-        && hasRecordShape(value.metadata)
-        && hasRecordShape(value.state)
-}
-
-function isInactiveMachinePatch(value: unknown): boolean {
-    return hasRecordShape(value) && value.active === false
-}
-
-function getVisibilityState(): VisibilityState {
-    if (typeof document === 'undefined') {
-        return 'hidden'
-    }
-    return document.visibilityState === 'visible' ? 'visible' : 'hidden'
-}
-
-function buildEventsUrl(
-    baseUrl: string,
-    token: string,
-    subscription: SSESubscription,
-    visibility: VisibilityState
-): string {
-    const params = new URLSearchParams()
-    params.set('token', token)
-    params.set('visibility', visibility)
-    if (subscription.all) {
-        params.set('all', 'true')
-    }
-    if (subscription.sessionId) {
-        params.set('sessionId', subscription.sessionId)
-    }
-    if (subscription.machineId) {
-        params.set('machineId', subscription.machineId)
-    }
-    if (subscription.roomId) {
-        params.set('roomId', subscription.roomId)
-    }
-
-    const path = `/api/events?${params.toString()}`
-    try {
-        return new URL(path, baseUrl).toString()
-    } catch {
-        return path
-    }
-}
-
-export function useSSE(options: {
+type UseSSEOptions = {
     enabled: boolean
     token: string
     baseUrl: string
@@ -188,7 +25,9 @@ export function useSSE(options: {
     onDisconnect?: (reason: string) => void
     onError?: (error: unknown) => void
     onToast?: (event: ToastEvent) => void
-}): { subscriptionId: string | null } {
+}
+
+export function useSSE(options: UseSSEOptions): { subscriptionId: string | null } {
     const queryClient = useQueryClient()
     const onEventRef = useRef(options.onEvent)
     const onConnectRef = useRef(options.onConnect)
@@ -196,19 +35,19 @@ export function useSSE(options: {
     const onErrorRef = useRef(options.onError)
     const onToastRef = useRef(options.onToast)
     const eventSourceRef = useRef<EventSource | null>(null)
-    const invalidationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const pendingInvalidationsRef = useRef<{
-        sessions: boolean
-        rooms: boolean
-        machines: boolean
-        sessionIds: Set<string>
-        roomIds: Set<string>
-    }>({ sessions: false, rooms: false, machines: false, sessionIds: new Set(), roomIds: new Set() })
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const reconnectAttemptRef = useRef(0)
     const lastActivityAtRef = useRef(0)
+    const invalidationQueueRef = useRef(new SSEInvalidationQueue(queryClient))
     const [reconnectNonce, setReconnectNonce] = useState(0)
     const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
+
+    useEffect(() => {
+        invalidationQueueRef.current = new SSEInvalidationQueue(queryClient)
+        return () => {
+            invalidationQueueRef.current.dispose()
+        }
+    }, [queryClient])
 
     useEffect(() => {
         onEventRef.current = options.onEvent
@@ -231,7 +70,6 @@ export function useSSE(options: {
     }, [options.onToast])
 
     const subscription = options.subscription ?? {}
-
     const subscriptionKey = useMemo(() => {
         return `${subscription.all ? '1' : '0'}|${subscription.sessionId ?? ''}|${subscription.machineId ?? ''}|${subscription.roomId ?? ''}`
     }, [subscription.all, subscription.sessionId, subscription.machineId, subscription.roomId])
@@ -240,15 +78,7 @@ export function useSSE(options: {
         if (!options.enabled) {
             eventSourceRef.current?.close()
             eventSourceRef.current = null
-            if (invalidationTimerRef.current) {
-                clearTimeout(invalidationTimerRef.current)
-                invalidationTimerRef.current = null
-            }
-            pendingInvalidationsRef.current.sessions = false
-            pendingInvalidationsRef.current.rooms = false
-            pendingInvalidationsRef.current.machines = false
-            pendingInvalidationsRef.current.sessionIds.clear()
-            pendingInvalidationsRef.current.roomIds.clear()
+            invalidationQueueRef.current.dispose()
             if (reconnectTimerRef.current) {
                 clearTimeout(reconnectTimerRef.current)
                 reconnectTimerRef.current = null
@@ -261,7 +91,7 @@ export function useSSE(options: {
         setSubscriptionId(null)
         const url = buildEventsUrl(options.baseUrl, options.token, {
             ...subscription,
-            sessionId: subscription.sessionId ?? undefined
+            sessionId: subscription.sessionId ?? undefined,
         }, getVisibilityState())
         const eventSource = new EventSource(url)
         let disconnectNotified = false
@@ -305,338 +135,16 @@ export function useSSE(options: {
             scheduleReconnect()
         }
 
-        const flushInvalidations = () => {
-            const pending = pendingInvalidationsRef.current
-            if (!pending.sessions && !pending.rooms && !pending.machines && pending.sessionIds.size === 0 && pending.roomIds.size === 0) {
-                return
-            }
-
-            const shouldInvalidateSessions = pending.sessions
-            const shouldInvalidateRooms = pending.rooms
-            const shouldInvalidateMachines = pending.machines
-            const sessionIds = Array.from(pending.sessionIds)
-            const roomIds = Array.from(pending.roomIds)
-
-            pending.sessions = false
-            pending.rooms = false
-            pending.machines = false
-            pending.sessionIds.clear()
-            pending.roomIds.clear()
-
-            const tasks: Array<Promise<unknown>> = []
-            if (shouldInvalidateSessions) {
-                tasks.push(queryClient.invalidateQueries({ queryKey: queryKeys.sessions }))
-            }
-            if (shouldInvalidateRooms) {
-                tasks.push(queryClient.invalidateQueries({ queryKey: queryKeys.rooms }))
-            }
-            for (const sessionId of sessionIds) {
-                tasks.push(queryClient.invalidateQueries({ queryKey: queryKeys.session(sessionId) }))
-            }
-            for (const roomId of roomIds) {
-                tasks.push(queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) }))
-            }
-            if (shouldInvalidateMachines) {
-                tasks.push(queryClient.invalidateQueries({ queryKey: queryKeys.machines }))
-            }
-
-            if (tasks.length === 0) {
-                return
-            }
-            void Promise.all(tasks).catch(() => {})
-        }
-
-        const scheduleInvalidationFlush = () => {
-            if (invalidationTimerRef.current) {
-                return
-            }
-            invalidationTimerRef.current = setTimeout(() => {
-                invalidationTimerRef.current = null
-                flushInvalidations()
-            }, INVALIDATION_BATCH_MS)
-        }
-
-        const queueSessionListInvalidation = () => {
-            pendingInvalidationsRef.current.sessions = true
-            scheduleInvalidationFlush()
-        }
-
-        const queueRoomListInvalidation = () => {
-            pendingInvalidationsRef.current.rooms = true
-            scheduleInvalidationFlush()
-        }
-
-        const queueSessionDetailInvalidation = (sessionId: string) => {
-            pendingInvalidationsRef.current.sessionIds.add(sessionId)
-            scheduleInvalidationFlush()
-        }
-
-        const queueRoomDetailInvalidation = (roomId: string) => {
-            pendingInvalidationsRef.current.roomIds.add(roomId)
-            scheduleInvalidationFlush()
-        }
-
-        const queueMachinesInvalidation = () => {
-            pendingInvalidationsRef.current.machines = true
-            scheduleInvalidationFlush()
-        }
-
-        const upsertSessionSummary = (session: Session) => {
-            queryClient.setQueryData<SessionsResponse | undefined>(queryKeys.sessions, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-
-                const summary = toSessionSummary(session)
-                const nextSessions = previous.sessions.slice()
-                const existingIndex = nextSessions.findIndex((item) => item.id === session.id)
-                if (existingIndex >= 0) {
-                    nextSessions[existingIndex] = summary
-                } else {
-                    nextSessions.push(summary)
-                }
-                nextSessions.sort(sortSessionSummaries)
-                return { ...previous, sessions: nextSessions }
-            })
-        }
-
-        const patchSessionSummary = (sessionId: string, patch: SessionPatch): boolean => {
-            let patched = false
-            queryClient.setQueryData<SessionsResponse | undefined>(queryKeys.sessions, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-
-                const nextSessions = previous.sessions.slice()
-                const index = nextSessions.findIndex((item) => item.id === sessionId)
-                if (index < 0) {
-                    return previous
-                }
-
-                const current = nextSessions[index]
-                if (!current) {
-                    return previous
-                }
-
-                const nextSummary: SessionSummary = {
-                    ...current,
-                    active: patch.active ?? current.active,
-                    thinking: patch.thinking ?? current.thinking,
-                    activeAt: patch.activeAt ?? current.activeAt,
-                    updatedAt: patch.updatedAt ?? current.updatedAt,
-                    modelMode: patch.modelMode ?? current.modelMode
-                }
-
-                patched = true
-                nextSessions[index] = nextSummary
-                nextSessions.sort(sortSessionSummaries)
-                return { ...previous, sessions: nextSessions }
-            })
-            return patched
-        }
-
-        const patchSessionDetail = (sessionId: string, patch: SessionPatch): boolean => {
-            let patched = false
-            queryClient.setQueryData<SessionResponse | undefined>(queryKeys.session(sessionId), (previous) => {
-                if (!previous?.session) {
-                    return previous
-                }
-                patched = true
-                return {
-                    ...previous,
-                    session: {
-                        ...previous.session,
-                        ...patch
-                    }
-                }
-            })
-            return patched
-        }
-
-        const removeSessionSummary = (sessionId: string) => {
-            queryClient.setQueryData<SessionsResponse | undefined>(queryKeys.sessions, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-                const nextSessions = previous.sessions.filter((item) => item.id !== sessionId)
-                if (nextSessions.length === previous.sessions.length) {
-                    return previous
-                }
-                return { ...previous, sessions: nextSessions }
-            })
-        }
-
-        const upsertRoom = (room: Room) => {
-            queryClient.setQueryData<{ rooms: Room[] } | undefined>(queryKeys.rooms, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-                const nextRooms = previous.rooms.slice()
-                const existingIndex = nextRooms.findIndex((item) => item.id === room.id)
-                if (existingIndex >= 0) {
-                    nextRooms[existingIndex] = room
-                } else {
-                    nextRooms.unshift(room)
-                }
-                return { rooms: nextRooms }
-            })
-            queryClient.setQueryData(queryKeys.room(room.id), { room })
-        }
-
-        const appendRoomMessage = (roomId: string, message: RoomMessage) => {
-            queryClient.setQueryData<{ messages: RoomMessage[]; page: { limit: number; beforeSeq: number | null; nextBeforeSeq: number | null; hasMore: boolean } } | undefined>(
-                queryKeys.roomMessages(roomId),
-                (previous) => {
-                    if (!previous) {
-                        return previous
-                    }
-                    return {
-                        ...previous,
-                        messages: [...previous.messages, message]
-                    }
-                }
-            )
-        }
-
-        const removeRoom = (roomId: string) => {
-            queryClient.setQueryData<{ rooms: Room[] } | undefined>(queryKeys.rooms, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-                return { rooms: previous.rooms.filter((item) => item.id !== roomId) }
-            })
-            void queryClient.removeQueries({ queryKey: queryKeys.room(roomId) })
-            void queryClient.removeQueries({ queryKey: queryKeys.roomMessages(roomId) })
-        }
-
-        const upsertMachine = (machine: Machine) => {
-            queryClient.setQueryData<MachinesResponse | undefined>(queryKeys.machines, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-
-                const nextMachines = previous.machines.slice()
-                const index = nextMachines.findIndex((item) => item.id === machine.id)
-                if (!machine.active) {
-                    if (index >= 0) {
-                        nextMachines.splice(index, 1)
-                        return { ...previous, machines: nextMachines }
-                    }
-                    return previous
-                }
-
-                if (index >= 0) {
-                    nextMachines[index] = machine
-                } else {
-                    nextMachines.push(machine)
-                }
-                return { ...previous, machines: nextMachines }
-            })
-        }
-
-        const removeMachine = (machineId: string) => {
-            queryClient.setQueryData<MachinesResponse | undefined>(queryKeys.machines, (previous) => {
-                if (!previous) {
-                    return previous
-                }
-                const nextMachines = previous.machines.filter((item) => item.id !== machineId)
-                if (nextMachines.length === previous.machines.length) {
-                    return previous
-                }
-                return { ...previous, machines: nextMachines }
-            })
-        }
-
-        const handleSyncEvent = (event: SyncEvent) => {
-            lastActivityAtRef.current = Date.now()
-
-            if (event.type === 'heartbeat') {
-                return
-            }
-
-            if (event.type === 'connection-changed') {
-                const data = event.data
-                if (data && typeof data === 'object' && 'subscriptionId' in data) {
-                    const nextId = (data as { subscriptionId?: unknown }).subscriptionId
-                    if (typeof nextId === 'string' && nextId.length > 0) {
-                        setSubscriptionId(nextId)
-                    }
-                }
-            }
-
-            if (event.type === 'toast') {
-                onToastRef.current?.(event)
-                return
-            }
-
-            if (event.type === 'templates-updated') {
-                void queryClient.invalidateQueries({ queryKey: queryKeys.templates })
-            }
-
-            if (event.type === 'message-received') {
-                ingestIncomingMessages(event.sessionId, [event.message])
-            }
-
-            if (event.type === 'room-message-received') {
-                appendRoomMessage(event.roomId, event.message)
-                queueRoomDetailInvalidation(event.roomId)
-                queueRoomListInvalidation()
-            }
-
-            if (event.type === 'session-added' || event.type === 'session-updated' || event.type === 'session-removed') {
-                if (event.type === 'session-removed') {
-                    removeSessionSummary(event.sessionId)
-                    void queryClient.removeQueries({ queryKey: queryKeys.session(event.sessionId) })
-                    clearMessageWindow(event.sessionId)
-                } else if (isSessionRecord(event.data) && event.data.id === event.sessionId) {
-                    queryClient.setQueryData<SessionResponse>(queryKeys.session(event.sessionId), { session: event.data })
-                    upsertSessionSummary(event.data)
-                } else {
-                    const patch = getSessionPatch(event.data)
-                    if (patch) {
-                        const detailPatched = patchSessionDetail(event.sessionId, patch)
-                        const summaryPatched = patchSessionSummary(event.sessionId, patch)
-
-                        if (!detailPatched) {
-                            queueSessionDetailInvalidation(event.sessionId)
-                        }
-                        if (!summaryPatched) {
-                            queueSessionListInvalidation()
-                        }
-                        if (hasUnknownSessionPatchKeys(event.data)) {
-                            queueSessionDetailInvalidation(event.sessionId)
-                            queueSessionListInvalidation()
-                        }
-                    } else {
-                        queueSessionDetailInvalidation(event.sessionId)
-                        queueSessionListInvalidation()
-                    }
-                }
-            }
-
-            if (event.type === 'room-added' || event.type === 'room-updated' || event.type === 'room-removed') {
-                if (event.type === 'room-removed') {
-                    removeRoom(event.roomId)
-                } else if (isRoomRecord(event.data)) {
-                    upsertRoom(event.data)
-                } else {
-                    queueRoomDetailInvalidation(event.roomId)
-                    queueRoomListInvalidation()
-                }
-            }
-
-            if (event.type === 'machine-updated') {
-                if (isMachineRecord(event.data)) {
-                    upsertMachine(event.data)
-                } else if (event.data === null || isInactiveMachinePatch(event.data)) {
-                    removeMachine(event.machineId)
-                } else if (!hasRecordShape(event.data) || typeof event.data.activeAt !== 'number') {
-                    queueMachinesInvalidation()
-                }
-            }
-
-            onEventRef.current(event)
-        }
+        const handleSyncEvent = createSyncEventHandler({
+            queryClient,
+            invalidationQueue: invalidationQueueRef.current,
+            onEvent: (event) => onEventRef.current(event),
+            onToast: (event) => onToastRef.current?.(event),
+            setSubscriptionId,
+            markActivity: () => {
+                lastActivityAtRef.current = Date.now()
+            },
+        })
 
         const handleMessage = (message: MessageEvent<string>) => {
             if (typeof message.data !== 'string') {
@@ -695,15 +203,7 @@ export function useSSE(options: {
 
         return () => {
             clearInterval(watchdogTimer)
-            if (invalidationTimerRef.current) {
-                clearTimeout(invalidationTimerRef.current)
-                invalidationTimerRef.current = null
-            }
-            pendingInvalidationsRef.current.sessions = false
-            pendingInvalidationsRef.current.rooms = false
-            pendingInvalidationsRef.current.machines = false
-            pendingInvalidationsRef.current.sessionIds.clear()
-            pendingInvalidationsRef.current.roomIds.clear()
+            invalidationQueueRef.current.dispose()
             if (reconnectTimerRef.current) {
                 clearTimeout(reconnectTimerRef.current)
                 reconnectTimerRef.current = null
@@ -714,7 +214,7 @@ export function useSSE(options: {
             }
             setSubscriptionId(null)
         }
-    }, [options.baseUrl, options.enabled, options.token, subscriptionKey, queryClient, reconnectNonce])
+    }, [options.baseUrl, options.enabled, options.token, queryClient, reconnectNonce, subscriptionKey])
 
     return { subscriptionId }
 }
