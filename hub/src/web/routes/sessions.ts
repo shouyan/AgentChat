@@ -7,24 +7,16 @@ import {
     SessionResponseSchema,
     SessionsResponseSchema,
 } from '@hapi/protocol/contracts/sessions'
-import { DeleteUploadBodySchema, UploadFileBodySchema } from '@hapi/protocol/files'
-import { DeleteUploadResponseSchema, UploadFileResponseSchema } from '@hapi/protocol/contracts/files'
 import { Hono } from 'hono'
+import { registerUploadRoutes } from '../../domains/files/httpRoutes'
 import type { SyncEngine, Session } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
 
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
-
-function estimateBase64Bytes(base64: string): number {
-    const len = base64.length
-    if (len === 0) return 0
-    const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0
-    return Math.floor((len * 3) / 4) - padding
-}
 
 export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
+    registerUploadRoutes(app, getSyncEngine)
 
     app.get('/sessions', (c) => {
         const engine = requireSyncEngine(c, getSyncEngine)
@@ -91,72 +83,6 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         return c.json(ResumeSessionSuccessResponseSchema.parse({ type: 'success', sessionId: result.sessionId }))
-    })
-
-    app.post('/sessions/:id/upload', async (c) => {
-        const engine = requireSyncEngine(c, getSyncEngine)
-        if (engine instanceof Response) {
-            return engine
-        }
-
-        const sessionResult = requireSessionFromParam(c, engine, { requireActive: true })
-        if (sessionResult instanceof Response) {
-            return sessionResult
-        }
-
-        const body = await c.req.json().catch(() => null)
-        const parsed = UploadFileBodySchema.safeParse(body)
-        if (!parsed.success) {
-            return c.json({ error: 'Invalid body' }, 400)
-        }
-
-        const estimatedBytes = estimateBase64Bytes(parsed.data.content)
-        if (estimatedBytes > MAX_UPLOAD_BYTES) {
-            return c.json(UploadFileResponseSchema.parse({ success: false, error: 'File too large (max 50MB)' }), 413)
-        }
-
-        try {
-            const result = await engine.uploadFile(
-                sessionResult.sessionId,
-                parsed.data.filename,
-                parsed.data.content,
-                parsed.data.mimeType
-            )
-            return c.json(UploadFileResponseSchema.parse(result))
-        } catch (error) {
-            return c.json(UploadFileResponseSchema.parse({
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to upload file'
-            }), 500)
-        }
-    })
-
-    app.post('/sessions/:id/upload/delete', async (c) => {
-        const engine = requireSyncEngine(c, getSyncEngine)
-        if (engine instanceof Response) {
-            return engine
-        }
-
-        const sessionResult = requireSessionFromParam(c, engine, { requireActive: true })
-        if (sessionResult instanceof Response) {
-            return sessionResult
-        }
-
-        const body = await c.req.json().catch(() => null)
-        const parsed = DeleteUploadBodySchema.safeParse(body)
-        if (!parsed.success) {
-            return c.json({ error: 'Invalid body' }, 400)
-        }
-
-        try {
-            const result = await engine.deleteUploadFile(sessionResult.sessionId, parsed.data.path)
-            return c.json(DeleteUploadResponseSchema.parse(result))
-        } catch (error) {
-            return c.json(DeleteUploadResponseSchema.parse({
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to delete upload'
-            }), 500)
-        }
     })
 
     app.post('/sessions/:id/abort', async (c) => {
