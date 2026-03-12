@@ -11,7 +11,7 @@ import type { AgentType, SessionType } from './types'
 import { ActionButtons } from './ActionButtons'
 import { AgentSelector } from './AgentSelector'
 import { DirectorySection } from './DirectorySection'
-import { DirectoryBrowserDialog } from './DirectoryBrowserDialog'
+import { DirectoryBrowserDialog } from '@/features/machines/components/DirectoryBrowserDialog'
 import { MachineSelector } from './MachineSelector'
 import { ModelSelector } from './ModelSelector'
 import {

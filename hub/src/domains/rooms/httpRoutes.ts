@@ -1,4 +1,4 @@
-import type { Context, Hono } from 'hono'
+import type { Hono } from 'hono'
 import {
     AssignRoomRoleBodySchema,
     AssignRoomTaskBodySchema,
@@ -24,14 +24,7 @@ import {
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSyncEngine } from '../../web/routes/guards'
-
-function requireRoom(engine: SyncEngine, roomId: string, namespace: string, c: Context<WebAppEnv>) {
-    const room = engine.getRoomByNamespace(roomId, namespace)
-    if (!room) {
-        return c.json({ error: 'Room not found' }, 404)
-    }
-    return room
-}
+import { createRoomWithAssignments, getRoom } from './service'
 
 export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
     app.get('/rooms', (c) => {
@@ -55,56 +48,14 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
             return c.json({ error: 'Invalid body' }, 400)
         }
 
-        const room = engine.createRoom(namespace, {
-            metadata: {
-                name: parsed.data.name,
-                goal: parsed.data.goal,
-                templateKey: parsed.data.templateKey,
-                autoDispatch: parsed.data.autoDispatch,
-                coordinatorRoleKey: parsed.data.coordinatorRoleKey,
-                status: 'active',
-            },
-            roles: parsed.data.roles.map((role, index) => ({
-                ...role,
-                assignmentMode: role.assignmentMode ?? 'unassigned',
-                sortOrder: role.sortOrder ?? index,
-            })),
-        })
-
-        const spawnedSessionIds: string[] = []
-        let currentRoom = room
-
-        for (const role of currentRoom.state.roles) {
-            const source = parsed.data.roles.find((item) => item.key === role.key)
-            if (!source) continue
-
-            if (source.assignedSessionId) {
-                currentRoom = await engine.assignRoomRoleToSession(currentRoom.id, role.id, source.assignedSessionId, namespace)
-                continue
-            }
-
-            if (source.assignmentMode === 'spawn_new' && source.spawnConfig?.machineId && source.spawnConfig?.path) {
-                const spawn = await engine.spawnSession(
-                    source.spawnConfig.machineId,
-                    source.spawnConfig.path,
-                    source.spawnConfig.flavor,
-                    source.spawnConfig.model,
-                    source.spawnConfig.yolo,
-                    source.spawnConfig.sessionType,
-                    source.spawnConfig.worktreeName,
-                )
-                if (spawn.type !== 'success') {
-                    return c.json({ error: `Failed to spawn role ${role.label}: ${spawn.message}` }, 409)
-                }
-                await engine.markSessionAsRoomSpawned(spawn.sessionId, currentRoom.id, namespace)
-                spawnedSessionIds.push(spawn.sessionId)
-                currentRoom = engine.updateRoomRole(currentRoom.id, role.id, namespace, {
-                    assignedSessionId: spawn.sessionId,
-                })
-            }
+        try {
+            const result = await createRoomWithAssignments(engine, namespace, parsed.data)
+            return c.json(CreateRoomResponseSchema.parse(result))
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to create room'
+            const status = message.startsWith('Failed to spawn role ') ? 409 : 500
+            return c.json({ error: message }, status)
         }
-
-        return c.json(CreateRoomResponseSchema.parse({ room: currentRoom, spawnedSessionIds }))
     })
 
     app.get('/rooms/:id', (c) => {
@@ -113,9 +64,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
             return engine
         }
         const namespace = c.get('namespace')
-        const room = requireRoom(engine, c.req.param('id'), namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, c.req.param('id'), namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         return c.json(RoomResponseSchema.parse({ room }))
     })
@@ -127,9 +78,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
 
         try {
@@ -148,9 +99,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const body = await c.req.json().catch(() => null)
         const parsed = UpdateRoomBodySchema.safeParse(body)
@@ -167,9 +118,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const parsed = RoomMessageQuerySchema.safeParse(c.req.query())
         const limit = parsed.success ? (parsed.data.limit ?? 50) : 50
@@ -184,9 +135,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const body = await c.req.json().catch(() => null)
         const parsed = SendRoomMessageBodySchema.safeParse(body)
@@ -214,9 +165,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const body = await c.req.json().catch(() => null)
         const parsed = CreateRoomRoleInputSchema.safeParse(body)
@@ -233,9 +184,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const role = room.state.roles.find((item) => item.id === c.req.param('roleId'))
         if (!role) {
@@ -256,9 +207,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const role = room.state.roles.find((item) => item.id === c.req.param('roleId'))
         if (!role) {
@@ -279,9 +230,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const role = room.state.roles.find((item) => item.id === c.req.param('roleId'))
         if (!role) {
@@ -318,9 +269,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const role = room.state.roles.find((item) => item.id === c.req.param('roleId'))
         if (!role) {
@@ -336,9 +287,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const body = await c.req.json().catch(() => null)
         const parsed = CreateRoomTaskBodySchema.safeParse(body)
@@ -355,9 +306,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {
@@ -378,9 +329,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {
@@ -401,9 +352,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {
@@ -424,9 +375,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {
@@ -447,9 +398,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {
@@ -470,9 +421,9 @@ export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         }
         const namespace = c.get('namespace')
         const roomId = c.req.param('id')
-        const room = requireRoom(engine, roomId, namespace, c)
-        if (room instanceof Response) {
-            return room
+        const room = getRoom(engine, roomId, namespace)
+        if (!room) {
+            return c.json({ error: 'Room not found' }, 404)
         }
         const task = room.state.tasks.find((item) => item.id === c.req.param('taskId'))
         if (!task) {

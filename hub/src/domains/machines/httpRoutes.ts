@@ -11,6 +11,7 @@ import {
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireMachine } from '../../web/routes/guards'
+import { checkMachinePaths, checkMachineProviderHealth, cleanupMachineSessions, listMachineDirectory, listOnlineMachines, restartMachineRunner, spawnMachineSession, uniqueNonEmptyPaths } from './service'
 
 const spawnBodySchema = z.object({
     directory: z.string().min(1),
@@ -37,8 +38,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         const namespace = c.get('namespace')
-        const machines = engine.getOnlineMachinesByNamespace(namespace)
-        return c.json(MachinesResponseSchema.parse({ machines }))
+        return c.json(MachinesResponseSchema.parse({ machines: listOnlineMachines(engine, namespace) }))
     })
 
     app.post('/machines/:id/spawn', async (c) => {
@@ -59,15 +59,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return c.json({ error: 'Invalid body' }, 400)
         }
 
-        const result = await engine.spawnSession(
-            machineId,
-            parsed.data.directory,
-            parsed.data.agent,
-            parsed.data.model,
-            parsed.data.yolo,
-            parsed.data.sessionType,
-            parsed.data.worktreeName,
-        )
+        const result = await spawnMachineSession(engine, machineId, parsed.data)
         return c.json(result)
     })
 
@@ -89,13 +81,13 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return c.json({ error: 'Invalid body' }, 400)
         }
 
-        const uniquePaths = Array.from(new Set(parsed.data.paths.map((path) => path.trim()).filter(Boolean)))
+        const uniquePaths = uniqueNonEmptyPaths(parsed.data.paths)
         if (uniquePaths.length === 0) {
             return c.json({ exists: {} })
         }
 
         try {
-            const exists = await engine.checkPathsExist(machineId, uniquePaths)
+            const exists = await checkMachinePaths(engine, machineId, uniquePaths)
             return c.json(MachinePathsExistsResponseSchema.parse({ exists }))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to check paths' }, 500)
@@ -120,7 +112,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            const result = await engine.listMachineDirectory(machineId, parsed.data.path)
+            const result = await listMachineDirectory(engine, machineId, parsed.data.path)
             return c.json(MachineDirectoryResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to list directory' }, 500)
@@ -143,7 +135,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            const result = await engine.restartRunner(machineId, c.get('namespace'))
+            const result = await restartMachineRunner(engine, machineId, c.get('namespace'))
             return c.json(MachineActionResponseSchema.parse(result), 202)
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to restart runner' }, 500)
@@ -166,7 +158,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            const result = await engine.cleanupDeadSessions(machineId, c.get('namespace'))
+            const result = await cleanupMachineSessions(engine, machineId, c.get('namespace'))
             return c.json(MachineCleanupResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to clean dead sessions' }, 500)
@@ -189,7 +181,7 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            const result = await engine.checkProviderHealth(machineId, c.get('namespace'))
+            const result = await checkMachineProviderHealth(engine, machineId, c.get('namespace'))
             return c.json(ProviderHealthResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to run provider health checks' }, 500)

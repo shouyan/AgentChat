@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { ApiClient } from '@/api/client'
 import type { Room, SessionSummary } from '@/types/api'
-import { RoomItem } from '@/components/RoomList'
+import { RoomItem } from '@/features/rooms/components/RoomList'
 import { SessionItem } from '@/components/SessionList'
 
 function PlusIcon(props: { className?: string }) {

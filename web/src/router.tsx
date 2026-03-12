@@ -1,5 +1,3 @@
-import { useCallback } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
     Navigate,
     Outlet,
@@ -12,55 +10,18 @@ import {
     useParams,
 } from '@tanstack/react-router'
 import { App } from '@/App'
-import { SessionChat } from '@/components/SessionChat'
-import { SessionList } from '@/components/SessionList'
-import { NewSession } from '@/components/NewSession'
-import { NewRoom } from '@/components/NewRoom'
-import { RoomDetail } from '@/components/RoomDetail'
-import { InboxSidebar } from '@/components/InboxSidebar'
-import { LoadingState } from '@/components/LoadingState'
+import { InboxSidebar } from '@/features/inbox/components/InboxSidebar'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
-import { isTelegramApp } from '@/hooks/useTelegram'
-import { useMessages } from '@/hooks/queries/useMessages'
-import { useMachines } from '@/features/machines/hooks/useMachines'
-import { useSession } from '@/hooks/queries/useSession'
-import { useSessions } from '@/hooks/queries/useSessions'
-import { useRoom } from '@/features/rooms/hooks/useRoom'
-import { useRoomMessages } from '@/features/rooms/hooks/useRoomMessages'
-import { useRooms } from '@/features/rooms/hooks/useRooms'
-import { useSlashCommands } from '@/hooks/queries/useSlashCommands'
-import { useSkills } from '@/hooks/queries/useSkills'
-import { useSendMessage } from '@/hooks/mutations/useSendMessage'
-import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/toast-context'
-import { useTranslation } from '@/lib/use-translation'
-import { fetchLatestMessages, seedMessageWindowFromSession } from '@/lib/message-window-store'
 import FilesPage from '@/routes/sessions/files'
+import SessionPageImpl from '@/features/sessions/pages/SessionPage'
+import NewSessionPageImpl from '@/features/sessions/pages/NewSessionPage'
+import RoomPageImpl from '@/features/rooms/pages/RoomPage'
+import NewRoomPageImpl from '@/features/rooms/pages/NewRoomPage'
 import FilePage from '@/routes/sessions/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import MachinesPage from '@/routes/machines'
 import SettingsPage from '@/routes/settings'
 import TemplateManagerPage from '@/routes/templates'
-
-function BackIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
 
 function InboxShell() {
     const { api } = useAppContext()
@@ -116,149 +77,7 @@ function SessionsIndexPage() {
 }
 
 function SessionPage() {
-    const { api } = useAppContext()
-    const { t } = useTranslation()
-    const goBack = useAppGoBack()
-    const navigate = useNavigate()
-    const queryClient = useQueryClient()
-    const { addToast } = useToast()
-    const { sessionId } = useParams({ from: '/sessions/$sessionId' })
-    const {
-        session,
-        refetch: refetchSession,
-    } = useSession(api, sessionId)
-    const { machines } = useMachines(api, true)
-    const {
-        messages,
-        warning: messagesWarning,
-        isLoading: messagesLoading,
-        isLoadingMore: messagesLoadingMore,
-        hasMore: messagesHasMore,
-        loadMore: loadMoreMessages,
-        refetch: refetchMessages,
-        pendingCount,
-        messagesVersion,
-        flushPending,
-        setAtBottom,
-    } = useMessages(api, sessionId)
-    const {
-        sendMessage,
-        retryMessage,
-        isSending,
-    } = useSendMessage(api, sessionId, {
-        resolveSessionId: async (currentSessionId) => {
-            if (!api || !session || session.active) {
-                return currentSessionId
-            }
-            try {
-                return await api.resumeSession(currentSessionId)
-            } catch (error) {
-                const message = error instanceof Error ? error.message : 'Resume failed'
-                addToast({
-                    title: 'Resume failed',
-                    body: message,
-                    sessionId: currentSessionId,
-                    url: ''
-                })
-                throw error
-            }
-        },
-        onSessionResolved: (resolvedSessionId) => {
-            void (async () => {
-                if (api) {
-                    if (session && resolvedSessionId !== session.id) {
-                        seedMessageWindowFromSession(session.id, resolvedSessionId)
-                        queryClient.setQueryData(queryKeys.session(resolvedSessionId), {
-                            session: { ...session, id: resolvedSessionId, active: true }
-                        })
-                    }
-                    try {
-                        await Promise.all([
-                            queryClient.prefetchQuery({
-                                queryKey: queryKeys.session(resolvedSessionId),
-                                queryFn: () => api.getSession(resolvedSessionId),
-                            }),
-                            fetchLatestMessages(api, resolvedSessionId),
-                        ])
-                    } catch {
-                    }
-                }
-                navigate({
-                    to: '/sessions/$sessionId',
-                    params: { sessionId: resolvedSessionId },
-                    replace: true
-                })
-            })()
-        },
-        onBlocked: (reason) => {
-            if (reason === 'no-api') {
-                addToast({
-                    title: t('send.blocked.title'),
-                    body: t('send.blocked.noConnection'),
-                    sessionId: sessionId ?? '',
-                    url: ''
-                })
-            }
-            // 'no-session' and 'pending' don't need toast - either invalid state or expected behavior
-        }
-    })
-
-    // Get agent type from session metadata for slash commands
-    const agentType = session?.metadata?.flavor ?? 'claude'
-    const {
-        getSuggestions: getSlashSuggestions,
-    } = useSlashCommands(api, sessionId, agentType)
-    const {
-        getSuggestions: getSkillSuggestions,
-    } = useSkills(api, sessionId)
-
-    const getAutocompleteSuggestions = useCallback(async (query: string) => {
-        if (query.startsWith('$')) {
-            return await getSkillSuggestions(query)
-        }
-        return await getSlashSuggestions(query)
-    }, [getSkillSuggestions, getSlashSuggestions])
-
-    const refreshSelectedSession = useCallback(() => {
-        void refetchSession()
-        void refetchMessages()
-    }, [refetchMessages, refetchSession])
-
-    if (!session) {
-        return (
-            <div className="flex-1 flex items-center justify-center p-4">
-                <LoadingState label="Loading session…" className="text-sm" />
-            </div>
-        )
-    }
-
-    const sessionMachine = session.metadata?.machineId
-        ? machines.find((machine) => machine.id === session.metadata?.machineId) ?? null
-        : null
-
-    return (
-        <SessionChat
-            api={api}
-            session={session}
-            machine={sessionMachine}
-            messages={messages}
-            messagesWarning={messagesWarning}
-            hasMoreMessages={messagesHasMore}
-            isLoadingMessages={messagesLoading}
-            isLoadingMoreMessages={messagesLoadingMore}
-            isSending={isSending}
-            pendingCount={pendingCount}
-            messagesVersion={messagesVersion}
-            onBack={goBack}
-            onRefresh={refreshSelectedSession}
-            onLoadMore={loadMoreMessages}
-            onSend={sendMessage}
-            onFlushPending={flushPending}
-            onAtBottomChange={setAtBottom}
-            onRetryMessage={retryMessage}
-            autocompleteSuggestions={getAutocompleteSuggestions}
-        />
-    )
+    return <SessionPageImpl />
 }
 
 function SessionDetailRoute() {
@@ -271,60 +90,7 @@ function SessionDetailRoute() {
 }
 
 function NewSessionPage() {
-    const { api } = useAppContext()
-    const navigate = useNavigate()
-    const goBack = useAppGoBack()
-    const queryClient = useQueryClient()
-    const { machines, isLoading: machinesLoading, error: machinesError } = useMachines(api, true)
-    const { t } = useTranslation()
-
-    const handleCancel = useCallback(() => {
-        navigate({ to: '/sessions' })
-    }, [navigate])
-
-    const handleSuccess = useCallback((sessionId: string) => {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
-        // Replace current page with /sessions to clear spawn flow from history
-        navigate({ to: '/sessions', replace: true })
-        // Then navigate to new session
-        requestAnimationFrame(() => {
-            navigate({
-                to: '/sessions/$sessionId',
-                params: { sessionId },
-            })
-        })
-    }, [navigate, queryClient])
-
-    return (
-        <div className="flex-1 overflow-y-auto">
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
-                {!isTelegramApp() && (
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    >
-                        <BackIcon />
-                    </button>
-                )}
-                <div className="flex-1 font-semibold">{t('newSession.title')}</div>
-            </div>
-
-            {machinesError ? (
-                <div className="p-3 text-sm text-red-600">
-                    {machinesError}
-                </div>
-            ) : null}
-
-            <NewSession
-                api={api}
-                machines={machines}
-                isLoading={machinesLoading}
-                onCancel={handleCancel}
-                onSuccess={handleSuccess}
-            />
-        </div>
-    )
+    return <NewSessionPageImpl />
 }
 
 function RoomsPage() {
@@ -336,90 +102,11 @@ function RoomsIndexPage() {
 }
 
 function RoomPage() {
-    const { api } = useAppContext()
-    const navigate = useNavigate()
-    const { roomId } = useParams({ from: '/rooms/$roomId' })
-    const { room } = useRoom(api, roomId)
-    const { messages } = useRoomMessages(api, roomId)
-    const { sessions } = useSessions(api)
-    const { machines } = useMachines(api, true)
-    const queryClient = useQueryClient()
-
-    if (!api || !room) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <LoadingState label="Loading room…" className="text-sm" />
-            </div>
-        )
-    }
-
-    return (
-        <RoomDetail
-            api={api}
-            room={room}
-            messages={messages}
-            sessions={sessions}
-            machines={machines}
-            onOpenSession={(sessionId) => navigate({
-                to: '/sessions/$sessionId',
-                params: { sessionId },
-                search: { fromRoom: room.id },
-            })}
-            onOpenSessionFiles={(sessionId) => navigate({
-                to: '/sessions/$sessionId/files',
-                params: { sessionId },
-                search: { tab: 'directories', fromRoom: room.id },
-            })}
-            onOpenSessionTerminal={(sessionId) => navigate({
-                to: '/sessions/$sessionId/terminal',
-                params: { sessionId },
-                search: { fromRoom: room.id },
-            })}
-            onDeleted={() => {
-                void queryClient.invalidateQueries({ queryKey: queryKeys.rooms })
-                void queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
-                navigate({ to: '/rooms' })
-            }}
-        />
-    )
+    return <RoomPageImpl />
 }
 
 function NewRoomPage() {
-    const { api } = useAppContext()
-    const navigate = useNavigate()
-    const queryClient = useQueryClient()
-    const { machines, isLoading: machinesLoading } = useMachines(api, true)
-
-    if (!api) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <LoadingState label="Loading room creator…" className="text-sm" />
-            </div>
-        )
-    }
-
-    return (
-        <div className="flex h-full min-h-0 flex-col">
-            <div className="flex items-center justify-between border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
-                <div className="font-semibold">New room</div>
-                <button type="button" onClick={() => navigate({ to: '/rooms' })} className="rounded border border-[var(--app-border)] px-3 py-1.5 text-sm">Close</button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-                {machinesLoading ? <div className="px-4 py-2 text-sm text-[var(--app-hint)]">Loading machines…</div> : null}
-                <NewRoom
-                    api={api}
-                    machines={machines}
-                    onCancel={() => navigate({ to: '/rooms' })}
-                    onManageTemplates={() => navigate({ to: '/templates' })}
-                    onSuccess={(roomId) => {
-                        void queryClient.invalidateQueries({ queryKey: queryKeys.rooms })
-                        void queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
-                        navigate({ to: '/rooms/$roomId', params: { roomId } })
-                    }}
-                />
-            </div>
-        </div>
-    )
+    return <NewRoomPageImpl />
 }
 
 const rootRoute = createRootRoute({

@@ -1,4 +1,3 @@
-import { getPermissionModesForFlavor, isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor, toSessionSummary } from '@hapi/protocol'
 import {
     ModelModeBodySchema,
     PermissionModeBodySchema,
@@ -9,10 +8,10 @@ import {
 } from '@hapi/protocol/contracts/sessions'
 import { Hono } from 'hono'
 import { registerUploadRoutes } from '../files/httpRoutes'
-import type { SyncEngine, Session } from '../../sync/syncEngine'
+import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from '../../web/routes/guards'
-
+import { listSortedSessions, mapResumeErrorCodeToStatus, validateModelModeForSession, validatePermissionModeForSession } from './service'
 
 export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
     registerUploadRoutes(app, getSyncEngine)
@@ -23,27 +22,8 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return engine
         }
 
-        const getPendingCount = (s: Session) => s.agentState?.requests ? Object.keys(s.agentState.requests).length : 0
-
         const namespace = c.get('namespace')
-        const sessions = engine.getSessionsByNamespace(namespace)
-            .sort((a, b) => {
-                // Active sessions first
-                if (a.active !== b.active) {
-                    return a.active ? -1 : 1
-                }
-                // Within active sessions, sort by pending requests count
-                const aPending = getPendingCount(a)
-                const bPending = getPendingCount(b)
-                if (a.active && aPending !== bPending) {
-                    return bPending - aPending
-                }
-                // Then by updatedAt
-                return b.updatedAt - a.updatedAt
-            })
-            .map(toSessionSummary)
-
-        return c.json(SessionsResponseSchema.parse({ sessions }))
+        return c.json(SessionsResponseSchema.parse({ sessions: listSortedSessions(engine, namespace) }))
     })
 
     app.get('/sessions/:id', (c) => {
@@ -74,10 +54,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         const namespace = c.get('namespace')
         const result = await engine.resumeSession(sessionResult.sessionId, namespace)
         if (result.type === 'error') {
-            const status = result.code === 'no_machine_online' ? 503
-                : result.code === 'access_denied' ? 403
-                    : result.code === 'session_not_found' ? 404
-                        : 500
+            const status = mapResumeErrorCodeToStatus(result.code)
             return c.json({ error: result.message, code: result.code }, status)
         }
 
@@ -146,17 +123,11 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return c.json({ error: 'Invalid body' }, 400)
         }
 
-        const flavor = sessionResult.session.metadata?.flavor ?? 'claude'
+        const validation = validatePermissionModeForSession(sessionResult.session, parsed.data.mode)
+        if (!validation.ok) {
+            return c.json({ error: validation.error }, 400)
+        }
         const mode = parsed.data.mode
-
-        const allowedModes = getPermissionModesForFlavor(flavor)
-        if (allowedModes.length === 0) {
-            return c.json({ error: 'Permission mode not supported for session flavor' }, 400)
-        }
-
-        if (!isPermissionModeAllowedForFlavor(mode, flavor)) {
-            return c.json({ error: 'Invalid permission mode for session flavor' }, 400)
-        }
 
         try {
             await engine.applySessionConfig(sessionResult.sessionId, { permissionMode: mode })
@@ -184,9 +155,9 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return c.json({ error: 'Invalid body' }, 400)
         }
 
-        const flavor = sessionResult.session.metadata?.flavor ?? 'claude'
-        if (!isModelModeAllowedForFlavor(parsed.data.model, flavor)) {
-            return c.json({ error: 'Model mode is only supported for Claude sessions' }, 400)
+        const validation = validateModelModeForSession(sessionResult.session, parsed.data.model)
+        if (!validation.ok) {
+            return c.json({ error: validation.error }, 400)
         }
 
         try {
