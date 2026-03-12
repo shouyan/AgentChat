@@ -22,7 +22,9 @@ import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from '../../web/routes/guards'
 
-import { buildFileSearchItems, estimateBase64Bytes, getSessionWorkspacePath, MAX_UPLOAD_BYTES, parseBooleanParam, runRpc, searchSessionFiles } from './service'
+import { createDirectoryCommand, deleteSessionPathCommand, deleteUploadFileCommand, renameSessionPathCommand, uploadFileCommand, writeSessionFileCommand } from './commands'
+import { estimateBase64Bytes, getSessionWorkspacePath, MAX_UPLOAD_BYTES, parseBooleanParam, runRpc } from './helpers'
+import { searchSessionFiles } from './queries'
 
 export function registerFileRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
     app.get('/sessions/:id/git-status', async (c) => {
@@ -84,7 +86,7 @@ export function registerFileRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         const parsed = WriteFileBodySchema.safeParse(body)
         if (!parsed.success) return c.json({ error: 'Invalid body' }, 400)
         try {
-            const result = await engine.writeSessionFile(sessionResult.sessionId, parsed.data.path, parsed.data.content, parsed.data.expectedHash)
+            const result = await writeSessionFileCommand(engine, sessionResult.sessionId, parsed.data.path, parsed.data.content, parsed.data.expectedHash)
             return c.json(FileWriteResponseSchema.parse(result))
         } catch (error) {
             return c.json(FileWriteResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to write file' }), 500)
@@ -130,7 +132,7 @@ export function registerFileRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         const parsed = FilePathSchema.safeParse(body)
         if (!parsed.success) return c.json({ error: 'Invalid body' }, 400)
         try {
-            const result = await engine.createDirectory(sessionResult.sessionId, parsed.data.path)
+            const result = await createDirectoryCommand(engine, sessionResult.sessionId, parsed.data.path)
             return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
             return c.json(PathMutationResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to create directory' }), 500)
@@ -146,7 +148,7 @@ export function registerFileRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         const parsed = RenamePathBodySchema.safeParse(body)
         if (!parsed.success) return c.json({ error: 'Invalid body' }, 400)
         try {
-            const result = await engine.renameSessionPath(sessionResult.sessionId, parsed.data.path, parsed.data.nextPath)
+            const result = await renameSessionPathCommand(engine, sessionResult.sessionId, parsed.data.path, parsed.data.nextPath)
             return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
             return c.json(PathMutationResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to rename path' }), 500)
@@ -162,7 +164,7 @@ export function registerFileRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => Sy
         const parsed = DeletePathBodySchema.safeParse(body)
         if (!parsed.success) return c.json({ error: 'Invalid body' }, 400)
         try {
-            const result = await engine.deleteSessionPath(sessionResult.sessionId, parsed.data.path, parsed.data.recursive ?? true)
+            const result = await deleteSessionPathCommand(engine, sessionResult.sessionId, parsed.data.path, parsed.data.recursive ?? true)
             return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
             return c.json(PathMutationResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to delete path' }), 500)
@@ -184,7 +186,7 @@ export function registerUploadRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => 
             return c.json(UploadFileResponseSchema.parse({ success: false, error: 'File too large (max 50MB)' }), 413)
         }
         try {
-            const result = await engine.uploadFile(sessionResult.sessionId, parsed.data.filename, parsed.data.content, parsed.data.mimeType)
+            const result = await uploadFileCommand(engine, sessionResult.sessionId, parsed.data.filename, parsed.data.content, parsed.data.mimeType ?? 'application/octet-stream')
             return c.json(UploadFileResponseSchema.parse(result))
         } catch (error) {
             return c.json(UploadFileResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to upload file' }), 500)
@@ -200,7 +202,7 @@ export function registerUploadRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => 
         const parsed = DeleteUploadBodySchema.safeParse(body)
         if (!parsed.success) return c.json({ error: 'Invalid body' }, 400)
         try {
-            const result = await engine.deleteUploadFile(sessionResult.sessionId, parsed.data.path)
+            const result = await deleteUploadFileCommand(engine, sessionResult.sessionId, parsed.data.path)
             return c.json(DeleteUploadResponseSchema.parse(result))
         } catch (error) {
             return c.json(DeleteUploadResponseSchema.parse({ success: false, error: error instanceof Error ? error.message : 'Failed to delete upload' }), 500)

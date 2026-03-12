@@ -11,7 +11,9 @@ import {
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireMachine } from '../../web/routes/guards'
-import { checkMachinePaths, checkMachineProviderHealth, cleanupMachineSessions, listMachineDirectory, listOnlineMachines, restartMachineRunner, spawnMachineSession, uniqueNonEmptyPaths } from './service'
+import { cleanupMachineSessions, restartMachineRunner, spawnMachineSession } from './commands'
+import { uniqueNonEmptyPaths } from './helpers'
+import { checkMachinePaths, checkMachineProviderHealth, listMachineDirectory, listOnlineMachines } from './queries'
 
 const spawnBodySchema = z.object({
     directory: z.string().min(1),

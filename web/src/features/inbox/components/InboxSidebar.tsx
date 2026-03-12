@@ -1,6 +1,6 @@
 import type { ApiClient } from '@/api/client'
 import { BrandMark } from '@/components/BrandMark'
-import { ChatList } from '@/components/ChatList'
+import { ChatList } from '@/features/inbox/components/ChatList'
 import { useInboxSidebarData } from '../hooks/useInboxSidebarData'
 
 function SettingsIcon(props: { className?: string }) {

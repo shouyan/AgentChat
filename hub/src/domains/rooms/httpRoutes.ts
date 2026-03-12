@@ -24,7 +24,8 @@ import {
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSyncEngine } from '../../web/routes/guards'
-import { createRoomWithAssignments, getRoom } from './service'
+import { createRoomWithAssignments } from './commands'
+import { getRoom } from './queries'
 
 export function registerRoomRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
     app.get('/rooms', (c) => {

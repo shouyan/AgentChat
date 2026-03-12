@@ -11,7 +11,9 @@ import { registerUploadRoutes } from '../files/httpRoutes'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from '../../web/routes/guards'
-import { listSortedSessions, mapResumeErrorCodeToStatus, validateModelModeForSession, validatePermissionModeForSession } from './service'
+import { abortSessionCommand, applySessionModelModeCommand, applySessionPermissionModeCommand, archiveSessionCommand, deleteSessionCommand, renameSessionCommand, switchSessionToRemoteCommand } from './commands'
+import { listSortedSessions } from './queries'
+import { mapResumeErrorCodeToStatus, validateModelModeForSession, validatePermissionModeForSession } from './helpers'
 
 export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
     registerUploadRoutes(app, getSyncEngine)
@@ -72,7 +74,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return sessionResult
         }
 
-        await engine.abortSession(sessionResult.sessionId)
+        await abortSessionCommand(engine, sessionResult.sessionId)
         return c.json({ ok: true })
     })
 
@@ -87,7 +89,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return sessionResult
         }
 
-        await engine.archiveSession(sessionResult.sessionId)
+        await archiveSessionCommand(engine, sessionResult.sessionId)
         return c.json({ ok: true })
     })
 
@@ -102,7 +104,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return sessionResult
         }
 
-        await engine.switchSession(sessionResult.sessionId, 'remote')
+        await switchSessionToRemoteCommand(engine, sessionResult.sessionId)
         return c.json({ ok: true })
     })
 
@@ -130,7 +132,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         const mode = parsed.data.mode
 
         try {
-            await engine.applySessionConfig(sessionResult.sessionId, { permissionMode: mode })
+            await applySessionPermissionModeCommand(engine, sessionResult.sessionId, mode)
             return c.json({ ok: true })
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to apply permission mode'
@@ -161,7 +163,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            await engine.applySessionConfig(sessionResult.sessionId, { modelMode: parsed.data.model })
+            await applySessionModelModeCommand(engine, sessionResult.sessionId, parsed.data.model)
             return c.json({ ok: true })
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to apply model mode'
@@ -187,7 +189,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            await engine.renameSession(sessionResult.sessionId, parsed.data.name)
+            await renameSessionCommand(engine, sessionResult.sessionId, parsed.data.name)
             return c.json({ ok: true })
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to rename session'
@@ -211,7 +213,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            await engine.deleteSession(sessionResult.sessionId, c.get('namespace'))
+            await deleteSessionCommand(engine, sessionResult.sessionId, c.get('namespace'))
             return c.json({ ok: true })
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to delete session'

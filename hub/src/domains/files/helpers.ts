@@ -1,4 +1,4 @@
-import type { SyncEngine, Session } from '../../sync/syncEngine'
+import type { Session } from '../../sync/syncEngine'
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
@@ -39,16 +39,4 @@ export function buildFileSearchItems(stdout: string, limit: number) {
             const filePath = parts.slice(0, -1).join('/')
             return { fileName, filePath, fullPath, fileType: 'file' as const }
         })
-}
-
-export async function searchSessionFiles(engine: SyncEngine, sessionId: string, sessionPath: string, query: string, limit: number) {
-    const args = ['--files']
-    if (query) {
-        args.push('--iglob', `*${query}*`)
-    }
-    const result = await runRpc(() => engine.runRipgrep(sessionId, args, sessionPath))
-    if (!result.success) {
-        return { success: false as const, error: result.error ?? 'Failed to list files' }
-    }
-    return { success: true as const, files: buildFileSearchItems(result.stdout ?? '', limit) }
 }

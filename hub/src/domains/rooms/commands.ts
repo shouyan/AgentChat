@@ -1,10 +1,7 @@
 import type { z } from 'zod'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { CreateRoomBodySchema } from '@hapi/protocol/contracts/rooms'
-
-export function getRoom(engine: SyncEngine, roomId: string, namespace: string) {
-    return engine.getRoomByNamespace(roomId, namespace) ?? null
-}
+import { normalizeCreateRoomRoles } from './helpers'
 
 export async function createRoomWithAssignments(
     engine: SyncEngine,
@@ -20,11 +17,7 @@ export async function createRoomWithAssignments(
             coordinatorRoleKey: input.coordinatorRoleKey,
             status: 'active',
         },
-        roles: input.roles.map((role, index) => ({
-            ...role,
-            assignmentMode: role.assignmentMode ?? 'unassigned',
-            sortOrder: role.sortOrder ?? index,
-        })),
+        roles: normalizeCreateRoomRoles(input),
     })
 
     const spawnedSessionIds: string[] = []
