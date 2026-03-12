@@ -1,37 +1,22 @@
 import { Hono } from 'hono'
-import { z } from 'zod'
+import {
+    DeletePathBodySchema,
+    DirectoryQuerySchema,
+    FilePathSchema,
+    FileSearchQuerySchema,
+    RenamePathBodySchema,
+    WriteFileBodySchema,
+} from '@hapi/protocol/files'
+import {
+    FileReadResponseSchema,
+    FileSearchResponseSchema,
+    FileWriteResponseSchema,
+    ListDirectoryResponseSchema,
+    PathMutationResponseSchema,
+} from '@hapi/protocol/contracts/files'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
-
-const fileSearchSchema = z.object({
-    query: z.string().optional(),
-    limit: z.coerce.number().int().min(1).max(500).optional()
-})
-
-const directorySchema = z.object({
-    path: z.string().optional()
-})
-
-const filePathSchema = z.object({
-    path: z.string().min(1)
-})
-
-const writeFileSchema = z.object({
-    path: z.string().min(1),
-    content: z.string(),
-    expectedHash: z.string().nullable().optional()
-})
-
-const renamePathSchema = z.object({
-    path: z.string().min(1),
-    nextPath: z.string().min(1)
-})
-
-const deletePathSchema = z.object({
-    path: z.string().min(1),
-    recursive: z.boolean().optional()
-})
 
 function parseBooleanParam(value: string | undefined): boolean | undefined {
     if (value === 'true') return true
@@ -107,7 +92,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             return c.json({ success: false, error: 'Session path not available' })
         }
 
-        const parsed = filePathSchema.safeParse(c.req.query())
+        const parsed = FilePathSchema.safeParse(c.req.query())
         if (!parsed.success) {
             return c.json({ error: 'Invalid file path' }, 400)
         }
@@ -137,13 +122,13 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             return c.json({ success: false, error: 'Session path not available' })
         }
 
-        const parsed = filePathSchema.safeParse(c.req.query())
+        const parsed = FilePathSchema.safeParse(c.req.query())
         if (!parsed.success) {
             return c.json({ error: 'Invalid file path' }, 400)
         }
 
         const result = await runRpc(() => engine.readSessionFile(sessionResult.sessionId, parsed.data.path))
-        return c.json(result)
+        return c.json(FileReadResponseSchema.parse(result))
     })
 
     app.post('/sessions/:id/file/write', async (c) => {
@@ -158,7 +143,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = writeFileSchema.safeParse(body)
+        const parsed = WriteFileBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
@@ -170,12 +155,12 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
                 parsed.data.content,
                 parsed.data.expectedHash
             )
-            return c.json(result)
+            return c.json(FileWriteResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(FileWriteResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to write file'
-            }, 500)
+            }), 500)
         }
     })
 
@@ -195,7 +180,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             return c.json({ success: false, error: 'Session path not available' })
         }
 
-        const parsed = fileSearchSchema.safeParse(c.req.query())
+        const parsed = FileSearchQuerySchema.safeParse(c.req.query())
         if (!parsed.success) {
             return c.json({ error: 'Invalid query' }, 400)
         }
@@ -230,7 +215,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
                 }
             })
 
-        return c.json({ success: true, files })
+        return c.json(FileSearchResponseSchema.parse({ success: true, files }))
     })
 
     app.get('/sessions/:id/directory', async (c) => {
@@ -249,14 +234,14 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             return c.json({ success: false, error: 'Session path not available' })
         }
 
-        const parsed = directorySchema.safeParse(c.req.query())
+        const parsed = DirectoryQuerySchema.safeParse(c.req.query())
         if (!parsed.success) {
             return c.json({ error: 'Invalid query' }, 400)
         }
 
         const path = parsed.data.path ?? ''
         const result = await runRpc(() => engine.listDirectory(sessionResult.sessionId, path))
-        return c.json(result)
+        return c.json(ListDirectoryResponseSchema.parse(result))
     })
 
     app.post('/sessions/:id/directory/create', async (c) => {
@@ -271,19 +256,19 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = filePathSchema.safeParse(body)
+        const parsed = FilePathSchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
 
         try {
             const result = await engine.createDirectory(sessionResult.sessionId, parsed.data.path)
-            return c.json(result)
+            return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(PathMutationResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to create directory'
-            }, 500)
+            }), 500)
         }
     })
 
@@ -299,19 +284,19 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = renamePathSchema.safeParse(body)
+        const parsed = RenamePathBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
 
         try {
             const result = await engine.renameSessionPath(sessionResult.sessionId, parsed.data.path, parsed.data.nextPath)
-            return c.json(result)
+            return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(PathMutationResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to rename path'
-            }, 500)
+            }), 500)
         }
     })
 
@@ -327,7 +312,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = deletePathSchema.safeParse(body)
+        const parsed = DeletePathBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
@@ -338,12 +323,12 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
                 parsed.data.path,
                 parsed.data.recursive ?? true
             )
-            return c.json(result)
+            return c.json(PathMutationResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(PathMutationResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to delete path'
-            }, 500)
+            }), 500)
         }
     })
 

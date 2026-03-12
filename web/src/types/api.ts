@@ -13,6 +13,19 @@ import type {
     RunnerState as ProtocolRunnerState
 } from '@hapi/protocol/types'
 import type {
+    DeleteUploadResponse as ProtocolDeleteUploadResponse,
+    FileReadResponse as ProtocolFileReadResponse,
+    FileSearchResponse as ProtocolFileSearchResponse,
+    FileWriteResponse as ProtocolFileWriteResponse,
+    ListDirectoryResponse as ProtocolListDirectoryResponse,
+    PathMutationResponse as ProtocolPathMutationResponse,
+    UploadFileResponse as ProtocolUploadFileResponse,
+} from '@hapi/protocol/contracts/files'
+import type {
+    DirectoryEntry as ProtocolDirectoryEntry,
+    FileSearchItem as ProtocolFileSearchItem,
+} from '@hapi/protocol/files'
+import type {
     MachineActionResponse as ProtocolMachineActionResponse,
     MachineCleanupResponse as ProtocolMachineCleanupResponse,
     MachineDirectoryEntry as ProtocolMachineDirectoryEntry,
@@ -140,61 +153,15 @@ export type GitCommandResponse = {
     error?: string
 }
 
-export type FileSearchItem = {
-    fileName: string
-    filePath: string
-    fullPath: string
-    fileType: 'file' | 'folder'
-}
-
-export type FileSearchResponse = {
-    success: boolean
-    files?: FileSearchItem[]
-    error?: string
-}
-
-export type DirectoryEntry = {
-    name: string
-    type: 'file' | 'directory' | 'other'
-    size?: number
-    modified?: number
-}
-
-export type ListDirectoryResponse = {
-    success: boolean
-    entries?: DirectoryEntry[]
-    error?: string
-}
-
-export type FileReadResponse = {
-    success: boolean
-    content?: string
-    hash?: string
-    error?: string
-}
-
-export type FileWriteResponse = {
-    success: boolean
-    hash?: string
-    error?: string
-}
-
-export type PathMutationResponse = {
-    success: boolean
-    path?: string
-    error?: string
-}
-
-export type UploadFileResponse = {
-    success: boolean
-    path?: string
-    error?: string
-}
-
-export type DeleteUploadResponse = {
-    success: boolean
-    error?: string
-}
+export type FileSearchItem = ProtocolFileSearchItem
+export type FileSearchResponse = ProtocolFileSearchResponse
+export type DirectoryEntry = ProtocolDirectoryEntry
+export type ListDirectoryResponse = ProtocolListDirectoryResponse
+export type FileReadResponse = ProtocolFileReadResponse
+export type FileWriteResponse = ProtocolFileWriteResponse
+export type PathMutationResponse = ProtocolPathMutationResponse
+export type UploadFileResponse = ProtocolUploadFileResponse
+export type DeleteUploadResponse = ProtocolDeleteUploadResponse
 
 export type GitFileStatus = {
     fileName: string

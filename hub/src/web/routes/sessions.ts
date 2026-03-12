@@ -1,4 +1,6 @@
 import { getPermissionModesForFlavor, isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor, toSessionSummary } from '@hapi/protocol'
+import { DeleteUploadBodySchema, UploadFileBodySchema } from '@hapi/protocol/files'
+import { DeleteUploadResponseSchema, UploadFileResponseSchema } from '@hapi/protocol/contracts/files'
 import { ModelModeSchema, PermissionModeSchema } from '@hapi/protocol/schemas'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -16,16 +18,6 @@ const modelModeSchema = z.object({
 
 const renameSessionSchema = z.object({
     name: z.string().min(1).max(255)
-})
-
-const uploadSchema = z.object({
-    filename: z.string().min(1).max(255),
-    content: z.string().min(1),
-    mimeType: z.string().min(1).max(255)
-})
-
-const uploadDeleteSchema = z.object({
-    path: z.string().min(1)
 })
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
@@ -119,14 +111,14 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = uploadSchema.safeParse(body)
+        const parsed = UploadFileBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
 
         const estimatedBytes = estimateBase64Bytes(parsed.data.content)
         if (estimatedBytes > MAX_UPLOAD_BYTES) {
-            return c.json({ success: false, error: 'File too large (max 50MB)' }, 413)
+            return c.json(UploadFileResponseSchema.parse({ success: false, error: 'File too large (max 50MB)' }), 413)
         }
 
         try {
@@ -136,12 +128,12 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
                 parsed.data.content,
                 parsed.data.mimeType
             )
-            return c.json(result)
+            return c.json(UploadFileResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(UploadFileResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to upload file'
-            }, 500)
+            }), 500)
         }
     })
 
@@ -157,19 +149,19 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = uploadDeleteSchema.safeParse(body)
+        const parsed = DeleteUploadBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
 
         try {
             const result = await engine.deleteUploadFile(sessionResult.sessionId, parsed.data.path)
-            return c.json(result)
+            return c.json(DeleteUploadResponseSchema.parse(result))
         } catch (error) {
-            return c.json({
+            return c.json(DeleteUploadResponseSchema.parse({
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to delete upload'
-            }, 500)
+            }), 500)
         }
     })
 

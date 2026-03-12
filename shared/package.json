@@ -7,8 +7,10 @@
     "types": "./src/index.ts",
     "exports": {
         ".": "./src/index.ts",
+        "./contracts/files": "./src/contracts/files.ts",
         "./contracts/machines": "./src/contracts/machines.ts",
         "./contracts/templates": "./src/contracts/templates.ts",
+        "./files": "./src/files.ts",
         "./machines": "./src/machines.ts",
         "./messages": "./src/messages.ts",
         "./modes": "./src/modes.ts",

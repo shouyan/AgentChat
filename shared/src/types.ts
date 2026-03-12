@@ -27,6 +27,18 @@ export type {
 
 export type { SessionSummary, SessionSummaryMetadata } from './sessionSummary'
 export type {
+    DeletePathBody,
+    DeleteUploadBody,
+    DirectoryEntry,
+    DirectoryQuery,
+    FilePathInput,
+    FileSearchItem,
+    FileSearchQuery,
+    RenamePathBody,
+    UploadFileBody,
+    WriteFileBody,
+} from './files'
+export type {
     Machine,
     MachineMetadata,
     MachineProviderFlavor,

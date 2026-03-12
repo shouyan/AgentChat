@@ -1,54 +1,30 @@
 import type { ModelMode, PermissionMode } from '@hapi/protocol/types'
+import type {
+    DeleteUploadResponse as RpcDeleteUploadResponse,
+    FileReadResponse as RpcReadFileResponse,
+    FileWriteResponse as RpcWriteFileResponse,
+    ListDirectoryResponse as RpcListDirectoryResponse,
+    PathMutationResponse as RpcPathMutationResponse,
+    UploadFileResponse as RpcUploadFileResponse,
+} from '@hapi/protocol/contracts/files'
+import type { DirectoryEntry as RpcDirectoryEntry } from '@hapi/protocol/files'
 import type { Server } from 'socket.io'
 import type { RpcRegistry } from '../socket/rpcRegistry'
+
+export type {
+    DeleteUploadResponse as RpcDeleteUploadResponse,
+    FileReadResponse as RpcReadFileResponse,
+    FileWriteResponse as RpcWriteFileResponse,
+    ListDirectoryResponse as RpcListDirectoryResponse,
+    PathMutationResponse as RpcPathMutationResponse,
+    UploadFileResponse as RpcUploadFileResponse,
+} from '@hapi/protocol/contracts/files'
 
 export type RpcCommandResponse = {
     success: boolean
     stdout?: string
     stderr?: string
     exitCode?: number
-    error?: string
-}
-
-export type RpcReadFileResponse = {
-    success: boolean
-    content?: string
-    error?: string
-}
-
-export type RpcWriteFileResponse = {
-    success: boolean
-    hash?: string
-    error?: string
-}
-
-export type RpcUploadFileResponse = {
-    success: boolean
-    path?: string
-    error?: string
-}
-
-export type RpcDeleteUploadResponse = {
-    success: boolean
-    error?: string
-}
-
-export type RpcDirectoryEntry = {
-    name: string
-    type: 'file' | 'directory' | 'other'
-    size?: number
-    modified?: number
-}
-
-export type RpcListDirectoryResponse = {
-    success: boolean
-    entries?: RpcDirectoryEntry[]
-    error?: string
-}
-
-export type RpcPathMutationResponse = {
-    success: boolean
-    path?: string
     error?: string
 }
 
