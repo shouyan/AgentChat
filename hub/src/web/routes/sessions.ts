@@ -1,24 +1,18 @@
 import { getPermissionModesForFlavor, isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor, toSessionSummary } from '@hapi/protocol'
+import {
+    ModelModeBodySchema,
+    PermissionModeBodySchema,
+    RenameSessionBodySchema,
+    ResumeSessionSuccessResponseSchema,
+    SessionResponseSchema,
+    SessionsResponseSchema,
+} from '@hapi/protocol/contracts/sessions'
 import { DeleteUploadBodySchema, UploadFileBodySchema } from '@hapi/protocol/files'
 import { DeleteUploadResponseSchema, UploadFileResponseSchema } from '@hapi/protocol/contracts/files'
-import { ModelModeSchema, PermissionModeSchema } from '@hapi/protocol/schemas'
 import { Hono } from 'hono'
-import { z } from 'zod'
 import type { SyncEngine, Session } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
-
-const permissionModeSchema = z.object({
-    mode: PermissionModeSchema
-})
-
-const modelModeSchema = z.object({
-    model: ModelModeSchema
-})
-
-const renameSessionSchema = z.object({
-    name: z.string().min(1).max(255)
-})
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
@@ -58,7 +52,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
             })
             .map(toSessionSummary)
 
-        return c.json({ sessions })
+        return c.json(SessionsResponseSchema.parse({ sessions }))
     })
 
     app.get('/sessions/:id', (c) => {
@@ -72,7 +66,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
             return sessionResult
         }
 
-        return c.json({ session: sessionResult.session })
+        return c.json(SessionResponseSchema.parse({ session: sessionResult.session }))
     })
 
     app.post('/sessions/:id/resume', async (c) => {
@@ -96,7 +90,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
             return c.json({ error: result.message, code: result.code }, status)
         }
 
-        return c.json({ type: 'success', sessionId: result.sessionId })
+        return c.json(ResumeSessionSuccessResponseSchema.parse({ type: 'success', sessionId: result.sessionId }))
     })
 
     app.post('/sessions/:id/upload', async (c) => {
@@ -222,7 +216,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = permissionModeSchema.safeParse(body)
+        const parsed = PermissionModeBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
@@ -260,7 +254,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = modelModeSchema.safeParse(body)
+        const parsed = ModelModeBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
@@ -291,7 +285,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = renameSessionSchema.safeParse(body)
+        const parsed = RenameSessionBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body: name is required' }, 400)
         }

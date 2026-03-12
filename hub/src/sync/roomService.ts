@@ -1,4 +1,9 @@
 import type { Room, RoomMessage, RoomMetadata, RoomRole, RoomTask } from '@hapi/protocol/types'
+import {
+  getRoomCoordinatorRoleKey,
+  resolveRoomMentionTargets,
+  uniqueRoomStrings,
+} from '@hapi/protocol/roomRouting'
 import type { Store } from '../store'
 import type { EventPublisher } from './eventPublisher'
 import type { MessageService } from './messageService'
@@ -64,28 +69,8 @@ type SessionRoomAssignment = {
   role: RoomRole
 }
 
-function normalizeMentionToken(value: string): string {
-  return value.trim().replace(/^@+/, '').toLowerCase()
-}
-
-function slugifyMentionAlias(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 function uniqueStrings(values: Array<string | null | undefined>): string[] {
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const value of values) {
-    if (!value) continue
-    if (seen.has(value)) continue
-    seen.add(value)
-    result.push(value)
-  }
-  return result
+  return uniqueRoomStrings(values)
 }
 
 const ROOM_EXECUTION_TOOL_NAMES = [
@@ -1019,42 +1004,13 @@ export class RoomService {
     })
   }
 
-  private buildRoomRoleAliases(room: Room): Map<string, string> {
-    const aliases = new Map<string, string>()
-    for (const role of room.state.roles) {
-      const candidates = uniqueStrings([
-        normalizeMentionToken(role.key),
-        slugifyMentionAlias(role.label),
-        slugifyMentionAlias(role.key).replace(/-/g, '_'),
-        slugifyMentionAlias(role.label).replace(/-/g, '_'),
-      ])
-      for (const alias of candidates) {
-        if (!alias) continue
-        if (!aliases.has(alias)) {
-          aliases.set(alias, role.key)
-        }
-      }
-    }
-    return aliases
-  }
-
   private resolveRoomRouting(
     room: Room,
     roomId: string,
     namespace: string,
     content: SendRoomMessageInput['content']
   ): ResolvedRoomRouting {
-    const aliases = this.buildRoomRoleAliases(room)
-    const mentionMatches = Array.from(content.text.matchAll(/\B@([a-zA-Z0-9][\w-]*)/g))
-      .map((match) => normalizeMentionToken(match[1] ?? ''))
-      .filter(Boolean)
-
-    const mentionAll = mentionMatches.includes('all')
-    const mentionedRoleKeys = uniqueStrings(
-      mentionMatches
-        .filter((token) => token !== 'all')
-        .map((token) => aliases.get(token))
-    )
+    const { mentionAll, mentionedRoleKeys } = resolveRoomMentionTargets(content.text, room.state.roles)
 
     if (content.targetSessionId) {
       return {
@@ -1101,9 +1057,7 @@ export class RoomService {
       }
     }
 
-    const coordinatorKey = room.metadata.coordinatorRoleKey
-      ?? room.state.roles.find((role) => role.key === 'coordinator')?.key
-      ?? room.state.roles[0]?.key
+    const coordinatorKey = getRoomCoordinatorRoleKey(room)
 
     return {
       deliveryMode: 'coordinator',

@@ -34,6 +34,18 @@ import type {
     MachinesResponse as ProtocolMachinesResponse,
     ProviderHealthResponse as ProtocolProviderHealthResponse
 } from '@hapi/protocol/contracts/machines'
+import type {
+    CreateRoomResponse as ProtocolCreateRoomResponse,
+    DeleteRoomResponse as ProtocolDeleteRoomResponse,
+    RoomMessagesResponse as ProtocolRoomMessagesResponse,
+    RoomResponse as ProtocolRoomResponse,
+    RoomsResponse as ProtocolRoomsResponse,
+} from '@hapi/protocol/contracts/rooms'
+import type {
+    MessagesResponse as ProtocolMessagesResponse,
+    SessionResponse as ProtocolSessionResponse,
+    SessionsResponse as ProtocolSessionsResponse,
+} from '@hapi/protocol/contracts/sessions'
 
 export type {
     AgentState,
@@ -100,28 +112,12 @@ export type AuthResponse = {
     }
 }
 
-export type SessionsResponse = { sessions: SessionSummary[] }
-export type SessionResponse = { session: Session }
-export type RoomsResponse = { rooms: Room[] }
-export type RoomResponse = { room: Room }
-export type RoomMessagesResponse = {
-    messages: RoomMessage[]
-    page: {
-        limit: number
-        beforeSeq: number | null
-        nextBeforeSeq: number | null
-        hasMore: boolean
-    }
-}
-export type MessagesResponse = {
-    messages: DecryptedMessage[]
-    page: {
-        limit: number
-        beforeSeq: number | null
-        nextBeforeSeq: number | null
-        hasMore: boolean
-    }
-}
+export type SessionsResponse = ProtocolSessionsResponse
+export type SessionResponse = ProtocolSessionResponse
+export type RoomsResponse = ProtocolRoomsResponse
+export type RoomResponse = ProtocolRoomResponse
+export type RoomMessagesResponse = ProtocolRoomMessagesResponse
+export type MessagesResponse = ProtocolMessagesResponse
 
 export type MachinesResponse = ProtocolMachinesResponse
 export type MachinePathsExistsResponse = ProtocolMachinePathsExistsResponse
@@ -135,15 +131,8 @@ export type SpawnResponse =
     | { type: 'success'; sessionId: string }
     | { type: 'error'; message: string }
 
-export type CreateRoomResponse = {
-    room: Room
-    spawnedSessionIds?: string[]
-}
-
-export type DeleteRoomResponse = {
-    ok: true
-    deletedSessionIds: string[]
-}
+export type CreateRoomResponse = ProtocolCreateRoomResponse
+export type DeleteRoomResponse = ProtocolDeleteRoomResponse
 
 export type GitCommandResponse = {
     success: boolean

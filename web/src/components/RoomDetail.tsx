@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { buildRoomMentionAliasMap, getRoomComposerRoutingPreview } from '@hapi/protocol/roomRouting'
 import type { ApiClient } from '@/api/client'
 import type { Machine, Room, RoomMessage, RoomRole, RoomRoleTemplate, SessionSummary } from '@/types/api'
 import { BUILTIN_ROLE_TEMPLATE_LIST, getRoomSavedTemplates, slugifyRoleTemplateKey, type RoleTemplateDraft } from '@/components/rooms/roleTemplates'
@@ -124,75 +125,6 @@ function createInviteDraft(presetKey: InvitePresetKey, roles: RoomRole[]) {
   }
 }
 
-function buildMentionAliasMap(roles: RoomRole[]): Map<string, string> {
-  const aliases = new Map<string, string>()
-  for (const role of roles) {
-    const candidates = [
-      role.key.toLowerCase(),
-      slugifyMentionAlias(role.key),
-      slugifyMentionAlias(role.label),
-      slugifyMentionAlias(role.key).replace(/-/g, '_'),
-      slugifyMentionAlias(role.label).replace(/-/g, '_'),
-    ].filter(Boolean)
-
-    for (const candidate of candidates) {
-      if (!aliases.has(candidate)) {
-        aliases.set(candidate, role.key)
-      }
-    }
-  }
-  return aliases
-}
-
-function getComposerRoutingPreview(text: string, room: Room): {
-  mentionAll: boolean
-  mentionedRoleKeys: string[]
-  helper: string
-} {
-  const aliases = buildMentionAliasMap(room.state.roles)
-  const tokens = Array.from(text.matchAll(/\B@([a-zA-Z0-9][\w-]*)/g))
-    .map((match) => (match[1] ?? '').toLowerCase())
-    .filter(Boolean)
-
-  const mentionAll = tokens.includes('all')
-  const mentionedRoleKeys: string[] = []
-  for (const token of tokens) {
-    if (token === 'all') continue
-    const matched = aliases.get(token)
-    if (matched && !mentionedRoleKeys.includes(matched)) {
-      mentionedRoleKeys.push(matched)
-    }
-  }
-
-  if (mentionAll) {
-    return {
-      mentionAll: true,
-      mentionedRoleKeys,
-      helper: 'This will notify everyone in the room.'
-    }
-  }
-
-  if (mentionedRoleKeys.length > 0) {
-    return {
-      mentionAll: false,
-      mentionedRoleKeys,
-      helper: `This will route to ${mentionedRoleKeys.map((item) => `@${item}`).join(', ')}.`
-    }
-  }
-
-  const coordinatorKey = room.metadata.coordinatorRoleKey
-    ?? room.state.roles.find((role) => role.key === 'coordinator')?.key
-    ?? room.state.roles[0]?.key
-
-  return {
-    mentionAll: false,
-    mentionedRoleKeys: coordinatorKey ? [coordinatorKey] : [],
-    helper: coordinatorKey
-      ? `No @mention detected, so this will default to @${coordinatorKey}.`
-      : 'No roles available for routing yet.'
-  }
-}
-
 function getRoleTone(roleKey: string): string {
   const palette = [
     'bg-sky-100 text-sky-700 border-sky-200',
@@ -295,7 +227,7 @@ function renderHighlightedMessageText(
     active?: boolean
   }
 ) {
-  const aliases = buildMentionAliasMap(room.state.roles)
+  const aliases = buildRoomMentionAliasMap(room.state.roles)
   const parts = text.split(/(\B@[a-zA-Z0-9][\w-]*)/g)
   return parts.map((part, index) => {
     const match = /^\B@([a-zA-Z0-9][\w-]*)$/.exec(part)
@@ -405,7 +337,7 @@ export function RoomDetail(props: {
     ?? props.room.state.roles[0]?.key
 
   const composerPreview = useMemo(
-    () => getComposerRoutingPreview(message, props.room),
+    () => getRoomComposerRoutingPreview(message, props.room),
     [message, props.room]
   )
 
