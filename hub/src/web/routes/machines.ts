@@ -1,5 +1,13 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import {
+    MachineActionResponseSchema,
+    MachineCleanupResponseSchema,
+    MachineDirectoryResponseSchema,
+    MachinePathsExistsResponseSchema,
+    MachinesResponseSchema,
+    ProviderHealthResponseSchema,
+} from '@hapi/protocol/contracts/machines'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireMachine } from './guards'
@@ -21,11 +29,6 @@ const machineDirectoryQuerySchema = z.object({
     path: z.string().optional()
 })
 
-const emptyMutationResponseSchema = z.object({
-    ok: z.literal(true),
-    message: z.string()
-})
-
 export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
@@ -37,7 +40,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         const namespace = c.get('namespace')
         const machines = engine.getOnlineMachinesByNamespace(namespace)
-        return c.json({ machines })
+        return c.json(MachinesResponseSchema.parse({ machines }))
     })
 
     app.post('/machines/:id/spawn', async (c) => {
@@ -95,7 +98,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         try {
             const exists = await engine.checkPathsExist(machineId, uniquePaths)
-            return c.json({ exists })
+            return c.json(MachinePathsExistsResponseSchema.parse({ exists }))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to check paths' }, 500)
         }
@@ -120,7 +123,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         try {
             const result = await engine.listMachineDirectory(machineId, parsed.data.path)
-            return c.json(result)
+            return c.json(MachineDirectoryResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to list directory' }, 500)
         }
@@ -143,7 +146,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         try {
             const result = await engine.restartRunner(machineId, c.get('namespace'))
-            return c.json(emptyMutationResponseSchema.parse(result), 202)
+            return c.json(MachineActionResponseSchema.parse(result), 202)
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to restart runner' }, 500)
         }
@@ -166,7 +169,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         try {
             const result = await engine.cleanupDeadSessions(machineId, c.get('namespace'))
-            return c.json(result)
+            return c.json(MachineCleanupResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to clean dead sessions' }, 500)
         }
@@ -189,7 +192,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
 
         try {
             const result = await engine.checkProviderHealth(machineId, c.get('namespace'))
-            return c.json(result)
+            return c.json(ProviderHealthResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to run provider health checks' }, 500)
         }

@@ -26,6 +26,17 @@ export type {
 } from './schemas'
 
 export type { SessionSummary, SessionSummaryMetadata } from './sessionSummary'
+export type {
+    Machine,
+    MachineMetadata,
+    MachineProviderFlavor,
+    MachineProviderHealthMap,
+    MachineProviderHealthProbe,
+    MachineProviderHealthStatus,
+    MachineProviderStatus,
+    MachineProviderStatusMap,
+    RunnerState
+} from './machines'
 
 export type {
     AgentFlavor,

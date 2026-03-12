@@ -6,6 +6,12 @@ import {
     PermissionModeSchema,
     TodosSchema
 } from '@hapi/protocol/schemas'
+import {
+    MachineMetadataSchema,
+    RunnerStateSchema,
+    type MachineMetadata,
+    type RunnerState
+} from '@hapi/protocol/machines'
 import type { ModelMode, PermissionMode } from '@hapi/protocol/types'
 import { z } from 'zod'
 import { UsageSchema } from '@/claude/types'
@@ -23,44 +29,8 @@ export type {
 export type SessionPermissionMode = PermissionMode
 export type SessionModelMode = ModelMode
 
-export { AgentStateSchema, AttachmentMetadataSchema, MetadataSchema }
-
-export const MachineMetadataSchema = z.object({
-    host: z.string(),
-    platform: z.string(),
-    happyCliVersion: z.string(),
-    displayName: z.string().optional(),
-    homeDir: z.string(),
-    happyHomeDir: z.string(),
-    happyLibDir: z.string(),
-    providers: z.record(z.string(), z.object({
-        configured: z.boolean(),
-        authMode: z.string().optional(),
-        baseUrl: z.string().optional(),
-        configPath: z.string().optional(),
-        note: z.string().optional()
-    })).optional()
-})
-
-export type MachineMetadata = z.infer<typeof MachineMetadataSchema>
-
-export const RunnerStateSchema = z.object({
-    status: z.union([z.enum(['running', 'shutting-down']), z.string()]),
-    pid: z.number().optional(),
-    httpPort: z.number().optional(),
-    startedAt: z.number().optional(),
-    shutdownRequestedAt: z.number().optional(),
-    shutdownSource: z.union([z.enum(['mobile-app', 'cli', 'os-signal', 'unknown']), z.string()]).optional(),
-    lastSpawnError: z.object({
-        message: z.string(),
-        pid: z.number().optional(),
-        exitCode: z.number().nullable().optional(),
-        signal: z.string().nullable().optional(),
-        at: z.number()
-    }).nullable().optional()
-})
-
-export type RunnerState = z.infer<typeof RunnerStateSchema>
+export { AgentStateSchema, AttachmentMetadataSchema, MetadataSchema, MachineMetadataSchema, RunnerStateSchema }
+export type { MachineMetadata, RunnerState }
 
 export type Machine = {
     id: string

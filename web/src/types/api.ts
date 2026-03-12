@@ -1,16 +1,34 @@
 import type {
     DecryptedMessage as ProtocolDecryptedMessage,
+    Machine as ProtocolMachine,
+    MachineMetadata as ProtocolMachineMetadata,
+    MachineProviderHealthStatus as ProtocolMachineProviderHealthStatus,
+    MachineProviderStatus as ProtocolMachineProviderStatus,
     Room,
     RoomMessage,
     Session,
     SessionSummary,
     SyncEvent as ProtocolSyncEvent,
-    WorktreeMetadata
+    WorktreeMetadata,
+    RunnerState as ProtocolRunnerState
 } from '@hapi/protocol/types'
+import type {
+    MachineActionResponse as ProtocolMachineActionResponse,
+    MachineCleanupResponse as ProtocolMachineCleanupResponse,
+    MachineDirectoryEntry as ProtocolMachineDirectoryEntry,
+    MachineDirectoryResponse as ProtocolMachineDirectoryResponse,
+    MachinePathsExistsResponse as ProtocolMachinePathsExistsResponse,
+    MachinesResponse as ProtocolMachinesResponse,
+    ProviderHealthResponse as ProtocolProviderHealthResponse
+} from '@hapi/protocol/contracts/machines'
 
 export type {
     AgentState,
     AttachmentMetadata,
+    Machine as ProtocolMachine,
+    MachineMetadata as ProtocolMachineMetadata,
+    MachineProviderHealthStatus as ProtocolMachineProviderHealthStatus,
+    MachineProviderStatus as ProtocolMachineProviderStatus,
     ModelMode,
     PermissionMode,
     Room,
@@ -52,60 +70,11 @@ export type DecryptedMessage = ProtocolDecryptedMessage & {
     originalText?: string
 }
 
-export type RunnerState = {
-    status?: string
-    pid?: number
-    httpPort?: number
-    startedAt?: number
-    shutdownRequestedAt?: number
-    shutdownSource?: string
-    lastSpawnError?: {
-        message: string
-        pid?: number
-        exitCode?: number | null
-        signal?: string | null
-        at: number
-    } | null
-}
-
-export type MachineProviderStatus = {
-    configured: boolean
-    authMode?: string
-    baseUrl?: string
-    configPath?: string
-    note?: string
-}
-
-export type MachineProviderHealthStatus = MachineProviderStatus & {
-    checkedAt: number
-    status: 'ready' | 'needs-auth' | 'not-configured' | 'unreachable' | 'warning'
-    summary: string
-    detail: string
-    probe?: {
-        url: string
-        ok: boolean
-        statusCode?: number
-        error?: string
-    }
-}
-
-export type MachineMetadata = {
-    host: string
-    platform: string
-    happyCliVersion: string
-    displayName?: string
-    homeDir: string
-    happyHomeDir: string
-    happyLibDir: string
-    providers?: Partial<Record<'claude' | 'codex' | 'gemini' | 'cursor' | 'opencode', MachineProviderStatus>>
-}
-
-export type Machine = {
-    id: string
-    active: boolean
-    metadata: MachineMetadata | null
-    runnerState?: RunnerState | null
-}
+export type RunnerState = ProtocolRunnerState
+export type MachineProviderStatus = ProtocolMachineProviderStatus
+export type MachineProviderHealthStatus = ProtocolMachineProviderHealthStatus
+export type MachineMetadata = ProtocolMachineMetadata
+export type Machine = ProtocolMachine
 
 export type AuthResponse = {
     token: string
@@ -141,42 +110,13 @@ export type MessagesResponse = {
     }
 }
 
-export type MachinesResponse = { machines: Machine[] }
-export type MachinePathsExistsResponse = { exists: Record<string, boolean> }
-export type MachineDirectoryEntry = {
-    name: string
-    path: string
-    type: 'file' | 'directory' | 'other'
-    size?: number
-    modified?: number
-}
-export type MachineDirectoryResponse = {
-    success: boolean
-    path?: string
-    parentPath?: string | null
-    entries?: MachineDirectoryEntry[]
-    error?: string
-}
-
-export type MachineActionResponse = {
-    ok: true
-    message: string
-}
-
-export type MachineCleanupResponse = {
-    deletedSessionIds: string[]
-    keptSessionIds: string[]
-    preservedInactiveSessionIds: string[]
-    deadProcessSessionIds: string[]
-    aliveProcessSessionIds: string[]
-}
-
-export type ProviderHealthResponse = {
-    success: boolean
-    checkedAt?: number
-    providers?: Partial<Record<'claude' | 'codex' | 'cursor' | 'gemini' | 'opencode', MachineProviderHealthStatus>>
-    error?: string
-}
+export type MachinesResponse = ProtocolMachinesResponse
+export type MachinePathsExistsResponse = ProtocolMachinePathsExistsResponse
+export type MachineDirectoryEntry = ProtocolMachineDirectoryEntry
+export type MachineDirectoryResponse = ProtocolMachineDirectoryResponse
+export type MachineActionResponse = ProtocolMachineActionResponse
+export type MachineCleanupResponse = ProtocolMachineCleanupResponse
+export type ProviderHealthResponse = ProtocolProviderHealthResponse
 
 export type SpawnResponse =
     | { type: 'success'; sessionId: string }

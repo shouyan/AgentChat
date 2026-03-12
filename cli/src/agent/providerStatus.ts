@@ -1,12 +1,4 @@
-export type MachineProviderStatus = {
-    configured: boolean
-    authMode?: string
-    baseUrl?: string
-    configPath?: string
-    note?: string
-}
-
-export type MachineProviderStatusMap = Partial<Record<'claude' | 'codex' | 'gemini' | 'cursor' | 'opencode', MachineProviderStatus>>
+import type { MachineProviderStatus, MachineProviderStatusMap } from '@hapi/protocol/machines'
 
 function getClaudeStatus(): MachineProviderStatus {
     const authMode = process.env.ANTHROPIC_AUTH_TOKEN

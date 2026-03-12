@@ -1,21 +1,12 @@
 import { access } from 'node:fs/promises'
 import { constants as fsConstants } from 'node:fs'
-import { buildMachineProviderStatus, type MachineProviderStatus, type MachineProviderStatusMap } from './providerStatus'
-
-export type MachineProviderHealthStatus = MachineProviderStatus & {
-    checkedAt: number
-    status: 'ready' | 'needs-auth' | 'not-configured' | 'unreachable' | 'warning'
-    summary: string
-    detail: string
-    probe?: {
-        url: string
-        ok: boolean
-        statusCode?: number
-        error?: string
-    }
-}
-
-export type MachineProviderHealthMap = Partial<Record<'claude' | 'codex' | 'gemini' | 'cursor' | 'opencode', MachineProviderHealthStatus>>
+import type {
+    MachineProviderHealthMap,
+    MachineProviderHealthStatus,
+    MachineProviderStatus,
+    MachineProviderStatusMap
+} from '@hapi/protocol/machines'
+import { buildMachineProviderStatus } from './providerStatus'
 
 const DEFAULT_PROBE_URLS: Partial<Record<keyof MachineProviderHealthMap, string>> = {
     claude: 'https://api.anthropic.com',

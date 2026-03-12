@@ -18,7 +18,7 @@ import type { SpawnSessionOptions, SpawnSessionResult } from '../modules/common/
 import { applyVersionedAck } from './versionedUpdate'
 import { listDirectoryEntries } from '../modules/common/directoryListing'
 import { isProcessAlive } from '@/utils/process'
-import type { MachineProviderHealthMap } from '@/agent/providerHealth'
+import type { MachineProviderHealthMap } from '@hapi/protocol/machines'
 
 interface ServerToRunnerEvents {
     update: (data: Update) => void
