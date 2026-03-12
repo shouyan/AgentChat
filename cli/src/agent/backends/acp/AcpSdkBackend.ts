@@ -289,6 +289,10 @@ export class AcpSdkBackend implements AgentBackend {
             const elapsedSinceUpdate = Date.now() - this.lastSessionUpdateAt;
             if (elapsedSinceUpdate >= quietMs) {
                 const observedLastUpdateAt = this.lastSessionUpdateAt;
+                // Give the event loop one extra macrotask turn before declaring the
+                // session quiet. ACP agents may schedule trailing tool updates with a
+                // short setTimeout from the same prompt turn; without this yield we can
+                // emit turn_complete before those tool_call/tool_result updates arrive.
                 await new Promise<void>((resolve) => setTimeout(resolve, 0));
                 const elapsedAfterYield = Date.now() - this.lastSessionUpdateAt;
                 if (this.lastSessionUpdateAt === observedLastUpdateAt && elapsedAfterYield >= quietMs) {
