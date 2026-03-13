@@ -3,28 +3,30 @@ import { Box, Text, useInput, useStdout } from 'ink'
 import type { Session } from '@/api/types'
 import type { MessageBuffer, BufferedMessage } from '@/ui/ink/messageBuffer'
 import type { AttachConnectionState, AttachedSessionClient } from './AttachedSessionClient'
+import { parseAttachInput } from './commands'
 
 interface AttachSessionDisplayProps {
     client: AttachedSessionClient
     messageBuffer: MessageBuffer
     logPath?: string
     onExit: () => void | Promise<void>
-    onRefresh?: () => void | Promise<void>
+    onSubmitInput: (text: string) => Promise<void>
 }
 
-type ActionState = 'refreshing' | 'exiting' | null
+type ActionState = 'refreshing' | 'exiting' | 'sending' | null
 
 export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
     client,
     messageBuffer,
     logPath,
     onExit,
-    onRefresh,
+    onSubmitInput,
 }) => {
     const [messages, setMessages] = useState<BufferedMessage[]>(() => messageBuffer.getMessages())
     const [session, setSession] = useState<Session>(() => client.getSession())
     const [connectionState, setConnectionState] = useState<AttachConnectionState>(() => client.getConnectionState())
     const [actionState, setActionState] = useState<ActionState>(null)
+    const [composer, setComposer] = useState('')
     const { stdout } = useStdout()
     const terminalWidth = stdout.columns || 80
     const terminalHeight = stdout.rows || 24
@@ -64,21 +66,51 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
             return
         }
 
-        if (input === 'q' || input === 'Q') {
-            setActionState('exiting')
-            await Promise.resolve(onExit())
+        if (key.return) {
+            const parsed = parseAttachInput(composer)
+            if (!parsed) {
+                return
+            }
+
+            const nextActionState: ActionState = parsed.type === 'detach'
+                ? 'exiting'
+                : parsed.type === 'refresh'
+                    ? 'refreshing'
+                    : parsed.type === 'message'
+                        ? 'sending'
+                        : null
+
+            if (nextActionState) {
+                setActionState(nextActionState)
+            }
+
+            try {
+                await Promise.resolve(onSubmitInput(composer))
+                if (parsed.type !== 'detach') {
+                    setComposer('')
+                }
+            } finally {
+                if (parsed.type !== 'detach' && nextActionState) {
+                    setActionState(null)
+                }
+            }
             return
         }
 
-        if ((input === 'r' || input === 'R') && onRefresh) {
-            setActionState('refreshing')
-            try {
-                await Promise.resolve(onRefresh())
-            } finally {
-                setActionState(null)
-            }
+        if (key.backspace || key.delete) {
+            setComposer((current) => current.slice(0, -1))
+            return
         }
-    })
+
+        if (key.ctrl && input === 'u') {
+            setComposer('')
+            return
+        }
+
+        if (!key.ctrl && !key.meta && input.length > 0) {
+            setComposer((current) => current + input)
+        }
+    }, { isActive: true })
 
     const header = useMemo(() => buildHeaderLines(session, connectionState), [session, connectionState])
 
@@ -87,7 +119,7 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
             <Box
                 flexDirection="column"
                 width={terminalWidth}
-                height={terminalHeight - 4}
+                height={terminalHeight - 6}
                 borderStyle="round"
                 borderColor="gray"
                 paddingX={1}
@@ -101,11 +133,11 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
                     ))}
                 </Box>
 
-                <Box flexDirection="column" height={Math.max(1, terminalHeight - 12)} overflow="hidden">
+                <Box flexDirection="column" height={Math.max(1, terminalHeight - 14)} overflow="hidden">
                     {messages.length === 0 ? (
                         <Text color="gray" dimColor>Waiting for session history...</Text>
                     ) : (
-                        messages.slice(-Math.max(1, terminalHeight - 12)).map((msg) => (
+                        messages.slice(-Math.max(1, terminalHeight - 14)).map((msg) => (
                             <Box key={msg.id} flexDirection="column" marginBottom={1}>
                                 <Text color={getMessageColor(msg.type)} dimColor>{formatMessage(msg.content, terminalWidth)}</Text>
                             </Box>
@@ -125,11 +157,14 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
             >
                 {actionState === 'refreshing' ? (
                     <Text color="yellow" bold>Refreshing session snapshot...</Text>
+                ) : actionState === 'sending' ? (
+                    <Text color="yellow" bold>Sending message to session...</Text>
                 ) : actionState === 'exiting' ? (
                     <Text color="yellow" bold>Detaching from session...</Text>
                 ) : (
-                    <Text color="green" bold>👀 Read-only attach • q exit • r refresh • Ctrl-C exit</Text>
+                    <Text color="green" bold>💬 Interactive attach • Enter send • /refresh • /detach • Ctrl-C exit</Text>
                 )}
+                <Text color="white">{formatComposer(composer, terminalWidth)}</Text>
                 {process.env.DEBUG && logPath ? (
                     <Text color="gray" dimColor>Debug logs: {logPath}</Text>
                 ) : null}
@@ -195,4 +230,16 @@ function formatMessage(content: string, terminalWidth: number): string {
         }
         return chunks.join('\n')
     }).join('\n')
+}
+
+function formatComposer(composer: string, terminalWidth: number): string {
+    const label = '> '
+    const placeholder = 'Type a message or /help'
+    const maxLength = Math.max(10, terminalWidth - 8)
+    const content = composer.length > 0 ? composer : placeholder
+    const line = `${label}${content}`
+    if (line.length <= maxLength) {
+        return line
+    }
+    return `${line.slice(-maxLength)}`
 }

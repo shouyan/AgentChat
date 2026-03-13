@@ -117,6 +117,29 @@ describe('AttachedSessionClient', () => {
         expect(states).toEqual(['connecting', 'connected', 'disconnected', 'connected'])
         expect(socket.outbound).toEqual([])
     })
+
+    it('sends terminal-composed messages through the CLI attach endpoint helper', async () => {
+        const socket = new FakeSocket()
+        const session = createSession('session-3')
+        const sendMessage = vi.fn(async (_sessionId: string, _text: string, _localId: string) => {})
+
+        const client = new AttachedSessionClient('token', session, {
+            createSocket: () => socket as never,
+            fetchSession: async () => session,
+            fetchMessages: async () => [],
+            sendMessage,
+        })
+
+        await client.start()
+        await client.sendUserMessage('  hello from terminal  ')
+
+        const [calledSessionId, calledText, calledLocalId] = sendMessage.mock.calls[0] ?? []
+        expect(sendMessage).toHaveBeenCalledTimes(1)
+        expect(calledSessionId).toBe('session-3')
+        expect(calledText).toBe('hello from terminal')
+        expect(typeof calledLocalId).toBe('string')
+        expect(socket.outbound).toEqual([])
+    })
 })
 
 function createSession(id: string): Session {

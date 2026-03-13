@@ -5,6 +5,7 @@ import { logger } from '@/ui/logger'
 import { MessageBuffer } from '@/ui/ink/messageBuffer'
 import { AttachedSessionClient, fetchAttachedSessionSnapshot } from './AttachedSessionClient'
 import { AttachSessionDisplay } from './AttachSessionDisplay'
+import { parseAttachInput } from './commands'
 import { formatAttachedMessage } from './formatAttachedMessage'
 
 export async function runAttach(opts: { sessionId: string }): Promise<void> {
@@ -19,7 +20,8 @@ export async function runAttach(opts: { sessionId: string }): Promise<void> {
     const logPath = logger.getLogPath()
 
     messageBuffer.addMessage(`Attached to session ${session.id}`, 'status')
-    messageBuffer.addMessage('Read-only mode; detaching will not stop the underlying agent session.', 'status')
+    messageBuffer.addMessage('Detach will not stop the underlying agent session.', 'status')
+    messageBuffer.addMessage('Type a message and press Enter. Commands: /refresh, /detach, /help.', 'status')
 
     let sawConnectedState = false
     const handleMessage = (message: Parameters<typeof formatAttachedMessage>[0]) => {
@@ -72,9 +74,30 @@ export async function runAttach(opts: { sessionId: string }): Promise<void> {
             messageBuffer,
             logPath: process.env.DEBUG ? logPath : undefined,
             onExit: finish,
-            onRefresh: async () => {
-                await client.refreshAll()
-                messageBuffer.addMessage('Session snapshot refreshed.', 'status')
+            onSubmitInput: async (input) => {
+                const parsed = parseAttachInput(input)
+                if (!parsed) {
+                    return
+                }
+
+                if (parsed.type === 'detach') {
+                    await finish()
+                    return
+                }
+
+                if (parsed.type === 'refresh') {
+                    await client.refreshAll()
+                    messageBuffer.addMessage('Session snapshot refreshed.', 'status')
+                    return
+                }
+
+                if (parsed.type === 'help') {
+                    messageBuffer.addMessage('Commands: /refresh refresh session snapshot, /detach exit attach, /help show this help.', 'status')
+                    return
+                }
+
+                await client.sendUserMessage(parsed.text)
+                messageBuffer.addMessage('Message sent from terminal attach.', 'status')
             },
         }),
         {

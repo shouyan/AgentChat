@@ -69,7 +69,7 @@ export class MessageService {
             text: string
             localId?: string | null
             attachments?: AttachmentMetadata[]
-            sentFrom?: 'webapp' | 'feishu-bot'
+            sentFrom?: 'webapp' | 'feishu-bot' | 'cli-attach'
             meta?: Record<string, unknown>
         }
     ): Promise<DecryptedMessage> {

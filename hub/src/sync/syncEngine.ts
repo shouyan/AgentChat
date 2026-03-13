@@ -324,7 +324,7 @@ export class SyncEngine {
                 path: string
                 previewUrl?: string
             }>
-            sentFrom?: 'webapp' | 'feishu-bot'
+            sentFrom?: 'webapp' | 'feishu-bot' | 'cli-attach'
             meta?: Record<string, unknown>
         }
     ): Promise<DecryptedMessage> {

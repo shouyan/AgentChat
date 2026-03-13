@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events'
+import { randomUUID } from 'node:crypto'
 import axios from 'axios'
 import { io, type Socket } from 'socket.io-client'
 import type { CliMessagesResponse, Session } from '@/api/types'
@@ -24,12 +25,14 @@ type AttachedSessionClientDeps = {
     createSocket?: () => AttachSocketLike
     fetchSession?: (sessionId: string) => Promise<Session>
     fetchMessages?: (sessionId: string, afterSeq: number, limit: number) => Promise<AttachMessageRecord[]>
+    sendMessage?: (sessionId: string, text: string, localId: string) => Promise<void>
 }
 
 export class AttachedSessionClient extends EventEmitter {
     private readonly socket: AttachSocketLike
     private readonly fetchSessionImpl: (sessionId: string) => Promise<Session>
     private readonly fetchMessagesImpl: (sessionId: string, afterSeq: number, limit: number) => Promise<AttachMessageRecord[]>
+    private readonly sendMessageImpl: (sessionId: string, text: string, localId: string) => Promise<void>
 
     private session: Session
     private connectionState: AttachConnectionState = 'disconnected'
@@ -51,6 +54,7 @@ export class AttachedSessionClient extends EventEmitter {
         this.socket = deps.createSocket?.() ?? createAttachSocket(accessToken, session.id)
         this.fetchSessionImpl = deps.fetchSession ?? ((sessionId) => fetchAttachedSessionSnapshot(accessToken, sessionId))
         this.fetchMessagesImpl = deps.fetchMessages ?? ((sessionId, afterSeq, limit) => fetchAttachedSessionMessages(accessToken, sessionId, afterSeq, limit))
+        this.sendMessageImpl = deps.sendMessage ?? ((sessionId, text, localId) => sendAttachedSessionMessage(accessToken, sessionId, text, localId))
     }
 
     getSession(): Session {
@@ -106,6 +110,15 @@ export class AttachedSessionClient extends EventEmitter {
     async refreshAll(): Promise<void> {
         await this.refreshSession()
         await this.backfillMessages()
+    }
+
+    async sendUserMessage(text: string): Promise<void> {
+        const trimmed = text.trim()
+        if (!trimmed) {
+            return
+        }
+
+        await this.sendMessageImpl(this.session.id, trimmed, randomUUID())
     }
 
     private registerListeners(): void {
@@ -353,6 +366,28 @@ async function fetchAttachedSessionMessages(
     }
 
     return parsed.data.messages
+}
+
+async function sendAttachedSessionMessage(
+    accessToken: string,
+    sessionId: string,
+    text: string,
+    localId: string
+): Promise<void> {
+    await axios.post(
+        `${configuration.apiUrl}/cli/sessions/${encodeURIComponent(sessionId)}/user-message`,
+        {
+            text,
+            localId,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            timeout: 60_000,
+        }
+    )
 }
 
 function hydrateSession(raw: {

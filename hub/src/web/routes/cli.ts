@@ -25,6 +25,11 @@ const getMessagesQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(200).optional()
 })
 
+const sendCliSessionMessageSchema = z.object({
+    text: z.string().trim().min(1),
+    localId: z.string().min(1).optional()
+})
+
 const roomContextQuerySchema = z.object({
     recentLimit: z.coerce.number().int().min(1).max(50).optional()
 })
@@ -179,6 +184,36 @@ export function createCliRoutes(getSyncEngine: () => SyncEngine | null): Hono<Cl
         const limit = parsed.data.limit ?? 200
         const messages = engine.getMessagesAfter(resolved.sessionId, { afterSeq: parsed.data.afterSeq, limit })
         return c.json({ messages })
+    })
+
+    app.post('/sessions/:id/user-message', async (c) => {
+        const engine = getSyncEngine()
+        if (!engine) {
+            return c.json({ error: 'Not ready' }, 503)
+        }
+        const sessionId = c.req.param('id')
+        const namespace = c.get('namespace')
+        const resolved = resolveSessionForNamespace(engine, sessionId, namespace)
+        if (!resolved.ok) {
+            return c.json({ error: resolved.error }, resolved.status)
+        }
+        if (!resolved.session.active) {
+            return c.json({ error: 'Session is inactive' }, 409)
+        }
+
+        const json = await c.req.json().catch(() => null)
+        const parsed = sendCliSessionMessageSchema.safeParse(json)
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid body' }, 400)
+        }
+
+        await engine.sendMessage(resolved.sessionId, {
+            text: parsed.data.text,
+            localId: parsed.data.localId,
+            sentFrom: 'cli-attach',
+        })
+
+        return c.json({ ok: true })
     })
 
     app.get('/sessions/:id/room-context', (c) => {
