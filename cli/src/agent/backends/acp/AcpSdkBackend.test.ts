@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AgentMessage } from '@/agent/types';
 import { AcpSdkBackend } from './AcpSdkBackend';
 import { ACP_SESSION_UPDATE_TYPES } from './constants';
@@ -27,9 +27,14 @@ afterEach(() => {
     backendStatics.UPDATE_DRAIN_TIMEOUT_MS = originalStatics.updateDrainTimeoutMs;
     backendStatics.PRE_PROMPT_UPDATE_QUIET_PERIOD_MS = originalStatics.prePromptUpdateQuietPeriodMs;
     backendStatics.PRE_PROMPT_UPDATE_DRAIN_TIMEOUT_MS = originalStatics.prePromptUpdateDrainTimeoutMs;
+    vi.useRealTimers();
 });
 
 describe('AcpSdkBackend', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
     it('emits turn_complete after trailing tool updates from the same turn', async () => {
         backendStatics.UPDATE_QUIET_PERIOD_MS = 8;
         backendStatics.UPDATE_DRAIN_TIMEOUT_MS = 200;
@@ -90,9 +95,11 @@ describe('AcpSdkBackend', () => {
             close: async () => {}
         };
 
-        await backend.prompt('session-1', [{ type: 'text', text: 'hello' }], (message) => {
+        const promptPromise = backend.prompt('session-1', [{ type: 'text', text: 'hello' }], (message) => {
             messages.push(message);
         });
+        await vi.advanceTimersByTimeAsync(100);
+        await promptPromise;
 
         expect(messages.map((message) => message.type)).toEqual([
             'tool_call',
