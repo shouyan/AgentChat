@@ -13,7 +13,7 @@
     },
     "cli": {
       "name": "agentchat-cli",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "@agentchat/protocol": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.25.1",
@@ -50,7 +50,7 @@
     },
     "hub": {
       "name": "agentchat-hub",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "@agentchat/protocol": "workspace:*",
         "@larksuiteoapi/node-sdk": "^1.59.0",
@@ -72,14 +72,14 @@
     },
     "shared": {
       "name": "@agentchat/protocol",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "zod": "^4.2.1",
       },
     },
     "web": {
       "name": "agentchat-web",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "@agentchat/protocol": "workspace:*",
         "@assistant-ui/react": "^0.11.53",

@@ -65,10 +65,10 @@ export const claudeCommand: CommandDefinition = {
 
         if (showHelp) {
             console.log(`
-${chalk.bold('agentchat')} - Claude Code On the Go
+${chalk.bold('agentchat')} - AgentChat CLI
 
 ${chalk.bold('Usage:')}
-  agentchat [options]         Start Claude with web/PWA control (direct-connect)
+  agentchat [options]         Start the default AgentChat session backend
   agentchat auth              Manage authentication
   agentchat attach <sessionId> Attach terminal view to an existing session
   agentchat codex             Start Codex mode
@@ -86,7 +86,7 @@ ${chalk.bold('Usage:')}
   agentchat doctor            System diagnostics & troubleshooting
 
 ${chalk.bold('Examples:')}
-  agentchat                    Start session (will prompt for token if not set)
+  agentchat                    Start a session (will prompt for token if not set)
   agentchat auth login         Configure CLI_API_TOKEN interactively
   agentchat attach <sessionId> Open a read-only terminal view for a web-started session
   agentchat --yolo             Start with bypassing permissions
@@ -94,13 +94,13 @@ ${chalk.bold('Examples:')}
   agentchat auth status        Show direct-connect status
   agentchat doctor             Run diagnostics
 
-${chalk.bold('agentchat supports ALL Claude options!')}
-  Use any claude flag with agentchat as you would with claude. Our favorite:
+${chalk.bold('Claude-compatible flags')}
+  When the default backend is Claude Code, agentchat forwards Claude flags through unchanged.
 
   agentchat --resume
 
 ${chalk.gray('─'.repeat(60))}
-${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
+${chalk.bold.cyan('Claude Code reference options (from `claude --help`):')}
 `)
 
             try {

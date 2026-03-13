@@ -1,7 +1,7 @@
 {
   "name": "agentchat-hub",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AgentChat hub server for web, rooms, and remote agent sessions",
   "author": "weishu",
   "license": "AGPL-3.0-only",

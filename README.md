@@ -6,7 +6,7 @@ GitHub 仓库：
 
 - `https://github.com/shouyan/AgentChat`
 
-当前版本：**0.0.1**
+当前版本：**0.0.2**
 
 ## 核心能力
 
@@ -102,7 +102,7 @@ GEMINI_API_KEY=
 
 ## 飞书支持
 
-0.0.1 当前支持：
+0.0.2 当前支持：
 
 - 飞书**私聊机器人**文本消息
 - `/help`、`/sessions`、`/use`、`/progress`、`/new`、`/model`、`/pwd`、`/status`、`/web`
@@ -119,7 +119,7 @@ GEMINI_API_KEY=
 
 ## 支持平台
 
-0.0.1 目标平台：
+0.0.2 目标平台：
 
 - macOS `arm64` / `x64`
 - Linux `arm64` / `x64`
