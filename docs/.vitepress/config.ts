@@ -1,15 +1,17 @@
 import { defineConfig } from 'vitepress'
 
+const docsBase = process.env.AGENTCHAT_DOCS_BASE || '/docs/'
+
 export default defineConfig({
     title: 'AgentChat',
     description: '本地优先的 AI 编程代理控制台',
-    base: '/docs/',
+    base: docsBase,
 
     lang: 'zh-CN',
     cleanUrls: true,
 
     head: [
-        ['link', { rel: 'icon', href: '/docs/favicon.ico' }],
+        ['link', { rel: 'icon', href: '/favicon.ico' }],
     ],
 
     themeConfig: {

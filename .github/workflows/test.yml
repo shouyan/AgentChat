@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
     push:
@@ -12,6 +12,8 @@ jobs:
             - uses: oven-sh/setup-bun@v2
             - run: bun install
             - run: bun typecheck
+            - name: Build docs
+              run: bun run --cwd docs docs:build
             - name: Create integration test env
               run: |
                   {
