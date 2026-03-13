@@ -17,7 +17,7 @@ GitHub 仓库：
 
 - `https://github.com/shouyan/AgentChat`
 
-当前版本：**0.0.2**
+当前版本：**0.0.3**
 
 ## 这个项目能做什么
 
@@ -181,7 +181,7 @@ AgentChat 支持在**飞书 App**里通过机器人远程控制会话。
 
 ## 支持平台
 
-0.0.2 目标平台：
+0.0.3 目标平台：
 
 - macOS `arm64` / `x64`
 - Linux `arm64` / `x64`

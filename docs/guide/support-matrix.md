@@ -1,6 +1,6 @@
 # 支持矩阵
 
-本文给出 AgentChat 0.0.2 当前的目标平台和主要能力范围。
+本文给出 AgentChat 0.0.3 当前的目标平台和主要能力范围。
 
 ## 平台支持
 
@@ -20,7 +20,7 @@
 | Gemini | 通过 ACP 接入 |
 | OpenCode | 通过 ACP 接入 |
 
-## 0.0.2 已知限制
+## 0.0.3 已知限制
 
 - Windows 暂不支持 Web Terminal
 - `runner.env` 的 provider 变更只影响**新会话**
