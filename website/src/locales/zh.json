@@ -111,11 +111,14 @@
   "installation": {
     "title": "几秒钟内开始",
     "e2ee": "🔒 WireGuard + TLS 端对端加密",
-    "npm": {
-      "step1": "1. 启动服务器",
-      "step2": "2. 启动编码会话",
+    "note": "先下载并解压对应平台的发布包，或查看源码安装文档。",
+    "releaseLink": "GitHub Releases",
+    "sourceLink": "源码安装",
+    "release": {
+      "step1": "1. 运行 Hub",
+      "step2": "2. 启动 Runner",
       "step3": "3. 打开 URL",
-      "step3Hint": "终端中显示 URL 和二维码"
+      "step3Hint": "终端会显示 URL 和二维码；打开后即可创建和接管会话"
     }
   },
   "cta": {

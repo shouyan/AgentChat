@@ -97,7 +97,7 @@ describe('SettingsPage', () => {
     it('displays the website field with an empty value', () => {
         renderWithProviders(<SettingsPage />)
         expect(screen.getAllByText('Website').length).toBeGreaterThanOrEqual(1)
-        expect(screen.queryByRole('link', { name: 'github.com/tiann/agentchat' })).not.toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: 'github.com/shouyan/AgentChat' })).not.toBeInTheDocument()
     })
 
     it('uses correct i18n keys for About section', () => {

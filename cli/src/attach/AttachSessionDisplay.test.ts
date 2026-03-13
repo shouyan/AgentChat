@@ -184,9 +184,10 @@ describe('AttachSessionDisplay', () => {
 
         expect(onSubmitInput).toHaveBeenCalledTimes(1)
         expect(onSubmitInput).toHaveBeenCalledWith('hi')
+        await waitForText(capture, 'Interactive attach')
         capture.reset()
         await triggerInput('x')
-        expect(capture.text()).toContain('> x')
+        await waitForText(capture, '> x')
     })
 
     it('shows retry guidance and preserves composer text after a failed send', async () => {
@@ -203,7 +204,7 @@ describe('AttachSessionDisplay', () => {
         await triggerInput('', { return: true })
 
         expect(onSubmitInput).toHaveBeenCalledTimes(1)
-        expect(capture.text()).toContain('Last action failed. Enter retry • Ctrl-U clear • /detach exit')
+        await waitForText(capture, 'Last action failed. Enter retry • Ctrl-U clear • /detach exit')
         expect(capture.text()).toContain('network down')
         expect(capture.text()).toContain('> retry me')
 
@@ -212,9 +213,10 @@ describe('AttachSessionDisplay', () => {
 
         expect(onSubmitInput).toHaveBeenCalledTimes(2)
         expect(onSubmitInput).toHaveBeenNthCalledWith(2, 'retry me')
+        await waitForText(capture, 'Interactive attach')
         capture.reset()
         await triggerInput('z')
-        expect(capture.text()).toContain('> z')
+        await waitForText(capture, '> z')
     })
 
     it('shows sending status while a submit is still in flight', async () => {
@@ -233,7 +235,7 @@ describe('AttachSessionDisplay', () => {
         const pendingSubmit = startInput('', { return: true })
         await flush()
 
-        expect(capture.text()).toContain('Sending message to session...')
+        await waitForText(capture, 'Sending message to session...')
 
         const releaseSubmit = resolveSubmit
         if (!releaseSubmit) {
@@ -275,4 +277,17 @@ async function flush(): Promise<void> {
     await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 20))
     })
+}
+
+async function waitForText(capture: OutputCapture, expected: string, timeoutMs = 500): Promise<void> {
+    const deadline = Date.now() + timeoutMs
+
+    while (Date.now() < deadline) {
+        if (capture.text().includes(expected)) {
+            return
+        }
+        await flush()
+    }
+
+    expect(capture.text()).toContain(expected)
 }

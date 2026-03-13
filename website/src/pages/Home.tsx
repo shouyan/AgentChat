@@ -50,7 +50,7 @@ export default function Home() {
                     {t('hero.startBtn')} <ArrowRight className="ml-2 h-5 w-5" />
                   </a>
                 </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/tiann/agentchat', '_blank')}>
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/shouyan/AgentChat', '_blank')}>
                   {t('hero.githubBtn')}
                 </Button>
               </div>
@@ -266,16 +266,31 @@ export default function Home() {
       <section id="installation" className="py-20">
         <div className="container max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">{t('installation.title')}</h2>
+          <p className="text-center mb-6 text-sm text-muted-foreground">
+            {t('installation.note')}{" "}
+            <a
+              href="https://github.com/shouyan/AgentChat/releases/latest"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary hover:underline"
+            >
+              {t('installation.releaseLink')}
+            </a>
+            {" · "}
+            <a href="/docs/guide/source-install" className="font-medium text-primary hover:underline">
+              {t('installation.sourceLink')}
+            </a>
+          </p>
           
           <Card className="border-2 border-border shadow-hard bg-card">
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-bold">{t('installation.npm.step1')}</h3>
+                  <h3 className="font-bold">{t('installation.release.step1')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
-                  <code>npx @twsxtd/agentchat hub --relay</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/agentchat hub --relay", "hub")}>
+                  <code>./agentchat hub</code>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("./agentchat hub", "hub")}>
                     {copied === "hub" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -283,11 +298,11 @@ export default function Home() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-bold">{t('installation.npm.step2')}</h3>
+                  <h3 className="font-bold">{t('installation.release.step2')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
-                  <code>npx @twsxtd/agentchat</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/agentchat", "session")}>
+                  <code>./agentchat runner start-sync</code>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("./agentchat runner start-sync", "session")}>
                     {copied === "session" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -295,10 +310,10 @@ export default function Home() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-bold">{t('installation.npm.step3')}</h3>
+                  <h3 className="font-bold">{t('installation.release.step3')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm border-2 border-slate-800">
-                  <code className="text-slate-400">{t('installation.npm.step3Hint')}</code>
+                  <code className="text-slate-400">{t('installation.release.step3Hint')}</code>
                 </div>
               </div>
             </CardContent>

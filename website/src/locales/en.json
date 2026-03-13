@@ -111,11 +111,14 @@
   "installation": {
     "title": "Get Started in Seconds",
     "e2ee": "🔒 End-to-end encrypted with WireGuard + TLS",
-    "npm": {
-      "step1": "1. Start the Server",
-      "step2": "2. Start a Coding Session",
+    "note": "Download and extract the release archive for your platform first, or follow the source install guide.",
+    "releaseLink": "GitHub Releases",
+    "sourceLink": "Source install",
+    "release": {
+      "step1": "1. Run the Hub",
+      "step2": "2. Start the Runner",
       "step3": "3. Open the URL",
-      "step3Hint": "URL and QR code shown in terminal"
+      "step3Hint": "The terminal shows a URL and QR code. Open it to create and control sessions."
     }
   },
   "cta": {

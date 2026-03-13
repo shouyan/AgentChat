@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const GITHUB_REPO = "tiann/agentchat";
+const GITHUB_REPO = "shouyan/AgentChat";
 const CACHE_KEY = "agentchat-latest-version";
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
