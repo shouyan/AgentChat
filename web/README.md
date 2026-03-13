@@ -1,123 +1,26 @@
-# hapi-web
+# AgentChat Web
 
-React Mini App / PWA for monitoring and controlling hapi sessions.
+React web app and PWA for monitoring and controlling AgentChat sessions.
 
 ## What it does
 
-- Session list with status, pending approvals, todos, and summaries.
-- Chat view with streaming updates and message sending.
-- Permission approval and denial workflows.
-- Permission mode and model selection.
-- Machine list and remote session spawn.
-- File browser and git status/diff views.
-- PWA install prompt and offline banner.
-
-## Runtime behavior
-
-- When opened inside Telegram, auth uses Telegram WebApp init data.
-- When opened in a normal browser, you can log in with `CLI_API_TOKEN:<namespace>` (or `CLI_API_TOKEN` for the default namespace).
-- The login screen includes a top-right hub picker; if unset, the app uses the same origin it was loaded from.
-- Live updates come from the hub via SSE.
-
-## Routes
-
-See `src/router.tsx` for route definitions.
-
-- `/` - Redirect to /sessions.
-- `/sessions` - Session list.
-- `/sessions/$sessionId` - Chat interface.
-- `/sessions/new` - Create new session.
-- `/sessions/$sessionId/files` - File browser with git status.
-- `/sessions/$sessionId/file` - File viewer with diff support.
-- `/sessions/$sessionId/terminal` - Terminal interface.
-- `/settings` - Application settings.
-
-## Features
-
-### Session list (`src/components/SessionList.tsx`)
-
-- Active/inactive status indicator.
-- Session title from name, summary, or path.
-- Todo progress display.
-- Pending permission request count.
-- Agent flavor label (claude/codex/gemini).
-- Model mode display.
-
-### Chat interface (`src/components/SessionChat.tsx`)
-
-- Message thread with infinite scroll.
-- Composer for sending messages.
-- Permission mode toggle (default/acceptEdits/bypassPermissions/plan).
-- Model selection (default/sonnet/opus).
-- Session abort and mode switch controls.
-- Context size display.
-
-### File browser (`src/routes/sessions/files.tsx`)
-
-- Git status view (staged/unstaged files).
-- File search with ripgrep.
-- Navigate to file viewer.
-
-### File viewer (`src/routes/sessions/file.tsx`)
-
-- File content display with syntax highlighting.
-- Staged/unstaged diff view.
-
-### Terminal (`src/routes/sessions/terminal.tsx`)
-
-- Remote terminal via xterm.js
-- Real-time via Socket.IO
-- Resize handling
-
-### Voice assistant
-
-- ElevenLabs integration (@elevenlabs/react)
-- Real-time voice control
-
-### New session (`src/components/NewSession/`)
-
-Modular session creation:
-- Machine selector
-- Directory input with recent paths
-- Agent type selector
-- Model selector
-- Permission mode toggle (YOLO mode)
+- Shows active and archived sessions
+- Streams messages and status changes live
+- Lets users send messages and approve permissions
+- Exposes file browser, diffs, and remote terminal
+- Supports machine selection and remote session spawn
+- Supports installation as a PWA with web push notifications
 
 ## Authentication
 
-See `src/hooks/useAuth.ts` and `src/hooks/useAuthSource.ts`.
+- Browser and PWA login use `CLI_API_TOKEN[:namespace]`
+- The hub exchanges that token for a short-lived JWT
+- The login screen also supports picking a custom hub origin
 
-- Telegram Mini App: Uses initData from WebApp SDK.
-- Browser: Uses CLI_API_TOKEN from login prompt.
-- JWT tokens with auto-refresh.
+## Realtime
 
-## Data fetching
-
-See `src/hooks/queries/` for query hooks and `src/hooks/mutations/` for mutations.
-
-- Sessions, messages, machines via TanStack Query.
-- Git status and file operations.
-- Optimistic updates for message sending.
-
-## Real-time updates
-
-See `src/hooks/useSSE.ts`.
-
-- SSE connection to `/api/events`.
-- Session/message/machine update events.
-- Automatic cache invalidation on events.
-
-## Stack
-
-React 19 + Vite + TanStack Router/Query + Tailwind + @assistant-ui/react + xterm.js + @elevenlabs/react + socket.io-client + workbox + shiki.
-
-## Source structure
-
-- `src/router.tsx` - Route definitions.
-- `src/components/` - UI components.
-- `src/hooks/` - Data fetching and state hooks.
-- `src/api/client.ts` - API client.
-- `src/types/api.ts` - Type definitions.
+- SSE drives session, message, and machine updates
+- Socket.IO powers the remote terminal
 
 ## Development
 
@@ -128,9 +31,10 @@ bun install
 bun run dev:web
 ```
 
-If testing in Telegram, set:
-- `HAPI_PUBLIC_URL` to the public HTTPS URL of the dev server.
-- `CORS_ORIGINS` to include the dev server origin.
+If you want to test from another device, expose the dev server over HTTPS and set:
+
+- `AGENTCHAT_PUBLIC_URL`
+- `CORS_ORIGINS`
 
 ## Build
 
@@ -138,20 +42,21 @@ If testing in Telegram, set:
 bun run build:web
 ```
 
-The built assets land in `web/dist` and are served by hapi-hub. The single executable can embed these assets.
+The built files land in `web/dist`. The hub can serve them directly, and the single executable can embed them.
 
-## Standalone hosting
+## Structure
 
-You can host `web/dist` on a static host (GitHub Pages, Cloudflare Pages) and point it at any hapi hub:
+- `src/components/` - reusable UI
+- `src/routes/` - app pages
+- `src/hooks/` - auth, SSE, queries, mutations
+- `src/api/` - hub API client
+- `src/chat/` - message normalization and tool rendering
 
-1. Build the web app. If your static host uses a subpath, set the Vite base:
+## Standalone Hosting
 
-```bash
-bun run build:web -- --base /<repo>/
-```
+You can host `web/dist` on a static host and point it at any AgentChat hub:
 
-2. Deploy `web/dist` to your static host.
-3. Set hub CORS to allow the static origin (`HAPI_PUBLIC_URL` or `CORS_ORIGINS`).
-4. Open the static site, click the top-right Hub button on the login screen, and enter the hapi hub origin.
-
-Clear the hub override in the same dialog to return to same-origin behavior.
+1. Build the app
+2. Deploy `web/dist`
+3. Allow the static origin in `CORS_ORIGINS`
+4. Set the hub URL from the login screen

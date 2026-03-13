@@ -8,7 +8,7 @@ import {
     RenamePathBodySchema,
     UploadFileBodySchema,
     WriteFileBodySchema,
-} from '@hapi/protocol/files'
+} from '@agentchat/protocol/files'
 import {
     DeleteUploadResponseSchema,
     FileReadResponseSchema,
@@ -17,7 +17,7 @@ import {
     ListDirectoryResponseSchema,
     PathMutationResponseSchema,
     UploadFileResponseSchema,
-} from '@hapi/protocol/contracts/files'
+} from '@agentchat/protocol/contracts/files'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from '../../web/routes/guards'

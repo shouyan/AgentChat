@@ -1,11 +1,11 @@
 /**
- * HAPI Hub - Main Entry Point
+ * AgentChat Hub - Main Entry Point
  *
  * Provides:
  * - Web app + HTTP API
  * - Socket.IO for CLI connections
  * - SSE updates for the web UI
- * - Optional Telegram bot for notifications and Mini App entrypoint
+ * - Optional Feishu private-chat bridge
  */
 
 import { createConfiguration, type ConfigSource } from './configuration'
@@ -13,7 +13,6 @@ import { Store } from './store'
 import { SyncEngine, type SyncEvent } from './sync/syncEngine'
 import { NotificationHub } from './notifications/notificationHub'
 import type { NotificationChannel } from './notifications/notificationTypes'
-import { HappyBot } from './telegram/bot'
 import { startWebServer } from './web/server'
 import { getOrCreateJwtSecret } from './config/jwtSecret'
 import { createSocketServer } from './socket/server'
@@ -27,6 +26,7 @@ import { waitForTunnelTlsReady } from './tunnel/tlsGate'
 import QRCode from 'qrcode'
 import type { Server as BunServer } from 'bun'
 import type { WebSocketData } from '@socket.io/bun-engine'
+import { FeishuIntegration } from './integrations/feishu'
 
 /** Format config source for logging */
 function formatSource(source: ConfigSource | 'generated'): string {
@@ -98,20 +98,20 @@ function mergeCorsOrigins(base: string[], extra: string[]): string[] {
 }
 
 let syncEngine: SyncEngine | null = null
-let happyBot: HappyBot | null = null
 let webServer: BunServer<WebSocketData> | null = null
 let sseManager: SSEManager | null = null
 let visibilityTracker: VisibilityTracker | null = null
 let notificationHub: NotificationHub | null = null
 let tunnelManager: TunnelManager | null = null
+let feishuIntegration: FeishuIntegration | null = null
 
 async function main() {
     console.log('AgentChat Hub starting...')
 
     // Load configuration (async - loads from env/file with persistence)
-    const relayApiDomain = process.env.HAPI_RELAY_API || 'relay.hapi.run'
+    const relayApiDomain = process.env.AGENTCHAT_RELAY_API || 'relay.agentchat.run'
     const relayFlag = resolveRelayFlag(process.argv)
-    const officialWebUrl = process.env.HAPI_OFFICIAL_WEB_URL || 'https://app.hapi.run'
+    const officialWebUrl = process.env.AGENTCHAT_OFFICIAL_WEB_URL || 'https://app.agentchat.run'
     const config = await createConfiguration()
     const baseCorsOrigins = normalizeOrigins(config.corsOrigins)
     const relayCorsOrigin = normalizeOrigin(officialWebUrl)
@@ -141,15 +141,6 @@ async function main() {
     console.log(`[Hub] AGENTCHAT_LISTEN_PORT: ${config.listenPort} (${formatSource(config.sources.listenPort)})`)
     console.log(`[Hub] AGENTCHAT_PUBLIC_URL: ${config.publicUrl} (${formatSource(config.sources.publicUrl)})`)
 
-    if (!config.telegramEnabled) {
-        console.log('[Hub] Telegram: disabled (no TELEGRAM_BOT_TOKEN)')
-    } else {
-        const tokenSource = formatSource(config.sources.telegramBotToken)
-        console.log(`[Hub] Telegram: enabled (${tokenSource})`)
-        const notificationSource = formatSource(config.sources.telegramNotification)
-        console.log(`[Hub] Telegram notifications: ${config.telegramNotification ? 'enabled' : 'disabled'} (${notificationSource})`)
-    }
-
     // Display tunnel status
     if (relayFlag.enabled) {
         console.log(`[Hub] Tunnel: enabled (${relayFlag.source}), API: ${relayApiDomain}`)
@@ -160,7 +151,7 @@ async function main() {
     const store = new Store(config.dbPath)
     const jwtSecret = await getOrCreateJwtSecret()
     const vapidKeys = await getOrCreateVapidKeys(config.dataDir)
-    const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:admin@hapi.run'
+    const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:admin@agentchat.run'
     const pushService = new PushService(vapidKeys, vapidSubject, store)
 
     visibilityTracker = new VisibilityTracker()
@@ -183,24 +174,14 @@ async function main() {
     })
 
     syncEngine = new SyncEngine(store, socketServer.io, socketServer.rpcRegistry, sseManager)
+    feishuIntegration = new FeishuIntegration({
+        store,
+        engine: syncEngine,
+    })
 
     const notificationChannels: NotificationChannel[] = [
         new PushNotificationChannel(pushService, sseManager, visibilityTracker, config.publicUrl)
     ]
-
-    // Initialize Telegram bot (optional)
-    if (config.telegramEnabled && config.telegramBotToken) {
-        happyBot = new HappyBot({
-            syncEngine,
-            botToken: config.telegramBotToken,
-            publicUrl: config.publicUrl,
-            store
-        })
-        // Only add to notification channels if notifications are enabled
-        if (config.telegramNotification) {
-            notificationChannels.push(happyBot)
-        }
-    }
 
     notificationHub = new NotificationHub(syncEngine, notificationChannels)
 
@@ -215,13 +196,11 @@ async function main() {
         socketEngine: socketServer.engine,
         corsOrigins,
         relayMode: relayFlag.enabled,
-        officialWebUrl
+        officialWebUrl,
+        getFeishuStatus: () => feishuIntegration?.getStatus() ?? null,
     })
 
-    // Start the bot if configured
-    if (happyBot) {
-        await happyBot.start()
-    }
+    await feishuIntegration.start()
 
     console.log('')
     console.log('[Web] AgentChat Hub listening on :' + config.listenPort)
@@ -234,8 +213,8 @@ async function main() {
             localPort: config.listenPort,
             enabled: true,
             apiDomain: relayApiDomain,
-            authKey: process.env.HAPI_RELAY_AUTH || null,
-            useRelay: process.env.HAPI_RELAY_FORCE_TCP === 'true' || process.env.HAPI_RELAY_FORCE_TCP === '1'
+            authKey: process.env.AGENTCHAT_RELAY_AUTH || null,
+            useRelay: process.env.AGENTCHAT_RELAY_FORCE_TCP === 'true' || process.env.AGENTCHAT_RELAY_FORCE_TCP === '1'
         })
 
         try {
@@ -294,8 +273,8 @@ async function main() {
     const shutdown = async () => {
         console.log('\nShutting down...')
         await tunnelManager?.stop()
-        await happyBot?.stop()
         notificationHub?.stop()
+        await feishuIntegration?.stop()
         syncEngine?.stop()
         sseManager?.stop()
         webServer?.stop()

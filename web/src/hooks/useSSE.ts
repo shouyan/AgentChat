@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import type { SyncEvent } from '@/types/api'
 import { createSyncEventHandler } from './sse/eventHandler'
 import { SSEInvalidationQueue } from './sse/invalidationQueue'

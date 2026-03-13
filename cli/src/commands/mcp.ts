@@ -1,4 +1,4 @@
-import { runHappyMcpStdioBridge } from '../codex/happyMcpStdioBridge'
+import { runHappyMcpStdioBridge } from '../codex/agentchatMcpStdioBridge'
 import type { CommandDefinition } from './types'
 
 export const mcpCommand: CommandDefinition = {

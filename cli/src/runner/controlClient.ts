@@ -52,7 +52,7 @@ async function runnerPost(path: string, body?: any): Promise<{ error?: string } 
   }
 
   try {
-    const timeout = process.env.HAPI_RUNNER_HTTP_TIMEOUT ? parseInt(process.env.HAPI_RUNNER_HTTP_TIMEOUT) : 10_000;
+    const timeout = process.env.AGENTCHAT_RUNNER_HTTP_TIMEOUT ? parseInt(process.env.AGENTCHAT_RUNNER_HTTP_TIMEOUT) : 10_000;
     const response = await fetch(`http://127.0.0.1:${state.httpPort}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -110,7 +110,7 @@ export async function stopRunnerHttp(): Promise<void> {
 
 /**
  * The version check is still quite naive.
- * For instance we are not handling the case where we upgraded hapi,
+ * For instance we are not handling the case where we upgraded agentchat,
  * the runner is still running, and it recieves a new message to spawn a new session.
  * This is a tough case - we need to somehow figure out to restart ourselves,
  * yet still handle the original request.
@@ -133,7 +133,7 @@ export async function stopRunnerHttp(): Promise<void> {
  * Not just a boolean.
  * 
  * We can destructure the response on the caller for richer output.
- * For instance when running `hapi runner status` we can show more information.
+ * For instance when running `agentchat runner status` we can show more information.
  */
 export async function checkIfRunnerRunningAndCleanupStaleState(): Promise<boolean> {
   const state = await readRunnerState();
@@ -158,7 +158,7 @@ export async function checkIfRunnerRunningAndCleanupStaleState(): Promise<boolea
  * 
  * @returns true if versions match, false if versions differ or no runner running
  */
-export async function isRunnerRunningCurrentlyInstalledHappyVersion(): Promise<boolean> {
+export async function isRunnerRunningCurrentlyInstalledAgentChatVersion(): Promise<boolean> {
   logger.debug('[RUNNER CONTROL] Checking if runner is running same version');
   const runningRunner = await checkIfRunnerRunningAndCleanupStaleState();
   if (!runningRunner) {
@@ -185,17 +185,17 @@ export async function isRunnerRunningCurrentlyInstalledHappyVersion(): Promise<b
     
     // PREVIOUS IMPLEMENTATION - Keeping this commented in case we need it
     // Kirill does not understand how the upgrade of npm packages happen and whether 
-    // we will get a new path or not when hapi is upgraded globally.
+    // we will get a new path or not when agentchat is upgraded globally.
     // If reading package.json doesn't work correctly after npm upgrades, 
     // we can revert to spawning a process (but should add timeout and cleanup!)
     /*
-    const { spawnHappyCLI } = await import('../utils/spawnHappyCLI');
-    const happyProcess = spawnHappyCLI(['--version'], { stdio: 'pipe' });
+    const { spawnAgentchatCLI } = await import('../utils/spawnAgentchatCLI');
+    const agentchatProcess = spawnAgentchatCLI(['--version'], { stdio: 'pipe' });
     let version: string | null = null;
-    happyProcess.stdout?.on('data', (data) => {
+    agentchatProcess.stdout?.on('data', (data) => {
       version = data.toString().trim();
     });
-    await new Promise(resolve => happyProcess.stdout?.on('close', resolve));
+    await new Promise(resolve => agentchatProcess.stdout?.on('close', resolve));
     logger.debug(`[RUNNER CONTROL] Current CLI version: ${version}, Runner started with version: ${state.startedWithCliVersion}`);
     return version === state.startedWithCliVersion;
     */

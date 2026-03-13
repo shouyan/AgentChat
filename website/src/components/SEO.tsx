@@ -12,12 +12,12 @@ export function SEO({ title, description, image, url }: SEOProps) {
   const { i18n } = useTranslation();
   const currentLang = i18n.language;
   
-  const siteTitle = "HAPI - Vibe Coding Anytime, Anywhere";
+  const siteTitle = "AgentChat - Vibe Coding Anytime, Anywhere";
   const defaultDescription = "The local-first AI agent platform for developers who love freedom. Go for a hike, grab a coffee, or just relax. Your AI agents work in the background.";
-  const siteUrl = "https://hapi.manus.space";
+  const siteUrl = "https://agentchat.manus.space";
   const defaultImage = "/images/og-image.png"; // We need to create this or use an existing one
 
-  const metaTitle = title ? `${title} | HAPI` : siteTitle;
+  const metaTitle = title ? `${title} | AgentChat` : siteTitle;
   const metaDescription = description || defaultDescription;
   const metaImage = image ? `${siteUrl}${image}` : `${siteUrl}${defaultImage}`;
   const metaUrl = url ? `${siteUrl}${url}` : siteUrl;
@@ -26,7 +26,7 @@ export function SEO({ title, description, image, url }: SEOProps) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "HAPI",
+    "name": "AgentChat",
     "operatingSystem": "Windows, macOS, Linux",
     "applicationCategory": "DeveloperApplication",
     "offers": {
@@ -58,7 +58,7 @@ export function SEO({ title, description, image, url }: SEOProps) {
       <meta property="og:description" content={metaDescription} />
       <meta property="og:image" content={metaImage} />
       <meta property="og:locale" content={currentLang === 'zh' ? 'zh_CN' : 'en_US'} />
-      <meta property="og:site_name" content="HAPI" />
+      <meta property="og:site_name" content="AgentChat" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />

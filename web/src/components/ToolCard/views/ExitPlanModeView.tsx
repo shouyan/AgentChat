@@ -1,5 +1,5 @@
 import type { ToolViewProps } from '@/components/ToolCard/views/_all'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 
 export function ExitPlanModeView(props: ToolViewProps) {

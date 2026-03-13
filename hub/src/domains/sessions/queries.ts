@@ -1,4 +1,4 @@
-import { toSessionSummary } from '@hapi/protocol'
+import { toSessionSummary } from '@agentchat/protocol'
 import type { SyncEngine, Session } from '../../sync/syncEngine'
 
 function getPendingCount(session: Session) {

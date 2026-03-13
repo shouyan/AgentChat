@@ -1,5 +1,5 @@
 import type { ToolViewProps } from '@/components/ToolCard/views/_all'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import { DiffView } from '@/components/DiffView'
 
 function parseUnifiedDiff(unifiedDiff: string): { oldText: string; newText: string; fileName?: string } {

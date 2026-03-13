@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useLocation, useMatchRoute, useRouter } from '@tanstack/react-router'
+import { Outlet, useMatchRoute, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { getTelegramWebApp, isTelegramApp } from '@/hooks/useTelegram'
 import { initializeTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthSource } from '@/hooks/useAuthSource'
@@ -13,7 +12,6 @@ import { useVisibilityReporter } from '@/hooks/useVisibilityReporter'
 import { queryKeys } from '@/lib/query-keys'
 import { AppContextProvider } from '@/lib/app-context'
 import { fetchLatestMessages } from '@/lib/message-window-store'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useTranslation } from '@/lib/use-translation'
 import { VoiceProvider } from '@/lib/voice-context'
 import { requireHubUrlForLogin } from '@/lib/runtime-config'
@@ -44,17 +42,12 @@ function AppInner() {
     const { t } = useTranslation()
     const { serverUrl, baseUrl, setServerUrl, clearServerUrl } = useServerUrl()
     const { authSource, isLoading: isAuthSourceLoading, setAccessToken } = useAuthSource(baseUrl)
-    const { token, namespace, api, isLoading: isAuthLoading, error: authError, needsBinding, bind } = useAuth(authSource, baseUrl)
-    const goBack = useAppGoBack()
-    const pathname = useLocation({ select: (location) => location.pathname })
+    const { token, namespace, api, isLoading: isAuthLoading, error: authError } = useAuth(authSource, baseUrl)
     const matchRoute = useMatchRoute()
     const router = useRouter()
     const { addToast } = useToast()
 
     useEffect(() => {
-        const tg = getTelegramWebApp()
-        tg?.ready()
-        tg?.expand()
         initializeTheme()
     }, [])
 
@@ -94,24 +87,6 @@ function AppInner() {
         }
     }, [])
 
-    useEffect(() => {
-        const tg = getTelegramWebApp()
-        const backButton = tg?.BackButton
-        if (!backButton) return
-
-        if (pathname === '/' || pathname === '/sessions') {
-            backButton.offClick(goBack)
-            backButton.hide()
-            return
-        }
-
-        backButton.show()
-        backButton.onClick(goBack)
-        return () => {
-            backButton.offClick(goBack)
-            backButton.hide()
-        }
-    }, [goBack, pathname])
     const queryClient = useQueryClient()
     const sessionMatch = matchRoute({ to: '/sessions/$sessionId' })
     const selectedSessionId = sessionMatch && sessionMatch.sessionId !== 'new' ? sessionMatch.sessionId : null
@@ -157,7 +132,7 @@ function AppInner() {
             pushPromptedRef.current = false
             return
         }
-        if (isTelegramApp() || !isPushSupported) {
+        if (!isPushSupported) {
             return
         }
         if (pushPromptedRef.current) {
@@ -292,21 +267,6 @@ function AppInner() {
         )
     }
 
-    if (needsBinding) {
-        return (
-            <LoginPrompt
-                mode="bind"
-                onBind={bind}
-                baseUrl={baseUrl}
-                serverUrl={serverUrl}
-                setServerUrl={setServerUrl}
-                clearServerUrl={clearServerUrl}
-                requireServerUrl={REQUIRE_SERVER_URL}
-                error={authError ?? undefined}
-            />
-        )
-    }
-
     // Authenticating (also covers the gap before useAuth effect starts)
     if (isAuthLoading || (authSource && !token && !authError)) {
         return (
@@ -318,32 +278,16 @@ function AppInner() {
 
     // Auth error
     if (authError || !token || !api) {
-        // If using access token and auth failed, show login again
-        if (authSource.type === 'accessToken') {
-            return (
-                <LoginPrompt
-                    onLogin={setAccessToken}
-                    baseUrl={baseUrl}
-                    serverUrl={serverUrl}
-                    setServerUrl={setServerUrl}
-                    clearServerUrl={clearServerUrl}
-                    requireServerUrl={REQUIRE_SERVER_URL}
-                    error={authError ?? t('login.error.authFailed')}
-                />
-            )
-        }
-
-        // Telegram auth failed
         return (
-            <div className="p-4 space-y-3">
-                <div className="text-base font-semibold">{t('login.title')}</div>
-                <div className="text-sm text-red-600">
-                    {authError ?? t('login.error.authFailed')}
-                </div>
-                <div className="text-xs text-[var(--app-hint)]">
-                    Open this page from Telegram using the bot's "Open App" button (not "Open in browser").
-                </div>
-            </div>
+            <LoginPrompt
+                onLogin={setAccessToken}
+                baseUrl={baseUrl}
+                serverUrl={serverUrl}
+                setServerUrl={setServerUrl}
+                clearServerUrl={clearServerUrl}
+                requireServerUrl={REQUIRE_SERVER_URL}
+                error={authError ?? t('login.error.authFailed')}
+            />
         )
     }
 

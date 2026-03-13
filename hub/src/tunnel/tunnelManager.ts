@@ -15,9 +15,9 @@ import { platform, arch, homedir } from 'node:os'
 import { isBunCompiled } from '../utils/bunCompiled'
 
 function getHapiHome(): string {
-    return process.env.HAPI_HOME
-        ? process.env.HAPI_HOME.replace(/^~/, homedir())
-        : join(homedir(), '.hapi')
+    return process.env.AGENTCHAT_HOME
+        ? process.env.AGENTCHAT_HOME.replace(/^~/, homedir())
+        : join(homedir(), '.agentchat')
 }
 
 function getPlatformDir(): string {
@@ -57,8 +57,8 @@ function getTunwgPath(): string {
 export interface TunnelConfig {
     localPort: number
     enabled: boolean
-    apiDomain?: string | null  // TUNWG_API - default: relay.hapi.run (official relay)
-    authKey?: string | null    // TUNWG_AUTH - default: hapi
+    apiDomain?: string | null  // TUNWG_API - default: relay.agentchat.run (official relay)
+    authKey?: string | null    // TUNWG_AUTH - default: agentchat
     useRelay?: boolean         // TUNWG_RELAY
 }
 
@@ -116,7 +116,7 @@ export class TunnelManager {
         if (this.config.apiDomain) {
             env.TUNWG_API = this.config.apiDomain
         }
-        env.TUNWG_AUTH = this.config.authKey ?? 'hapi'
+        env.TUNWG_AUTH = this.config.authKey ?? 'agentchat'
         if (this.config.useRelay) {
             env.TUNWG_RELAY = 'true'
         }

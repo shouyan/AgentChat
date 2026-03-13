@@ -3,8 +3,8 @@ import {
     BuiltinTemplateOverridePatchSchema,
     RoleSlotTemplateSchema,
     RoomTemplateDefinitionSchema,
-} from '@hapi/protocol/templates'
-import { TemplatesResponseSchema } from '@hapi/protocol/contracts/templates'
+} from '@agentchat/protocol/templates'
+import { TemplatesResponseSchema } from '@agentchat/protocol/contracts/templates'
 import type { Store } from '../../store'
 import type { TemplateKind } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'

@@ -1,7 +1,6 @@
 import { useId, useMemo, useRef, useState } from 'react'
 import type { Machine, Session } from '@/types/api'
 import type { ApiClient } from '@/api/client'
-import { isTelegramApp } from '@/hooks/useTelegram'
 import { useSessionActions } from '@/hooks/mutations/useSessionActions'
 import { SessionActionMenu } from '@/components/SessionActionMenu'
 import { RenameSessionDialog } from '@/components/RenameSessionDialog'
@@ -104,11 +103,6 @@ export function SessionHeader(props: {
         setMenuOpen((open) => !open)
     }
 
-    // In Telegram, don't render header (Telegram provides its own)
-    if (isTelegramApp()) {
-        return null
-    }
-
     return (
         <>
             <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
@@ -145,7 +139,7 @@ export function SessionHeader(props: {
                                 {session.metadata?.flavor?.trim() || 'unknown'}
                             </span>
                             <span>
-                                {t('session.item.modelMode')}: {session.modelMode || 'default'}
+                                {t('session.item.modelMode')}: {session.metadata?.model ?? session.modelMode ?? 'default'}
                             </span>
                             {props.machine ? (
                                 <span>machine: {getMachineTitle(props.machine)}</span>

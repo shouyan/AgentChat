@@ -38,6 +38,7 @@ export class AgentSessionBase<Mode> {
     private keepAliveInterval: NodeJS.Timeout | null = null;
     protected permissionMode?: SessionPermissionMode;
     protected modelMode?: SessionModelMode;
+    protected model?: string;
 
     constructor(opts: AgentSessionBaseOptions<Mode>) {
         this.path = opts.path;
@@ -103,13 +104,14 @@ export class AgentSessionBase<Mode> {
         }
     };
 
-    protected getKeepAliveRuntime(): { permissionMode?: SessionPermissionMode; modelMode?: SessionModelMode } | undefined {
-        if (this.permissionMode === undefined && this.modelMode === undefined) {
+    protected getKeepAliveRuntime(): { permissionMode?: SessionPermissionMode; modelMode?: SessionModelMode; model?: string } | undefined {
+        if (this.permissionMode === undefined && this.modelMode === undefined && this.model === undefined) {
             return undefined;
         }
         return {
             permissionMode: this.permissionMode,
-            modelMode: this.modelMode
+            modelMode: this.modelMode,
+            model: this.model,
         };
     }
 

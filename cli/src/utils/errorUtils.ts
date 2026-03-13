@@ -19,7 +19,7 @@ export type ErrorInfo = {
  */
 export function apiValidationError(message: string, response: AxiosResponse): Error {
     const err = new Error(message)
-    const raw = response.headers?.['x-hapi-protocol-version']
+    const raw = response.headers?.['x-agentchat-protocol-version']
     if (raw != null) {
         const pv = Number(raw)
         if (Number.isFinite(pv)) {
@@ -61,7 +61,7 @@ export function extractErrorInfo(error: unknown): ErrorInfo {
         const headers = typeof response?.headers === 'object' && response.headers !== null
             ? (response.headers as Record<string, unknown>)
             : undefined
-        const protocolHeader = headers?.['x-hapi-protocol-version']
+        const protocolHeader = headers?.['x-agentchat-protocol-version']
         if (typeof protocolHeader === 'string' && protocolHeader !== '') {
             const pv = Number(protocolHeader)
             if (Number.isFinite(pv)) serverProtocolVersion = pv

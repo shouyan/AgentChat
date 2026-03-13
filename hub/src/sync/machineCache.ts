@@ -6,11 +6,11 @@ import { EventPublisher } from './eventPublisher'
 const machineMetadataSchema = z.object({
     host: z.string().optional(),
     platform: z.string().optional(),
-    happyCliVersion: z.string().optional(),
+    agentchatCliVersion: z.string().optional(),
     displayName: z.string().optional(),
     homeDir: z.string().optional(),
-    happyHomeDir: z.string().optional(),
-    happyLibDir: z.string().optional(),
+    agentchatHomeDir: z.string().optional(),
+    agentchatLibDir: z.string().optional(),
     providers: z.record(z.string(), z.object({
         configured: z.boolean(),
         authMode: z.string().optional(),
@@ -31,11 +31,11 @@ export interface Machine {
     metadata: {
         host: string
         platform: string
-        happyCliVersion: string
+        agentchatCliVersion: string
         displayName?: string
         homeDir?: string
-        happyHomeDir?: string
-        happyLibDir?: string
+        agentchatHomeDir?: string
+        agentchatLibDir?: string
         providers?: Record<string, {
             configured: boolean
             authMode?: string
@@ -110,13 +110,13 @@ export class MachineCache {
             const data = parsed.data
             const host = typeof data.host === 'string' ? data.host : 'unknown'
             const platform = typeof data.platform === 'string' ? data.platform : 'unknown'
-            const happyCliVersion = typeof data.happyCliVersion === 'string' ? data.happyCliVersion : 'unknown'
+            const agentchatCliVersion = typeof data.agentchatCliVersion === 'string' ? data.agentchatCliVersion : 'unknown'
             const displayName = typeof data.displayName === 'string' ? data.displayName : undefined
             const homeDir = typeof data.homeDir === 'string' ? data.homeDir : undefined
-            const happyHomeDir = typeof data.happyHomeDir === 'string' ? data.happyHomeDir : undefined
-            const happyLibDir = typeof data.happyLibDir === 'string' ? data.happyLibDir : undefined
+            const agentchatHomeDir = typeof data.agentchatHomeDir === 'string' ? data.agentchatHomeDir : undefined
+            const agentchatLibDir = typeof data.agentchatLibDir === 'string' ? data.agentchatLibDir : undefined
             const providers = data.providers
-            return { host, platform, happyCliVersion, displayName, homeDir, happyHomeDir, happyLibDir, providers }
+            return { host, platform, agentchatCliVersion, displayName, homeDir, agentchatHomeDir, agentchatLibDir, providers }
         })()
 
         const storedActiveAt = stored.activeAt ?? stored.createdAt

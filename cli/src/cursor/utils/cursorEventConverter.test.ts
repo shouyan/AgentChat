@@ -9,7 +9,7 @@ describe('cursorEventConverter', () => {
     describe('parseCursorEvent', () => {
         it('parses system init event', () => {
             const line =
-                '{"type":"system","subtype":"init","apiKeySource":"login","cwd":"D:\\\\projects\\\\hapi","session_id":"cec26d70-d2d5-48ac-a88b-9e820eb201cf","timestamp_ms":1772422778942}';
+                '{"type":"system","subtype":"init","apiKeySource":"login","cwd":"D:\\\\projects\\\\agentchat","session_id":"cec26d70-d2d5-48ac-a88b-9e820eb201cf","timestamp_ms":1772422778942}';
             const event = parseCursorEvent(line);
             expect(event).not.toBeNull();
             expect(event?.type).toBe('system');

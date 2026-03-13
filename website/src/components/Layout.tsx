@@ -20,7 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center border-2 border-border shadow-hard-sm group-hover:translate-y-0.5 group-hover:shadow-none transition-all">
                 <span className="text-primary-foreground font-bold text-lg">H</span>
               </div>
-              <span className="font-bold text-xl tracking-tight">HAPI</span>
+              <span className="font-bold text-xl tracking-tight">AgentChat</span>
             </Link>
           </div>
 
@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-4">
               <LanguageToggle />
               <ModeToggle />
-              <a href="https://github.com/tiann/hapi" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="https://github.com/tiann/agentchat" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="h-5 w-5" />
               </a>
               <Button className="font-bold shadow-hard hover:translate-y-0.5 hover:shadow-none transition-all border-2 border-border" asChild>
@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Button className="w-full font-bold shadow-hard border-2 border-border" asChild>
                   <a href="/docs/">{t('nav.getStarted')}</a>
                 </Button>
-                <a href="https://github.com/tiann/hapi" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 text-sm font-medium p-2 hover:bg-muted rounded-md">
+                <a href="https://github.com/tiann/agentchat" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 text-sm font-medium p-2 hover:bg-muted rounded-md">
                   <Github className="h-4 w-4" /> {t('nav.viewOnGithub')}
                 </a>
               </div>
@@ -79,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center border-2 border-border shadow-hard-sm">
                   <span className="text-primary-foreground font-bold text-lg">H</span>
                 </div>
-                <span className="font-bold text-xl tracking-tight">HAPI</span>
+                <span className="font-bold text-xl tracking-tight">AgentChat</span>
               </div>
               <p className="text-muted-foreground text-sm max-w-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: t('footer.desc') }} />
             </div>
@@ -96,8 +96,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h3 className="font-bold mb-4">{t('footer.community')}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="https://github.com/tiann/hapi" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">GitHub</a></li>
-                <li><a href="https://github.com/tiann/hapi/issues" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Issues</a></li>
+                <li><a href="https://github.com/tiann/agentchat" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">GitHub</a></li>
+                <li><a href="https://github.com/tiann/agentchat/issues" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Issues</a></li>
                 <li><a href="https://twitter.com/tiann" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Twitter</a></li>
               </ul>
             </div>

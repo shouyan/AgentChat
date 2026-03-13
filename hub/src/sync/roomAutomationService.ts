@@ -1,4 +1,4 @@
-import type { Room, RoomRole } from '@hapi/protocol/types'
+import type { Room, RoomRole } from '@agentchat/protocol/types'
 import { buildRoomMessageMeta, formatTaskBriefing, roomHasGoal, suggestFollowUpRole } from './roomFormatting'
 
 type SendRoomMessage = (roomId: string, namespace: string, payload: {

@@ -5,14 +5,14 @@ import {
     ModelModeSchema,
     PermissionModeSchema,
     TodosSchema
-} from '@hapi/protocol/schemas'
+} from '@agentchat/protocol/schemas'
 import {
     MachineMetadataSchema,
     RunnerStateSchema,
     type MachineMetadata,
     type RunnerState
-} from '@hapi/protocol/machines'
-import type { ModelMode, PermissionMode } from '@hapi/protocol/types'
+} from '@agentchat/protocol/machines'
+import type { ModelMode, PermissionMode } from '@agentchat/protocol/types'
 import { z } from 'zod'
 import { UsageSchema } from '@/claude/types'
 
@@ -25,7 +25,7 @@ export type {
     CodexPermissionMode,
     Metadata,
     Session
-} from '@hapi/protocol/types'
+} from '@agentchat/protocol/types'
 export type SessionPermissionMode = PermissionMode
 export type SessionModelMode = ModelMode
 

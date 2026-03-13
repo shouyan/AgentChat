@@ -36,7 +36,7 @@ describe('NewSession preferences', () => {
 
         expect(localStorage.getItem('agentchat:newSession:agent')).toBe('gemini')
         expect(localStorage.getItem('agentchat:newSession:yolo')).toBe('true')
-        expect(localStorage.getItem('hapi:newSession:agent')).toBe('gemini')
-        expect(localStorage.getItem('hapi:newSession:yolo')).toBe('true')
+        expect(localStorage.getItem('agentchat:newSession:agent')).toBe('gemini')
+        expect(localStorage.getItem('agentchat:newSession:yolo')).toBe('true')
     })
 })

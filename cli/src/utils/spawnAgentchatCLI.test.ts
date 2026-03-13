@@ -30,7 +30,7 @@ function getSpawnOptionsOrThrow(): SpawnOptions {
   return options;
 }
 
-describe('spawnHappyCLI windowsHide behavior', () => {
+describe('spawnAgentchatCLI windowsHide behavior', () => {
   beforeAll(() => {
     if (!originalPlatformDescriptor?.configurable) {
       throw new Error('process.platform is not configurable in this runtime');
@@ -49,9 +49,9 @@ describe('spawnHappyCLI windowsHide behavior', () => {
 
   it('sets windowsHide=true when platform is win32 and detached=true', async () => {
     setPlatform('win32');
-    const { spawnHappyCLI } = await import('./spawnHappyCLI');
+    const { spawnAgentchatCLI } = await import('./spawnAgentchatCLI');
 
-    spawnHappyCLI(['runner', 'start-sync'], {
+    spawnAgentchatCLI(['runner', 'start-sync'], {
       detached: true,
       stdio: 'ignore'
     });
@@ -63,9 +63,9 @@ describe('spawnHappyCLI windowsHide behavior', () => {
 
   it('does not set windowsHide when platform is win32 but detached is false', async () => {
     setPlatform('win32');
-    const { spawnHappyCLI } = await import('./spawnHappyCLI');
+    const { spawnAgentchatCLI } = await import('./spawnAgentchatCLI');
 
-    spawnHappyCLI(['runner', 'start-sync'], {
+    spawnAgentchatCLI(['runner', 'start-sync'], {
       detached: false,
       stdio: 'ignore'
     });
@@ -77,9 +77,9 @@ describe('spawnHappyCLI windowsHide behavior', () => {
 
   it('does not set windowsHide on non-win32 even when detached=true', async () => {
     setPlatform('linux');
-    const { spawnHappyCLI } = await import('./spawnHappyCLI');
+    const { spawnAgentchatCLI } = await import('./spawnAgentchatCLI');
 
-    spawnHappyCLI(['runner', 'start-sync'], {
+    spawnAgentchatCLI(['runner', 'start-sync'], {
       detached: true,
       stdio: 'ignore'
     });

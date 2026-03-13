@@ -1,12 +1,12 @@
-# Why HAPI?
+# Why AgentChat?
 
-[Happy](https://github.com/slopus/happy) is an excellent project. So why build HAPI?
+[Happy](https://github.com/slopus/happy) is an excellent project. So why build AgentChat?
 
-**The short answer**: Happy uses a centralized server that stores your encrypted data. HAPI is decentralized — each user runs their own hub, and the relay server only forwards encrypted traffic without storing anything. These different goals lead to fundamentally different architectures.
+**The short answer**: Happy uses a centralized server that stores your encrypted data. AgentChat is decentralized — each user runs their own hub, and the relay server only forwards encrypted traffic without storing anything. These different goals lead to fundamentally different architectures.
 
 ## TL;DR
 
-| Aspect | Happy | HAPI |
+| Aspect | Happy | AgentChat |
 |--------|-------|------|
 | **Architecture** | Centralized (cloud server stores encrypted data) | Decentralized (each user runs own hub) |
 | **Users** | Multi-user on shared server | Any number (each runs own hub) |
@@ -15,7 +15,7 @@
 | **Deployment** | Multiple services (PostgreSQL, Redis, app server) | Single binary |
 | **Complexity** | High (E2EE, key management, scaling) | Low (one command) |
 
-**Choose HAPI if**: You want data sovereignty, self-hosting, and minimal setup.
+**Choose AgentChat if**: You want data sovereignty, self-hosting, and minimal setup.
 
 **Choose Happy if**: You need a managed cloud service with multi-user collaboration.
 
@@ -52,12 +52,12 @@ Happy's centralized design requires:
 
 The server stores encrypted data — it never sees plaintext, but it does hold your data.
 
-### HAPI: Decentralized
+### AgentChat: Decentralized
 
-Each user runs their own hub. HAPI offers two modes of remote access:
+Each user runs their own hub. AgentChat offers two modes of remote access:
 
 - **Self-hosted** (own server / Cloudflare Tunnel / Tailscale) — You control the full network path, no E2EE needed
-- **Public relay** (`hapi hub --relay`) — E2E encrypted via tunwg (WireGuard + TLS); the relay only forwards opaque packets
+- **Public relay** (`agentchat hub --relay`) — E2E encrypted via tunwg (WireGuard + TLS); the relay only forwards opaque packets
 - **Single embedded database** — SQLite, no external services
 - **One-command deployment** — Single binary, zero config
 
@@ -132,7 +132,7 @@ The relay server only forwards encrypted packets — it cannot read your data.
 
 ### Data Location
 
-| Aspect | Happy | HAPI |
+| Aspect | Happy | AgentChat |
 |--------|-------|------|
 | **Where data lives** | Cloud server (encrypted blobs) | Your own machine |
 | **Who stores it** | Central server holds encrypted data | Only your hub, locally |
@@ -156,7 +156,7 @@ The relay server only forwards encrypted packets — it cannot read your data.
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-**HAPI** bundles everything:
+**AgentChat** bundles everything:
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
@@ -172,7 +172,7 @@ The relay server only forwards encrypted packets — it cannot read your data.
 
 ### Security Approach
 
-| Aspect | Happy | HAPI (self-hosted) | HAPI (relay) |
+| Aspect | Happy | AgentChat (self-hosted) | AgentChat (relay) |
 |--------|-------|-------------------|--------------|
 | **Problem** | Data on untrusted server | Remote access to local hub | Remote access via third-party relay |
 | **Solution** | Application-layer E2EE | HTTPS (you control the path) | WireGuard + TLS (tunwg) |
@@ -198,7 +198,7 @@ Goal: Multi-user cloud platform
 
 **Result**: Sophisticated infrastructure with zero-knowledge server
 
-### HAPI: Decentralized
+### AgentChat: Decentralized
 
 ```
 Goal: Self-hosted tool — each user runs their own hub
@@ -220,7 +220,7 @@ Goal: Self-hosted tool — each user runs their own hub
 
 ## Summary
 
-| Dimension | Happy | HAPI |
+| Dimension | Happy | AgentChat |
 |-----------|-------|------|
 | **Architecture** | Centralized cloud server | Decentralized (each user runs own hub) |
 | **Server's role** | Stores encrypted data | Relay only forwards (or none if self-hosted) |
@@ -236,6 +236,6 @@ The architectural differences stem from a centralized vs decentralized design:
 
 - **Happy**: Centralized cloud server that stores your encrypted data. The server never sees plaintext (zero-knowledge), but it does hold your data. This requires application-layer E2EE, key management, and distributed infrastructure (PostgreSQL, Redis, scaling).
 
-- **HAPI**: Decentralized — each user runs their own hub. Your data stays on your machine. For remote access, you can self-host (own server or tunnel — no E2EE needed since you control the path) or use the public relay (WireGuard + TLS via tunwg — the relay only forwards encrypted packets it cannot read). This achieves one-command deployment with zero external dependencies.
+- **AgentChat**: Decentralized — each user runs their own hub. Your data stays on your machine. For remote access, you can self-host (own server or tunnel — no E2EE needed since you control the path) or use the public relay (WireGuard + TLS via tunwg — the relay only forwards encrypted packets it cannot read). This achieves one-command deployment with zero external dependencies.
 
-The core tradeoff: Happy solves the "untrusted server" problem with sophisticated encryption. HAPI avoids the problem entirely by keeping your data on your own machine.
+The core tradeoff: Happy solves the "untrusted server" problem with sophisticated encryption. AgentChat avoids the problem entirely by keeping your data on your own machine.

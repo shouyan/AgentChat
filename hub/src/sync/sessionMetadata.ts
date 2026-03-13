@@ -45,9 +45,9 @@ export function mergeSessionMetadataPreservingSystemFields(
     const carryForwardKeys = [
         'machineId',
         'homeDir',
-        'happyHomeDir',
-        'happyLibDir',
-        'happyToolsDir',
+        'agentchatHomeDir',
+        'agentchatLibDir',
+        'agentchatToolsDir',
         'flavor',
         'roomId',
         'claudeSessionId',

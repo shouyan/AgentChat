@@ -3,7 +3,7 @@ import { authAndSetupMachineIfNeeded } from '@/ui/auth'
 import { initializeToken } from '@/ui/tokenInit'
 import { maybeAutoStartServer } from '@/utils/autoStartServer'
 import type { CommandDefinition } from './types'
-import type { CursorPermissionMode } from '@hapi/protocol/types'
+import type { CursorPermissionMode } from '@agentchat/protocol/types'
 
 export const cursorCommand: CommandDefinition = {
     name: 'cursor',
@@ -62,10 +62,10 @@ export const cursorCommand: CommandDefinition = {
                     }
                 } else if (arg === '--continue') {
                     unknownArgs.push(arg)
-                } else if (arg === '--hapi-starting-mode') {
+                } else if (arg === '--agentchat-starting-mode') {
                     const value = commandArgs[++i]
                     if (value !== 'local' && value !== 'remote') {
-                        throw new Error('Invalid --hapi-starting-mode (expected local or remote)')
+                        throw new Error('Invalid --agentchat-starting-mode (expected local or remote)')
                     }
                     continue
                 } else {

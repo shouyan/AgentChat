@@ -4,7 +4,7 @@
  */
 
 import type { Readable } from 'node:stream'
-import type { ClaudePermissionMode } from '@hapi/protocol/types'
+import type { ClaudePermissionMode } from '@agentchat/protocol/types'
 
 /**
  * SDK message types

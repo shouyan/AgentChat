@@ -1,11 +1,11 @@
 /**
- * HAPI MCP STDIO Bridge
+ * AgentChat MCP STDIO Bridge
  *
  * Minimal STDIO MCP server exposing AgentChat MCP tools.
- * On invocation it forwards tool calls to an existing HAPI HTTP MCP server
+ * On invocation it forwards tool calls to an existing AgentChat HTTP MCP server
  * using the StreamableHTTPClientTransport.
  *
- * Configure the target HTTP MCP URL via env var `HAPI_HTTP_MCP_URL` or
+ * Configure the target HTTP MCP URL via env var `AGENTCHAT_HTTP_MCP_URL` or
  * via CLI flag `--url <http://127.0.0.1:PORT>`.
  *
  * Note: This process must not print to stdout as it would break MCP STDIO.
@@ -15,7 +15,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { happyMcpToolDefinitions } from '@/mcp/toolDefinitions';
+import { agentchatMcpToolDefinitions } from '@/mcp/toolDefinitions';
 
 function parseArgs(argv: string[]): {
   url: string | null;
@@ -68,15 +68,15 @@ export async function runHappyMcpStdioBridge(argv: string[]): Promise<void> {
   try {
     // Resolve target HTTP MCP URL
     const { url: urlFromArgs, sessionId, accessToken, apiUrl } = parseArgs(argv);
-    const baseUrl = urlFromArgs || process.env.HAPI_HTTP_MCP_URL || '';
-    const directSessionId = sessionId || process.env.HAPI_MCP_SESSION_ID || '';
-    const directAccessToken = accessToken || process.env.HAPI_MCP_ACCESS_TOKEN || '';
-    const directApiUrl = apiUrl || process.env.HAPI_MCP_API_URL || '';
+    const baseUrl = urlFromArgs || process.env.AGENTCHAT_HTTP_MCP_URL || '';
+    const directSessionId = sessionId || process.env.AGENTCHAT_MCP_SESSION_ID || '';
+    const directAccessToken = accessToken || process.env.AGENTCHAT_MCP_ACCESS_TOKEN || '';
+    const directApiUrl = apiUrl || process.env.AGENTCHAT_MCP_API_URL || '';
 
     if (!baseUrl && !(directSessionId && directAccessToken && directApiUrl)) {
       // Write to stderr; never stdout.
       process.stderr.write(
-        '[hapi-mcp] Missing target URL or direct session credentials. Pass --url <http://127.0.0.1:PORT> or --session-id/--access-token/--api-url.\n'
+        '[agentchat-mcp] Missing target URL or direct session credentials. Pass --url <http://127.0.0.1:PORT> or --session-id/--access-token/--api-url.\n'
       );
       process.exit(2);
     }
@@ -86,7 +86,7 @@ export async function runHappyMcpStdioBridge(argv: string[]): Promise<void> {
     async function ensureHttpClient(): Promise<Client> {
       if (httpClient) return httpClient;
       const client = new Client(
-        { name: 'hapi-stdio-bridge', version: '1.0.0' },
+        { name: 'agentchat-stdio-bridge', version: '1.0.0' },
         { capabilities: {} }
       );
 
@@ -98,11 +98,11 @@ export async function runHappyMcpStdioBridge(argv: string[]): Promise<void> {
 
     // Create STDIO MCP server
     const server = new McpServer({
-      name: 'HAPI MCP Bridge',
+      name: 'AgentChat MCP Bridge',
       version: '1.0.0',
     });
 
-    for (const tool of happyMcpToolDefinitions) {
+    for (const tool of agentchatMcpToolDefinitions) {
       server.registerTool<any, any>(
         tool.name,
         {
@@ -209,7 +209,7 @@ export async function runHappyMcpStdioBridge(argv: string[]): Promise<void> {
     await server.connect(stdio);
   } catch (err) {
     try {
-      process.stderr.write(`[hapi-mcp] Fatal: ${err instanceof Error ? err.message : String(err)}\n`);
+      process.stderr.write(`[agentchat-mcp] Fatal: ${err instanceof Error ? err.message : String(err)}\n`);
     } finally {
       process.exit(1);
     }

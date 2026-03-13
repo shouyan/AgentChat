@@ -11,8 +11,8 @@ import { createModeChangeHandler, createRunnerLifecycle, setControlledByUser } f
 import { startHookServer } from '@/claude/utils/startHookServer';
 import { cleanupHookSettingsFile, generateHookSettingsFile } from '@/modules/common/hooks/generateHookSettings';
 import { resolveGeminiRuntimeConfig } from './utils/config';
-import { isPermissionModeAllowedForFlavor } from '@hapi/protocol';
-import { PermissionModeSchema } from '@hapi/protocol/schemas';
+import { isPermissionModeAllowedForFlavor } from '@agentchat/protocol';
+import { PermissionModeSchema } from '@agentchat/protocol/schemas';
 import { formatMessageWithAttachments } from '@/utils/attachmentFormatter';
 import { getEffectiveCwd } from '@/utils/effectiveCwd';
 
@@ -40,6 +40,7 @@ export async function runGemini(opts: {
         flavor: 'gemini',
         startedBy,
         workingDirectory,
+        model: opts.model ? resolveGeminiRuntimeConfig({ model: opts.model }).model : undefined,
         agentState: initialState
     });
 
@@ -55,7 +56,7 @@ export async function runGemini(opts: {
 
     const sessionWrapperRef: { current: GeminiSession | null } = { current: null };
     let currentPermissionMode: PermissionMode = opts.permissionMode ?? 'default';
-    const resolvedModel = resolveGeminiRuntimeConfig({ model: opts.model }).model;
+    let currentModel = resolveGeminiRuntimeConfig({ model: opts.model }).model;
 
     const hookServer = await startHookServer({
         onSessionHook: (sessionId, data) => {
@@ -98,6 +99,11 @@ export async function runGemini(opts: {
             return;
         }
         sessionInstance.setPermissionMode(currentPermissionMode);
+        sessionInstance.setModel(currentModel);
+        session.updateMetadata((currentMetadata) => ({
+            ...currentMetadata,
+            model: currentModel,
+        }));
         logger.debug(`[gemini] Synced session permission mode for keepalive: ${currentPermissionMode}`);
     };
 
@@ -105,7 +111,7 @@ export async function runGemini(opts: {
         const formattedText = formatMessageWithAttachments(message.content.text, message.content.attachments);
         const mode: GeminiMode = {
             permissionMode: currentPermissionMode,
-            model: resolvedModel
+            model: currentModel
         };
         messageQueue.push(formattedText, mode);
     });
@@ -122,14 +128,21 @@ export async function runGemini(opts: {
         if (!payload || typeof payload !== 'object') {
             throw new Error('Invalid session config payload');
         }
-        const config = payload as { permissionMode?: unknown };
+        const config = payload as { permissionMode?: unknown; model?: unknown };
 
         if (config.permissionMode !== undefined) {
             currentPermissionMode = resolvePermissionMode(config.permissionMode);
         }
 
+        if (config.model !== undefined) {
+            if (typeof config.model !== 'string' || !config.model.trim()) {
+                throw new Error('Invalid model');
+            }
+            currentModel = resolveGeminiRuntimeConfig({ model: config.model.trim() }).model;
+        }
+
         syncSessionMode();
-        return { applied: { permissionMode: currentPermissionMode } };
+        return { applied: { permissionMode: currentPermissionMode, model: currentModel } };
     });
 
     try {
@@ -141,7 +154,7 @@ export async function runGemini(opts: {
             session,
             api,
             permissionMode: currentPermissionMode,
-            model: resolvedModel,
+            model: currentModel,
             hookSettingsPath,
             onModeChange: createModeChangeHandler(session),
             onSessionReady: (instance) => {

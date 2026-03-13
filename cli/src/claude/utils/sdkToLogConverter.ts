@@ -13,7 +13,7 @@ import type {
     SDKResultMessage
 } from '@/claude/sdk'
 import type { RawJSONLines } from '@/claude/types'
-import type { ClaudePermissionMode } from '@hapi/protocol/types'
+import type { ClaudePermissionMode } from '@agentchat/protocol/types'
 
 /**
  * Context for converting SDK messages to log format

@@ -62,7 +62,7 @@
   },
   "lifestyle": {
     "title": "The \"Vibe Coding\" Lifestyle",
-    "subtitle": "HAPI isn't just a tool; it's a declaration of independence from your desk.",
+    "subtitle": "AgentChat isn't just a tool; it's a declaration of independence from your desk.",
     "cards": {
       "explore": {
         "title": "Go Explore",
@@ -74,15 +74,15 @@
       },
       "walk": {
         "title": "Walk Away",
-        "desc": "Literally. Walk away from the screen. HAPI keeps the session alive and secure until you return."
+        "desc": "Literally. Walk away from the screen. AgentChat keeps the session alive and secure until you return."
       }
     }
   },
   "features": {
     "title": "Power When You Need It",
-    "telegram": {
-      "title": "Messaging App Integration",
-      "desc": "The perfect balance of distance and control. Get notified via Telegram or other apps only when your input is truly needed."
+    "notifications": {
+      "title": "Push Notifications",
+      "desc": "Stay out of the terminal until it matters. AgentChat pings your phone only when input or approval is actually needed."
     },
     "yolo": {
       "title": "YOLO Mode",
@@ -97,11 +97,11 @@
     "title": "How it Works",
     "step1": {
       "title": "1. Start on Desktop",
-      "desc": "Launch HAPI on your machine. It keeps your session alive and ready for remote access."
+      "desc": "Launch AgentChat on your machine. It keeps your session alive and ready for remote access."
     },
     "step2": {
       "title": "2. Connect Mobile",
-      "desc": "Open the PWA or Mini App. You now have full control over your local dev environment."
+      "desc": "Open the PWA or browser. You now have full control over your local dev environment."
     },
     "step3": {
       "title": "3. Vibe Code",
@@ -127,7 +127,7 @@
     "desc": "Vibe Coding Anytime, Anywhere. <br/> The local-first AI agent platform for developers who love freedom.",
     "product": "Product",
     "community": "Community",
-    "copyright": "© {{year}} HAPI Team. Open source under AGPL License.",
+    "copyright": "© {{year}} AgentChat Team. Open source under AGPL License.",
     "designedWith": "Designed with <span class=\"text-red-500\">♥</span> for Vibe Coding."
   }
 }

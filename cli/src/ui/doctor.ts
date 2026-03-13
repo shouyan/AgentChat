@@ -9,7 +9,7 @@ import chalk from 'chalk'
 import { configuration } from '@/configuration'
 import { readSettings } from '@/persistence'
 import { checkIfRunnerRunningAndCleanupStaleState } from '@/runner/controlClient'
-import { findRunawayHappyProcesses, findAllHappyProcesses } from '@/runner/doctor'
+import { findRunawayAgentChatProcesses, findAllAgentChatProcesses } from '@/runner/doctor'
 import { readRunnerState } from '@/persistence'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
@@ -25,16 +25,14 @@ export function getEnvironmentInfo(): Record<string, any> {
         PWD: process.env.PWD,
         AGENTCHAT_HOME: process.env.AGENTCHAT_HOME,
         AGENTCHAT_API_URL: process.env.AGENTCHAT_API_URL,
-        HAPI_HOME: process.env.HAPI_HOME,
-        HAPI_API_URL: process.env.HAPI_API_URL,
-        HAPI_PROJECT_ROOT: process.env.HAPI_PROJECT_ROOT,
+        AGENTCHAT_PROJECT_ROOT: process.env.AGENTCHAT_PROJECT_ROOT,
         CLI_API_TOKEN_SET: Boolean(process.env.CLI_API_TOKEN),
         DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING: process.env.DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING,
         NODE_ENV: process.env.NODE_ENV,
         DEBUG: process.env.DEBUG,
         workingDirectory: process.cwd(),
         processArgv: process.argv,
-        happyDir: configuration?.happyHomeDir,
+        agentchatDir: configuration?.agentchatHomeDir,
         apiUrl: configuration?.apiUrl,
         logsDir: configuration?.logsDir,
         processPid: process.pid,
@@ -108,7 +106,7 @@ export async function runDoctorCommand(filter?: 'all' | 'runner'): Promise<void>
 
         // Configuration
         console.log(chalk.bold('⚙️  Configuration'));
-        console.log(`AgentChat Home: ${chalk.blue(configuration.happyHomeDir)}`);
+        console.log(`AgentChat Home: ${chalk.blue(configuration.agentchatHomeDir)}`);
         console.log(`Bot URL: ${chalk.blue(configuration.apiUrl)}`);
         console.log(`Logs Dir: ${chalk.blue(configuration.logsDir)}`);
 
@@ -117,8 +115,8 @@ export async function runDoctorCommand(filter?: 'all' | 'runner'): Promise<void>
         const env = getEnvironmentInfo();
         console.log(`AGENTCHAT_HOME: ${env.AGENTCHAT_HOME ? chalk.green(env.AGENTCHAT_HOME) : chalk.gray('not set')}`);
         console.log(`AGENTCHAT_API_URL: ${env.AGENTCHAT_API_URL ? chalk.green(env.AGENTCHAT_API_URL) : chalk.gray('not set')}`);
-        console.log(`HAPI_HOME: ${env.HAPI_HOME ? chalk.green(env.HAPI_HOME) : chalk.gray('not set')}`);
-        console.log(`HAPI_API_URL: ${env.HAPI_API_URL ? chalk.green(env.HAPI_API_URL) : chalk.gray('not set')}`);
+        console.log(`AGENTCHAT_HOME: ${env.AGENTCHAT_HOME ? chalk.green(env.AGENTCHAT_HOME) : chalk.gray('not set')}`);
+        console.log(`AGENTCHAT_API_URL: ${env.AGENTCHAT_API_URL ? chalk.green(env.AGENTCHAT_API_URL) : chalk.gray('not set')}`);
         console.log(`CLI_API_TOKEN: ${env.CLI_API_TOKEN_SET ? chalk.green('set') : chalk.gray('not set')}`);
         console.log(`DANGEROUSLY_LOG_TO_SERVER: ${env.DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING ? chalk.yellow('ENABLED') : chalk.gray('not set')}`);
         console.log(`DEBUG: ${env.DEBUG ? chalk.green(env.DEBUG) : chalk.gray('not set')}`);
@@ -181,7 +179,7 @@ export async function runDoctorCommand(filter?: 'all' | 'runner'): Promise<void>
         }
 
         // All AgentChat processes
-        const allProcesses = await findAllHappyProcesses();
+        const allProcesses = await findAllAgentChatProcesses();
         if (allProcesses.length > 0) {
             console.log(chalk.bold('\n🔍 All AgentChat CLI Processes'));
 

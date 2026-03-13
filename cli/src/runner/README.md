@@ -1,20 +1,20 @@
-# HAPI CLI Runner: Control Flow and Lifecycle
+# AgentChat CLI Runner: Control Flow and Lifecycle
 
-The runner is a persistent background process that manages HAPI sessions, enables remote control from the mobile app, and handles auto-updates when the CLI version changes.
+The runner is a persistent background process that manages AgentChat sessions, enables remote control from the mobile app, and handles auto-updates when the CLI version changes.
 
 ## 1. Runner Lifecycle
 
 ### Starting the Runner
 
-Command: `hapi runner start`
+Command: `agentchat runner start`
 
 Control Flow:
 1. `src/index.ts` receives `runner start` command
-2. Spawns detached process via `spawnHappyCLI(['runner', 'start-sync'], { detached: true })`
+2. Spawns detached process via `spawnAgentchatCLI(['runner', 'start-sync'], { detached: true })`
 3. New process calls `startRunner()` from `src/runner/run.ts`
 4. `startRunner()` performs startup:
    - Sets up shutdown promise and handlers (SIGINT, SIGTERM, uncaughtException, unhandledRejection)
-   - Version check: `isRunnerRunningCurrentlyInstalledHappyVersion()` compares CLI binary mtime
+   - Version check: `isRunnerRunningCurrentlyInstalledAgentChatVersion()` compares CLI binary mtime
    - If version mismatch: calls `stopRunner()` to kill old runner before proceeding
    - If same version running: exits with "Runner already running"
    - Lock acquisition: `acquireRunnerLock()` creates exclusive lock file to prevent multiple runners
@@ -22,12 +22,12 @@ Control Flow:
    - State persistence: writes PID, version, HTTP port, mtime to runner.state.json
    - HTTP server: starts Fastify on random port for local CLI control (list, stop, spawn)
    - WebSocket: establishes persistent connection to backend via `ApiMachineClient`
-   - RPC registration: exposes `spawn-happy-session`, `stop-session`, `stop-runner` handlers
-   - Heartbeat loop: every 60s (or `HAPI_RUNNER_HEARTBEAT_INTERVAL`) checks for version updates, prunes dead sessions, verifies PID ownership
+   - RPC registration: exposes `spawn-agentchat-session`, `stop-session`, `stop-runner` handlers
+   - Heartbeat loop: every 60s (or `AGENTCHAT_RUNNER_HEARTBEAT_INTERVAL`) checks for version updates, prunes dead sessions, verifies PID ownership
 5. Awaits shutdown promise which resolves when:
    - OS signal received (SIGINT/SIGTERM) - source: `os-signal`
-   - HTTP `/stop` endpoint called - source: `hapi-cli`
-   - RPC `stop-runner` invoked - source: `hapi-app`
+   - HTTP `/stop` endpoint called - source: `agentchat-cli`
+   - RPC `stop-runner` invoked - source: `agentchat-app`
    - Uncaught exception occurs - source: `exception`
 6. On shutdown, `cleanupAndShutdown()` performs:
    - Clears heartbeat interval
@@ -40,12 +40,12 @@ Control Flow:
 
 ### Version Detection & Auto-Update
 
-The runner detects when CLI binary changes (e.g., after `npm upgrade hapi`):
+The runner detects when CLI binary changes (e.g., after `npm upgrade agentchat`):
 1. At startup, records `startedWithCliMtimeMs` (file modification time of CLI binary)
 2. Heartbeat compares current CLI mtime with recorded mtime via `getInstalledCliMtimeMs()`
 3. If mtime changed:
    - Clears heartbeat interval
-   - Spawns new runner via `spawnHappyCLI(['runner', 'start'])`
+   - Spawns new runner via `spawnAgentchatCLI(['runner', 'start'])`
    - Waits 10 seconds to be killed by new runner
 4. New runner starts, sees old runner running with different mtime
 5. New runner calls `stopRunner()` which tries HTTP `/stop`, falls back to SIGKILL
@@ -53,7 +53,7 @@ The runner detects when CLI binary changes (e.g., after `npm upgrade hapi`):
 
 ### Heartbeat System
 
-Every 60 seconds (configurable via `HAPI_RUNNER_HEARTBEAT_INTERVAL`):
+Every 60 seconds (configurable via `AGENTCHAT_RUNNER_HEARTBEAT_INTERVAL`):
 1. **Guard**: Skips if previous heartbeat still running (prevents concurrent heartbeats)
 2. **Session Pruning**: Checks each tracked PID with `isProcessAlive(pid)`, removes dead sessions
 3. **Version Check**: Compares CLI binary mtime, triggers self-restart if changed
@@ -62,12 +62,12 @@ Every 60 seconds (configurable via `HAPI_RUNNER_HEARTBEAT_INTERVAL`):
 
 ### Stopping the Runner
 
-Command: `hapi runner stop`
+Command: `agentchat runner stop`
 
 Control Flow:
 1. `stopRunner()` in `controlClient.ts` reads runner.state.json
 2. Attempts graceful shutdown via HTTP POST to `/stop`
-3. Runner receives request, triggers shutdown with source `hapi-cli`
+3. Runner receives request, triggers shutdown with source `agentchat-cli`
 4. `cleanupAndShutdown()` executes:
    - Updates backend status to "shutting-down"
    - Closes WebSocket connection
@@ -82,16 +82,16 @@ The runner supports spawning sessions with different AI agents:
 
 | Agent | Command | Token Environment |
 |-------|---------|-------------------|
-| `claude` (default) | `hapi claude` | `CLAUDE_CODE_OAUTH_TOKEN` |
-| `codex` | `hapi codex` | `CODEX_HOME` (temp directory with `auth.json`) |
-| `gemini` | `hapi gemini` | - |
-| `opencode` | `hapi opencode` | OpenCode config (no token injection) |
+| `claude` (default) | `agentchat claude` | `CLAUDE_CODE_OAUTH_TOKEN` |
+| `codex` | `agentchat codex` | `CODEX_HOME` (temp directory with `auth.json`) |
+| `gemini` | `agentchat gemini` | - |
+| `opencode` | `agentchat opencode` | OpenCode config (no token injection) |
 
 ### Token Authentication
 
 When spawning a session with a token:
 - **Claude**: Sets `CLAUDE_CODE_OAUTH_TOKEN` environment variable
-- **Codex**: Creates temp directory at `os.tmpdir()/hapi-codex-*`, writes token to `auth.json`, sets `CODEX_HOME`
+- **Codex**: Creates temp directory at `os.tmpdir()/agentchat-codex-*`, writes token to `auth.json`, sets `CODEX_HOME`
 - **OpenCode**: No token injection; relies on OpenCode's own configuration
 
 ## 3. Session Management
@@ -99,15 +99,15 @@ When spawning a session with a token:
 ### Runner-Spawned Sessions (Remote)
 
 Initiated by mobile app via backend RPC:
-1. Backend forwards RPC `spawn-happy-session` to runner via WebSocket
+1. Backend forwards RPC `spawn-agentchat-session` to runner via WebSocket
 2. `ApiMachineClient` invokes `spawnSession()` handler
 3. `spawnSession()`:
    - Validates/creates directory (with approval flow)
    - Configures agent-specific token environment
-   - Spawns detached HAPI process with `--hapi-starting-mode remote --started-by runner`
+   - Spawns detached AgentChat process with `--agentchat-starting-mode remote --started-by runner`
    - Adds to `pidToTrackedSession` map
    - Sets up 15-second awaiter for session webhook
-4. New HAPI process:
+4. New AgentChat process:
    - Creates session with backend, receives `happySessionId`
    - Calls `notifyRunnerSessionStarted()` to POST to runner's `/session-started`
 5. Runner updates tracking with `happySessionId`, resolves awaiter
@@ -115,10 +115,10 @@ Initiated by mobile app via backend RPC:
 
 ### Terminal-Spawned Sessions
 
-User runs `hapi` directly:
+User runs `agentchat` directly:
 1. CLI auto-starts runner if configured
-2. HAPI process calls `notifyRunnerSessionStarted()`
-3. Runner receives webhook, creates `TrackedSession` with `startedBy: 'hapi directly - likely by user from terminal'`
+2. AgentChat process calls `notifyRunnerSessionStarted()`
+3. Runner receives webhook, creates `TrackedSession` with `startedBy: 'agentchat directly - likely by user from terminal'`
 4. Session tracked for health monitoring
 
 ### Directory Creation Approval
@@ -254,7 +254,7 @@ Graceful runner shutdown.
 
 **Server to Runner:**
 - `rpc-request` with methods:
-  - `spawn-happy-session` - spawn new session
+  - `spawn-agentchat-session` - spawn new session
   - `stop-session` - stop session by ID
   - `stop-runner` - request shutdown
 
@@ -264,16 +264,16 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 ### Doctor Command
 
-`hapi doctor` uses `ps aux | grep` to find all HAPI processes:
-- Production: matches `hapi` binary, `happy-coder`
+`agentchat doctor` uses `ps aux | grep` to find all AgentChat processes:
+- Production: matches the `agentchat` binary
 - Development: matches `src/index.ts` (run via `bun`)
 - Categorizes by command args: runner, runner-spawned, user-session, doctor
 
 ### Clean Runaway Processes
 
-`hapi doctor clean`:
-1. `findRunawayHappyProcesses()` filters for likely orphans
-2. `killRunawayHappyProcesses()`:
+`agentchat doctor clean`:
+1. `findRunawayAgentChatProcesses()` filters for likely orphans
+2. `killRunawayAgentChatProcesses()`:
    - Sends SIGTERM
    - Waits 1 second
    - Sends SIGKILL if still alive
@@ -282,8 +282,8 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 ### Test Environment
 - Requires `.env.integration-test`
-- Uses local hapi-hub (http://localhost:3006)
-- Separate `~/.hapi-dev-test` home directory
+- Uses local AgentChat hub (`http://localhost:3217`)
+- Separate `~/.agentchat-dev-test` home directory
 
 ### Key Test Scenarios
 - Session listing, spawning, stopping
@@ -298,7 +298,7 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 # Machine Sync Architecture - Separated Metadata & Runner State
 
-> Direct-connect note: the "hub" is `hapi-hub`, payloads are plain JSON (no base64/encryption),
+> Direct-connect note: the "hub" is `agentchat-hub`, payloads are plain JSON (no base64/encryption),
 > and authentication uses `CLI_API_TOKEN` (REST `Authorization: Bearer ...` + Socket.IO `handshake.auth.token`).
 
 ## Data Structure (Similar to Session's metadata + agentState)
@@ -308,10 +308,10 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 interface MachineMetadata {
   host: string;              // hostname
   platform: string;          // darwin, linux, win32
-  happyCliVersion: string;
+  agentchatCliVersion: string;
   homeDir: string;
-  happyHomeDir: string;
-  happyLibDir: string;       // runtime path
+  agentchatHomeDir: string;
+  agentchatLibDir: string;       // runtime path
 }
 
 // Dynamic runner state (frequently updated)
@@ -321,7 +321,7 @@ interface RunnerState {
   httpPort?: number;
   startedAt?: number;
   shutdownRequestedAt?: number;
-  shutdownSource?: 'hapi-app' | 'hapi-cli' | 'os-signal' | 'exception';
+  shutdownSource?: 'agentchat-app' | 'agentchat-cli' | 'os-signal' | 'exception';
 }
 ```
 
@@ -341,10 +341,10 @@ Checks if machine ID exists in settings:
   "metadata": {
     "host": "MacBook-Pro.local",
     "platform": "darwin",
-    "happyCliVersion": "1.0.0",
+    "agentchatCliVersion": "1.0.0",
     "homeDir": "/Users/john",
-    "happyHomeDir": "/Users/john/.hapi",
-    "happyLibDir": "/usr/local/lib/node_modules/hapi"
+    "agentchatHomeDir": "/Users/john/.agentchat",
+    "agentchatLibDir": "/usr/local/lib/node_modules/agentchat"
   },
   "runnerState": {
     "status": "running",
@@ -360,7 +360,7 @@ Checks if machine ID exists in settings:
 {
   "machine": {
     "id": "machine-uuid-123",
-    "metadata": { "host": "...", "platform": "...", "happyCliVersion": "..." },
+    "metadata": { "host": "...", "platform": "...", "agentchatCliVersion": "..." },
     "metadataVersion": 1,
     "runnerState": { "status": "running", "pid": 12345 },
     "runnerStateVersion": 1,
@@ -409,7 +409,7 @@ socket.emit('machine-update-state', {
     "httpPort": 8080,
     "startedAt": 1703001234567,
     "shutdownRequestedAt": 1703001244567,
-    "shutdownSource": "hapi-app"
+    "shutdownSource": "agentchat-app"
   },
   "expectedVersion": 1
 }, callback)
@@ -438,21 +438,21 @@ socket.emit('machine-update-metadata', {
   "metadata": {
     "host": "MacBook-Pro.local",
     "platform": "darwin",
-    "happyCliVersion": "1.0.1",
+    "agentchatCliVersion": "1.0.1",
     "homeDir": "/Users/john",
-    "happyHomeDir": "/Users/john/.hapi"
+    "agentchatHomeDir": "/Users/john/.agentchat"
   },
   "expectedVersion": 1
 }, callback)
 ```
 
-## 5. Mini App RPC Calls (via hapi-hub)
+## 5. Web/PWA RPC Calls (via AgentChat hub)
 
-The Telegram Mini App calls REST endpoints on `hapi-hub` (for example `POST /api/machines/:id/spawn`).
-`hapi-hub` then relays those requests to the runner via Socket.IO `rpc-request` on the `/cli` namespace.
+The web app or installed PWA calls REST endpoints on the AgentChat hub (for example `POST /api/machines/:id/spawn`).
+The hub then relays those requests to the runner via Socket.IO `rpc-request` on the `/cli` namespace.
 
 RPC method naming (machine-scoped) uses a `${machineId}:` prefix, for example:
-- `${machineId}:spawn-happy-session`
+- `${machineId}:spawn-agentchat-session`
 
 ## 6. Server Broadcasts to Clients
 
@@ -503,7 +503,7 @@ Authorization: Bearer <CLI_API_TOKEN>
 {
   "machine": {
     "id": "machine-uuid-123",
-    "metadata": { "host": "...", "platform": "...", "happyCliVersion": "..." },
+    "metadata": { "host": "...", "platform": "...", "agentchatCliVersion": "..." },
     "metadataVersion": 2,
     "runnerState": { "status": "running", "pid": 12345 },
     "runnerStateVersion": 3,

@@ -1,4 +1,4 @@
-import { buildRoomMentionAliasMap } from '@hapi/protocol/roomRouting'
+import { buildRoomMentionAliasMap } from '@agentchat/protocol/roomRouting'
 import type { Room, RoomMessage, RoomRole, SessionSummary } from '@/types/api'
 import { normalizeAgentFlavor } from '@/components/rooms/agentCatalog'
 

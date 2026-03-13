@@ -1,5 +1,5 @@
-import { unwrapRoleWrappedRecordEnvelope } from '@hapi/protocol/messages'
-import { isObject } from '@hapi/protocol'
+import { unwrapRoleWrappedRecordEnvelope } from '@agentchat/protocol/messages'
+import { isObject } from '@agentchat/protocol'
 import type { DecryptedMessage, Session } from '@/types/api'
 import { VOICE_CONFIG } from '../voiceConfig'
 

@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { getTelegramWebApp } from './useTelegram'
 
 type ColorScheme = 'light' | 'dark'
 
 export type AppearancePreference = 'system' | 'dark' | 'light'
 
 const APPEARANCE_KEY = 'agentchat-appearance'
-const LEGACY_APPEARANCE_KEY = 'hapi-appearance'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -45,7 +43,7 @@ function parseAppearance(raw: string | null): AppearancePreference {
 }
 
 function getStoredAppearance(): AppearancePreference {
-    return parseAppearance(safeGetItem(APPEARANCE_KEY) ?? safeGetItem(LEGACY_APPEARANCE_KEY))
+    return parseAppearance(safeGetItem(APPEARANCE_KEY))
 }
 
 export function getAppearanceOptions(): ReadonlyArray<{ value: AppearancePreference; labelKey: string }> {
@@ -60,13 +58,6 @@ function getColorScheme(): ColorScheme {
     const pref = getStoredAppearance()
     if (pref === 'dark' || pref === 'light') return pref
 
-    // 'system': use Telegram → system preference → light
-    const tg = getTelegramWebApp()
-    if (tg?.colorScheme) {
-        return tg.colorScheme === 'dark' ? 'dark' : 'light'
-    }
-
-    // Fallback to system preference for browser environment
     if (typeof window !== 'undefined' && window.matchMedia) {
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
@@ -88,11 +79,9 @@ function applyPlatform(): void {
     }
 }
 
-// External store for theme state
 let currentScheme: ColorScheme = getColorScheme()
 const listeners = new Set<() => void>()
 
-// Apply theme immediately at module load (before React renders)
 applyTheme(currentScheme)
 
 function subscribe(callback: () => void): () => void {
@@ -113,7 +102,6 @@ function updateScheme(): void {
     }
 }
 
-// Track if theme listeners have been set up
 let listenersInitialized = false
 
 export function useTheme(): { colorScheme: ColorScheme; isDark: boolean } {
@@ -132,7 +120,7 @@ export function useAppearance(): { appearance: AppearancePreference; setAppearan
         if (!isBrowser()) return
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== APPEARANCE_KEY && event.key !== LEGACY_APPEARANCE_KEY) return
+            if (event.key !== APPEARANCE_KEY) return
             setAppearanceState(parseAppearance(safeGetItem(APPEARANCE_KEY) ?? event.newValue))
         }
 
@@ -145,10 +133,8 @@ export function useAppearance(): { appearance: AppearancePreference; setAppearan
 
         if (pref === 'system') {
             safeRemoveItem(APPEARANCE_KEY)
-            safeRemoveItem(LEGACY_APPEARANCE_KEY)
         } else {
             safeSetItem(APPEARANCE_KEY, pref)
-            safeSetItem(LEGACY_APPEARANCE_KEY, pref)
         }
 
         updateScheme()
@@ -157,28 +143,21 @@ export function useAppearance(): { appearance: AppearancePreference; setAppearan
     return { appearance, setAppearance }
 }
 
-// Call this once at app startup to ensure theme is applied and listeners attached
 export function initializeTheme(): void {
     currentScheme = getColorScheme()
     applyTheme(currentScheme)
+    applyPlatform()
 
-    // Set up listeners only once (after SDK may have loaded)
     if (!listenersInitialized) {
         listenersInitialized = true
-        const tg = getTelegramWebApp()
-        if (tg?.onEvent) {
-            // Telegram theme changes
-            tg.onEvent('themeChanged', updateScheme)
-        } else if (typeof window !== 'undefined' && window.matchMedia) {
-            // Browser system preference changes
+        if (typeof window !== 'undefined' && window.matchMedia) {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
             mediaQuery.addEventListener('change', updateScheme)
         }
 
-        // Cross-tab appearance sync: update theme when another tab changes localStorage
         if (typeof window !== 'undefined') {
             window.addEventListener('storage', (event: StorageEvent) => {
-                if (event.key === APPEARANCE_KEY || event.key === LEGACY_APPEARANCE_KEY) updateScheme()
+                if (event.key === APPEARANCE_KEY) updateScheme()
             })
         }
     }

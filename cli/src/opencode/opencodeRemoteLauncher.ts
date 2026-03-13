@@ -1,6 +1,6 @@
 import React from 'react';
 import { logger } from '@/ui/logger';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildAgentchatMcpBridge } from '@/codex/utils/buildAgentchatMcpBridge';
 import { convertAgentMessage } from '@/agent/messageConverter';
 import type { AgentMessage, McpServerStdio, PromptContent } from '@/agent/types';
 import { RemoteLauncherBase, type RemoteLauncherDisplayContext, type RemoteLauncherExitReason } from '@/modules/common/remote/RemoteLauncherBase';
@@ -15,7 +15,7 @@ class OpencodeRemoteLauncher extends RemoteLauncherBase {
     private readonly session: OpencodeSession;
     private backend: ReturnType<typeof createOpencodeBackend> | null = null;
     private permissionHandler: OpencodePermissionHandler | null = null;
-    private happyServer: { stop: () => void } | null = null;
+    private agentchatServer: { stop: () => void } | null = null;
     private abortController = new AbortController();
     private displayPermissionMode: PermissionMode | null = null;
     private instructionsSent = false;
@@ -40,8 +40,8 @@ class OpencodeRemoteLauncher extends RemoteLauncherBase {
         const session = this.session;
         const messageBuffer = this.messageBuffer;
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
-        this.happyServer = happyServer;
+        const { server: agentchatServer, mcpServers } = await buildAgentchatMcpBridge(session.client);
+        this.agentchatServer = agentchatServer;
 
         const backend = createOpencodeBackend({
             cwd: session.path
@@ -162,9 +162,9 @@ class OpencodeRemoteLauncher extends RemoteLauncherBase {
             this.backend = null;
         }
 
-        if (this.happyServer) {
-            this.happyServer.stop();
-            this.happyServer = null;
+        if (this.agentchatServer) {
+            this.agentchatServer.stop();
+            this.agentchatServer = null;
         }
     }
 

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MessageQueue2 } from '@/utils/MessageQueue2';
+import { testProjectPath, testTmpPath } from '@agentchat/protocol/testPaths';
 import type { EnhancedMode } from './loop';
 
 const harness = vi.hoisted(() => ({
@@ -55,8 +56,8 @@ vi.mock('./codexAppServerClient', () => {
     return { CodexAppServerClient: MockCodexAppServerClient };
 });
 
-vi.mock('./utils/buildHapiMcpBridge', () => ({
-    buildHapiMcpBridge: async () => ({
+vi.mock('./utils/buildAgentchatMcpBridge', () => ({
+    buildAgentchatMcpBridge: async () => ({
         server: {
             stop: () => {}
         },
@@ -111,8 +112,8 @@ function createSessionStub() {
     };
 
     const session = {
-        path: '/tmp/hapi-update',
-        logPath: '/tmp/hapi-update/test.log',
+        path: testProjectPath('agentchat-update'),
+        logPath: testTmpPath('agentchat-update', 'test.log'),
         client,
         queue,
         codexArgs: undefined,

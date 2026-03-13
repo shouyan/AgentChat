@@ -6,7 +6,7 @@ const path = require('path');
 const platform = process.platform;
 const arch = process.arch;
 const MAIN_PACKAGE_NAME = '@twsxtd/agentchat';
-const RELEASE_URL = 'https://github.com/tiann/hapi/releases';
+const RELEASE_URL = 'https://github.com/tiann/agentchat/releases';
 const OFFICIAL_NPM_REGISTRY = 'https://registry.npmjs.org';
 const SUPPORTED_PLATFORMS = [
     {
@@ -40,12 +40,12 @@ function isSupportedPlatform(platformName = platform, archName = arch) {
 }
 
 function getBinaryPath(platformName = platform, archName = arch) {
-    const pkgName = `@twsxtd/hapi-${platformName}-${archName}`;
+    const pkgName = `@twsxtd/agentchat-${platformName}-${archName}`;
 
     try {
         // Try to find the platform-specific package
         const pkgPath = require.resolve(`${pkgName}/package.json`);
-        const binName = platformName === 'win32' ? 'hapi.exe' : 'hapi';
+        const binName = platformName === 'win32' ? 'agentchat.exe' : 'agentchat';
         return path.join(path.dirname(pkgPath), 'bin', binName);
     } catch (e) {
         return null;
@@ -97,7 +97,7 @@ function reportUnsupportedPlatform(platformName = platform, archName = arch, log
 }
 
 function reportMissingPlatformPackage(platformName = platform, archName = arch, log = console.error) {
-    const platformPackage = `@twsxtd/hapi-${platformName}-${archName}`;
+    const platformPackage = `@twsxtd/agentchat-${platformName}-${archName}`;
     log(`Missing internal platform package: ${platformPackage}`);
     log('');
     log(`Detected platform ${platformName}-${archName} is supported, but the platform binary package was not installed.`);

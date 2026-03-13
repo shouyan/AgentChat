@@ -1,4 +1,4 @@
-import type { SyncEvent } from '@hapi/protocol/types'
+import type { SyncEvent } from '@agentchat/protocol/types'
 import type { SSEManager } from '../sse/sseManager'
 
 export type SyncEventListener = (event: SyncEvent) => void

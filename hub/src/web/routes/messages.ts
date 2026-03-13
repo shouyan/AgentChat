@@ -3,7 +3,7 @@ import {
     MessagesQuerySchema,
     MessagesResponseSchema,
     SendSessionMessageBodySchema,
-} from '@hapi/protocol/contracts/sessions'
+} from '@agentchat/protocol/contracts/sessions'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'

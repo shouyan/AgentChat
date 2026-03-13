@@ -1,5 +1,5 @@
 /**
- * Claude Code SDK integration for HAPI CLI
+ * Claude Code SDK integration for AgentChat CLI
  * Provides clean TypeScript implementation without Bun support
  */
 

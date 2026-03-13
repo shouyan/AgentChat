@@ -5,7 +5,7 @@ import type {
     MachineProviderHealthStatus,
     MachineProviderStatus,
     MachineProviderStatusMap
-} from '@hapi/protocol/machines'
+} from '@agentchat/protocol/machines'
 import { buildMachineProviderStatus } from './providerStatus'
 
 const DEFAULT_PROBE_URLS: Partial<Record<keyof MachineProviderHealthMap, string>> = {
@@ -171,8 +171,11 @@ async function buildHealthEntry(
     }
 }
 
-export async function buildMachineProviderHealth(fetchImpl: FetchLike = fetch): Promise<MachineProviderHealthMap> {
-    const statusMap = buildMachineProviderStatus()
+export async function buildMachineProviderHealth(
+    fetchImpl: FetchLike = fetch,
+    env: NodeJS.ProcessEnv = process.env
+): Promise<MachineProviderHealthMap> {
+    const statusMap = buildMachineProviderStatus(env)
     const entries = await Promise.all(
         (Object.entries(statusMap) as Array<[keyof MachineProviderHealthMap, MachineProviderStatus]>).map(async ([flavor, provider]) => {
             return [flavor, await buildHealthEntry(flavor, provider, fetchImpl)] as const

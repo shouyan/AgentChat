@@ -1,5 +1,5 @@
 import type { AgentMessage, PlanItem } from '@/agent/types';
-import { asString, isObject } from '@hapi/protocol';
+import { asString, isObject } from '@agentchat/protocol';
 import { deriveToolNameWithSource, isPlaceholderToolName } from '@/agent/utils';
 import { ACP_SESSION_UPDATE_TYPES } from './constants';
 

@@ -1,7 +1,6 @@
 import type {
     AttachmentMetadata,
     MessagesResponse,
-    ModelMode,
     PermissionMode,
     SessionResponse,
     SessionsResponse,
@@ -21,7 +20,7 @@ declare module '../core' {
         archiveSession(sessionId: string): Promise<void>
         switchSession(sessionId: string): Promise<void>
         setPermissionMode(sessionId: string, mode: PermissionMode): Promise<void>
-        setModelMode(sessionId: string, model: ModelMode): Promise<void>
+        setSessionModel(sessionId: string, model: string): Promise<void>
         approvePermission(
             sessionId: string,
             requestId: string,
@@ -115,7 +114,7 @@ Object.assign(ApiClient.prototype, {
         })
     },
 
-    async setModelMode(this: ApiClient, sessionId: string, model: ModelMode): Promise<void> {
+    async setSessionModel(this: ApiClient, sessionId: string, model: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}/model`, {
             method: 'POST',
             body: JSON.stringify({ model }),

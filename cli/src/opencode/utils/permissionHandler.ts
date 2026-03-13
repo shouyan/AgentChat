@@ -1,6 +1,6 @@
 import type { ApiSessionClient } from '@/api/apiSession';
 import type { AgentBackend, PermissionRequest, PermissionResponse } from '@/agent/types';
-import type { OpencodePermissionMode } from '@hapi/protocol/types';
+import type { OpencodePermissionMode } from '@agentchat/protocol/types';
 import { deriveToolName } from '@/agent/utils';
 import { logger } from '@/ui/logger';
 import {

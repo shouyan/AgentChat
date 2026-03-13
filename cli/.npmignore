@@ -1,4 +1,4 @@
-# npm package only needs bin/hapi.js (defined in package.json "files" field)
+# npm package only needs bin/agentchat.js (defined in package.json "files" field)
 # This file is kept for documentation purposes
 
 # Source code (not needed - binary distribution)

@@ -1,5 +1,5 @@
 import type { ToolViewProps } from '@/components/ToolCard/views/_all'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import { basename, resolveDisplayPath } from '@/utils/path'
 
 export function CodexPatchView(props: ToolViewProps) {

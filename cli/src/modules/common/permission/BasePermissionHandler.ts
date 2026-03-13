@@ -1,5 +1,5 @@
 import type { AgentState } from "@/api/types";
-import type { PermissionMode } from "@hapi/protocol/types";
+import type { PermissionMode } from "@agentchat/protocol/types";
 
 type RpcHandlerManagerLike = {
     registerHandler<TRequest = unknown, TResponse = unknown>(
@@ -18,8 +18,8 @@ type AutoApprovalRuleSet = {
 
 const AUTO_APPROVE_TOOL_NAME_HINTS = [
     'change_title',
-    'happy__change_title',
-    'hapi_change_title',  // OpenCode MCP tool pattern
+    'agentchat__change_title',
+    'agentchat_change_title',  // OpenCode MCP tool pattern
     'geminireasoning',
     'codexreasoning',
     'think',

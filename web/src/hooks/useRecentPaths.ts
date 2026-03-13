@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
 const STORAGE_KEY = 'agentchat:recentPaths'
-const LEGACY_STORAGE_KEY = 'hapi:recentPaths'
+const LEGACY_STORAGE_KEY = 'agentchat:recentPaths'
 const MAX_PATHS_PER_MACHINE = 5
 
 type RecentPathsData = Record<string, string[]>
@@ -50,7 +50,7 @@ export function useRecentPaths() {
 
     const getLastUsedMachineId = useCallback((): string | null => {
         try {
-            return localStorage.getItem('agentchat:lastMachineId') ?? localStorage.getItem('hapi:lastMachineId')
+            return localStorage.getItem('agentchat:lastMachineId') ?? localStorage.getItem('agentchat:lastMachineId')
         } catch {
             return null
         }
@@ -59,7 +59,7 @@ export function useRecentPaths() {
     const setLastUsedMachineId = useCallback((machineId: string): void => {
         try {
             localStorage.setItem('agentchat:lastMachineId', machineId)
-            localStorage.setItem('hapi:lastMachineId', machineId)
+            localStorage.setItem('agentchat:lastMachineId', machineId)
         } catch {
             // Ignore storage errors
         }

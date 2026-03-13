@@ -7,9 +7,11 @@ import {
     stopRunnerSession
 } from '@/runner/controlClient'
 import { getLatestRunnerLog } from '@/ui/logger'
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI'
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI'
 import { runDoctorCommand } from '@/ui/doctor'
 import { initializeToken } from '@/ui/tokenInit'
+import { configuration } from '@/configuration'
+import { ensureRunnerEnvFile, readRunnerEnvFile, RUNNER_ENV_KEYS } from '@/runner/envFile'
 import type { CommandDefinition } from './types'
 
 export const runnerCommand: CommandDefinition = {
@@ -51,7 +53,7 @@ export const runnerCommand: CommandDefinition = {
         }
 
         if (runnerSubcommand === 'start') {
-            const child = spawnHappyCLI(['runner', 'start-sync'], {
+            const child = spawnAgentchatCLI(['runner', 'start-sync'], {
                 detached: true,
                 stdio: 'ignore',
                 env: process.env
@@ -74,6 +76,38 @@ export const runnerCommand: CommandDefinition = {
                 process.exit(1)
             }
             process.exit(0)
+        }
+
+        if (runnerSubcommand === 'env') {
+            const envSubcommand = commandArgs[1]
+
+            if (envSubcommand === 'show') {
+                await ensureRunnerEnvFile()
+                const env = await readRunnerEnvFile()
+                console.log(`Runner env file: ${chalk.cyan(configuration.runnerEnvFile)}`)
+                console.log(chalk.gray('Edit this file manually. New agent sessions started by runner will use these values.'))
+                if (RUNNER_ENV_KEYS.every((key) => !env[key])) {
+                    console.log(chalk.yellow('No managed provider variables configured yet.'))
+                }
+                for (const key of RUNNER_ENV_KEYS) {
+                    console.log(`${key}=${env[key] ?? ''}`)
+                }
+                return
+            }
+
+            console.log(`
+${chalk.bold('agentchat runner env')} - Runner environment
+
+${chalk.bold('Managed variables:')}
+  ${RUNNER_ENV_KEYS.join('\n  ')}
+
+${chalk.bold('Usage:')}
+  agentchat runner env show           Show ${chalk.cyan(configuration.runnerEnvFile)} and managed values
+
+${chalk.bold('Edit manually:')}
+  ${chalk.cyan(configuration.runnerEnvFile)}
+`)
+            return
         }
 
         if (runnerSubcommand === 'start-sync') {
@@ -110,11 +144,13 @@ ${chalk.bold('Usage:')}
   agentchat runner stop               Stop the runner (sessions stay alive)
   agentchat runner status             Show runner status
   agentchat runner list               List active sessions
+  agentchat runner env show           Show current runner.env values
 
   If you want to kill all agentchat related processes run 
   ${chalk.cyan('agentchat doctor clean')}
 
-${chalk.bold('Note:')} The runner runs in the background and manages Claude sessions.
+${chalk.bold('Runner env file:')} ${chalk.cyan(configuration.runnerEnvFile)}
+${chalk.bold('Note:')} Edit runner.env manually. New agent sessions started by runner will use these values.
 
 ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('agentchat doctor clean')}
 `)

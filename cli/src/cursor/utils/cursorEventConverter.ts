@@ -1,5 +1,5 @@
 /**
- * Converts Cursor Agent stream-json events to HAPI AgentMessage format.
+ * Converts Cursor Agent stream-json events to AgentChat AgentMessage format.
  * Cursor emits NDJSON: system/init, thinking, assistant, tool_call, result.
  */
 

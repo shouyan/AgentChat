@@ -1,14 +1,14 @@
 import chalk from 'chalk'
 import { execFileSync } from 'node:child_process'
 import { z } from 'zod'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@agentchat/protocol'
 import type { StartOptions } from '@/claude/runClaude'
 import { configuration } from '@/configuration'
-import { isRunnerRunningCurrentlyInstalledHappyVersion } from '@/runner/controlClient'
+import { isRunnerRunningCurrentlyInstalledAgentChatVersion } from '@/runner/controlClient'
 import { authAndSetupMachineIfNeeded } from '@/ui/auth'
 import { logger } from '@/ui/logger'
 import { initializeToken } from '@/ui/tokenInit'
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI'
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI'
 import { maybeAutoStartServer } from '@/utils/autoStartServer'
 import { withBunRuntimeEnv } from '@/utils/bunRuntime'
 import { extractErrorInfo } from '@/utils/errorUtils'
@@ -34,7 +34,7 @@ export const claudeCommand: CommandDefinition = {
             if (arg === '-h' || arg === '--help') {
                 showHelp = true
                 unknownArgs.push(arg)
-            } else if (arg === '--hapi-starting-mode') {
+            } else if (arg === '--agentchat-starting-mode') {
                 options.startingMode = z.enum(['local', 'remote']).parse(args[++i])
             } else if (arg === '--yolo') {
                 options.permissionMode = 'bypassPermissions'
@@ -68,7 +68,7 @@ export const claudeCommand: CommandDefinition = {
 ${chalk.bold('agentchat')} - Claude Code On the Go
 
 ${chalk.bold('Usage:')}
-  agentchat [options]         Start Claude with Telegram control (direct-connect)
+  agentchat [options]         Start Claude with web/PWA control (direct-connect)
   agentchat auth              Manage authentication
   agentchat codex             Start Codex mode
   agentchat cursor            Start Cursor Agent mode
@@ -121,10 +121,10 @@ ${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
 
         logger.debug('Ensuring agentchat background service is running & matches our version...')
 
-        if (!(await isRunnerRunningCurrentlyInstalledHappyVersion())) {
+        if (!(await isRunnerRunningCurrentlyInstalledAgentChatVersion())) {
             logger.debug('Starting agentchat background service...')
 
-            const runnerProcess = spawnHappyCLI(['runner', 'start-sync'], {
+            const runnerProcess = spawnAgentchatCLI(['runner', 'start-sync'], {
                 detached: true,
                 stdio: 'ignore',
                 env: process.env

@@ -78,18 +78,6 @@ registerRoute(
     })
 )
 
-registerRoute(
-    /^https:\/\/telegram\.org\/.*/,
-    new CacheFirst({
-        cacheName: 'cdn-telegram',
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 5,
-                maxAgeSeconds: 60 * 60 * 24 * 7
-            })
-        ]
-    })
-)
 
 self.addEventListener('push', (event) => {
     const payload = event.data?.json() as PushPayload | undefined

@@ -124,7 +124,7 @@ export async function createWorktree(options: {
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const name = attempt === 0 ? baseName : `${baseName}-${randomBytes(2).toString('hex')}`;
-    const branch = `hapi-${name}`;
+    const branch = `agentchat-${name}`;
     const worktreePath = join(repoWorktreesRoot, name);
 
     if (await pathExists(worktreePath)) {

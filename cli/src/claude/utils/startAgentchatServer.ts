@@ -1,6 +1,6 @@
 /**
- * HAPI MCP server
- * Provides HAPI CLI specific tools including chat session title management
+ * AgentChat MCP server
+ * Provides AgentChat CLI specific tools including chat session title management
  * and room collaboration tools for agent sessions.
  */
 
@@ -12,7 +12,7 @@ import { logger } from "@/ui/logger";
 import { ApiSessionClient } from "@/api/apiSession";
 import { randomUUID } from "node:crypto";
 import { configuration } from "@/configuration";
-import { happyMcpToolDefinitions } from "@/mcp/toolDefinitions";
+import { agentchatMcpToolDefinitions } from "@/mcp/toolDefinitions";
 
 function successText(text: string) {
     return {
@@ -64,9 +64,9 @@ function pretty(value: unknown): string {
     return JSON.stringify(value, null, 2);
 }
 
-export async function startHappyServer(client: ApiSessionClient) {
+export async function startAgentchatServer(client: ApiSessionClient) {
     const changeTitleHandler = async (title: string) => {
-        logger.debug('[hapiMCP] Changing title to:', title);
+        logger.debug('[agentchatMCP] Changing title to:', title);
         try {
             client.sendClaudeSessionMessage({
                 type: 'summary',
@@ -81,14 +81,14 @@ export async function startHappyServer(client: ApiSessionClient) {
     };
 
     const mcp = new McpServer({
-        name: "HAPI MCP",
+        name: "AgentChat MCP",
         version: "1.0.0",
     });
 
     const registerToolHandlers: Record<string, (args: Record<string, unknown>) => Promise<{ content: { type: 'text'; text: string }[]; isError: boolean }>> = {
         async change_title(args) {
             const response = await changeTitleHandler(String(args.title ?? ''));
-            logger.debug('[hapiMCP] change_title response:', response);
+            logger.debug('[agentchatMCP] change_title response:', response);
             if (response.success) {
                 return successText(`Successfully changed chat title to: "${String(args.title ?? '')}"`);
             }
@@ -212,7 +212,7 @@ export async function startHappyServer(client: ApiSessionClient) {
         },
     };
 
-    for (const tool of happyMcpToolDefinitions) {
+    for (const tool of agentchatMcpToolDefinitions) {
         mcp.registerTool<any, any>(tool.name, {
             description: tool.description,
             title: tool.title,
@@ -221,7 +221,7 @@ export async function startHappyServer(client: ApiSessionClient) {
             try {
                 return await registerToolHandlers[tool.name](args);
             } catch (error) {
-                logger.debug(`[hapiMCP] ${tool.name} failed:`, error);
+                logger.debug(`[agentchatMCP] ${tool.name} failed:`, error);
                 return errorText(`${tool.name} failed: ${error instanceof Error ? error.message : String(error)}`);
             }
         });
@@ -252,9 +252,9 @@ export async function startHappyServer(client: ApiSessionClient) {
 
     return {
         url: baseUrl.toString(),
-        toolNames: happyMcpToolDefinitions.map((tool) => tool.name),
+        toolNames: agentchatMcpToolDefinitions.map((tool) => tool.name),
         stop: () => {
-            logger.debug('[hapiMCP] Stopping server');
+            logger.debug('[agentchatMCP] Stopping server');
             mcp.close();
             server.close();
         }

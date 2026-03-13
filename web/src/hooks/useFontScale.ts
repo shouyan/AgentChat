@@ -17,7 +17,7 @@ function getFontScaleStorageKey(): string {
 }
 
 function getLegacyFontScaleStorageKey(): string {
-    return 'hapi-font-scale'
+    return 'agentchat-font-scale'
 }
 
 function isBrowser(): boolean {

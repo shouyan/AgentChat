@@ -1,47 +1,46 @@
 # AgentChat
 
-AgentChat is a local-first multi-agent coding workspace.
+AgentChat is a local-first coding workspace for running AI agents on your own machine and controlling them from the web, your phone, or Feishu private chat.
 
-It lets you run coding agents such as Claude Code, Codex, Gemini, Cursor Agent, and OpenCode on your own machine, then coordinate them through a web inbox and room-based group chat UI.
+Current release: **0.0.1**
 
-## What this repository contains
+## What you get
 
-This repository includes:
+- direct agent sessions for Claude, Codex, Gemini, Cursor Agent, and OpenCode
+- room-based multi-agent collaboration
+- web inbox, files, terminal, runner, and provider controls
+- machine-scoped runner environment editing
+- Feishu private-chat control and progress updates
 
-- `cli/` — the AgentChat CLI and agent launchers
-- `hub/` — the API server, room/session orchestration, and embedded web assets
-- `web/` — the web UI / PWA
-- `shared/` — shared protocol and types
-- `docs/` / `website/` — documentation site assets
+## Supported platforms
 
-## Main capabilities
+Officially targeted in 0.0.1:
 
-- Start and manage local agent sessions
-- Open direct 1:1 sessions or room-based multi-agent collaboration
-- Spawn multiple agents with different roles, models, and mention keys
-- Coordinate agents through a group-chat style room UI
-- Wake / offline rooms, invite / remove agents, and inspect child sessions from the room
-- Access sessions remotely through the web interface
-- Package the project as a portable build
+- macOS `arm64`, `x64`
+- Linux `arm64`, `x64`
+- Windows `x64`
 
-## Supported agent backends
+Known limitation:
 
-AgentChat currently includes integrations for:
+- web terminal is not supported on Windows
 
-- Claude Code
-- Codex
-- Gemini
-- Cursor Agent
-- OpenCode
+## Repo layout
 
-## Quick start
+- `cli/` — AgentChat CLI, runner, agent launchers
+- `hub/` — API server, persistence, SSE, Socket.IO, Feishu integration
+- `web/` — React PWA
+- `shared/` — protocol, contracts, shared utilities
+- `docs/` / `website/` — documentation assets
+
+## Quick start from source
 
 ### Requirements
 
 - Bun 1.3+
 - Node.js 20+
+- at least one supported local agent CLI installed
 
-### Install dependencies
+### Install
 
 ```bash
 bun install
@@ -50,85 +49,90 @@ bun install
 ### Start the hub
 
 ```bash
-./agentchat hub
-```
-
-### Start an agent session
-
-Default launcher:
-
-```bash
-./agentchat
-```
-
-Other backends:
-
-```bash
-./agentchat codex
-./agentchat gemini
-./agentchat cursor
-./agentchat opencode
-```
-
-### Common commands
-
-```bash
-./agentchat --help
-./agentchat auth login
-./agentchat doctor
-```
-
-## Development
-
-Run hub + web together:
-
-```bash
-bun run dev
-```
-
-Or separately:
-
-```bash
 bun run dev:hub
-bun run dev:web
 ```
 
-Useful scripts:
+### Start the web app
+
+```bash
+bun run dev:web -- --host 0.0.0.0 --port 4173
+```
+
+### Start a runner on the same machine
+
+```bash
+CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd cli dev -- runner start-sync
+```
+
+### Open the UI
+
+- web: `http://127.0.0.1:4173/`
+- login token: the same `CLI_API_TOKEN` you used for the hub/runner
+
+## Provider setup
+
+AgentChat reads machine-scoped provider variables from:
+
+- `~/.agentchat/runner.env`
+
+Managed keys in 0.0.1:
+
+- `ANTHROPIC_BASE_URL`
+- `ANTHROPIC_AUTH_TOKEN`
+- `ANTHROPIC_DEFAULT_OPUS_MODEL`
+- `ANTHROPIC_DEFAULT_SONNET_MODEL`
+- `ANTHROPIC_DEFAULT_HAIKU_MODEL`
+- `GOOGLE_GEMINI_BASE_URL`
+- `GEMINI_API_KEY`
+
+You can edit this file either:
+
+- locally, with any editor
+- from **Machines & providers** in the web UI
+
+Changes only affect **newly started agent sessions**. Existing sessions keep their current environment.
+
+## Feishu support
+
+0.0.1 includes:
+
+- Feishu private-chat bot control
+- help, session switching, current progress
+- current target can be either a direct session or a room
+
+Not in scope for 0.0.1:
+
+- Feishu group binding
+- Feishu OAuth workflows
+- file/image handling from Feishu
+
+## Before you ship
+
+Recommended checks:
 
 ```bash
 bun run typecheck
 bun run test
-bun run build
 ```
 
-## Packaging
+Then manually verify:
 
-Build a portable package:
+- web login
+- machine online
+- create session
+- send message
+- files page
+- room creation and reply flow
+- runner restart
+- Feishu private-chat flow
 
-```bash
-bun run package:portable
-```
+## More docs
 
-Build a single executable bundle:
-
-```bash
-bun run build:single-exe
-```
-
-## Project notes
-
-- The command name is `agentchat`
-- The web UI branding is `AgentChat`
-- Room-spawned child sessions are intended to be accessed from their room context
-- Top-level inbox is meant for rooms and user-created direct sessions
-
-## Source archive
-
-If you are receiving this repository as a source package, it should be enough to:
-
-1. extract the archive
-2. run `bun install`
-3. start with `./agentchat hub`
+- `docs/guide/quick-start.md`
+- `docs/guide/installation.md`
+- `docs/guide/provider-setup.md`
+- `docs/guide/feishu.md`
+- `CHANGELOG.md`
 
 ## License
 

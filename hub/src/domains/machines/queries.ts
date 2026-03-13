@@ -15,3 +15,7 @@ export async function listMachineDirectory(engine: SyncEngine, machineId: string
 export async function checkMachineProviderHealth(engine: SyncEngine, machineId: string, namespace: string) {
     return await engine.checkProviderHealth(machineId, namespace)
 }
+
+export async function getMachineRunnerEnv(engine: SyncEngine, machineId: string, namespace: string) {
+    return await engine.getRunnerEnv(machineId, namespace)
+}

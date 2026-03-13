@@ -1,7 +1,7 @@
-import type { Session } from '@hapi/protocol/types'
+import type { Session } from '@agentchat/protocol/types'
 import { planMachineSessionCleanup } from './machineMaintenance'
 import type { Machine } from './machineCache'
-import type { RpcGateway, RpcListMachineDirectoryResponse, RpcProviderHealthResponse } from './rpcGateway'
+import type { RpcGateway, RpcListMachineDirectoryResponse, RpcProviderHealthResponse, RpcRunnerEnvResponse } from './rpcGateway'
 
 type MachineAdminDependencies = {
     rpcGateway: RpcGateway
@@ -93,6 +93,16 @@ export class MachineAdminService {
     async checkProviderHealth(machineId: string, namespace: string): Promise<RpcProviderHealthResponse> {
         const machine = this.requireOnlineMachine(machineId, namespace)
         return await this.rpcGateway.checkProviderHealth(machine.id)
+    }
+
+    async getRunnerEnv(machineId: string, namespace: string): Promise<RpcRunnerEnvResponse> {
+        const machine = this.requireOnlineMachine(machineId, namespace)
+        return await this.rpcGateway.getRunnerEnv(machine.id)
+    }
+
+    async setRunnerEnv(machineId: string, namespace: string, content: string): Promise<RpcRunnerEnvResponse> {
+        const machine = this.requireOnlineMachine(machineId, namespace)
+        return await this.rpcGateway.setRunnerEnv(machine.id, content)
     }
 
     private requireOnlineMachine(machineId: string, namespace: string): Machine {

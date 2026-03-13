@@ -30,7 +30,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="system"
-        storageKey="hapi-theme"
+        storageKey="agentchat-theme"
       >
         <TooltipProvider>
           <Toaster />

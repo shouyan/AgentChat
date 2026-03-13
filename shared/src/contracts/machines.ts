@@ -54,3 +54,12 @@ export const ProviderHealthResponseSchema = z.object({
     error: z.string().optional()
 })
 export type ProviderHealthResponse = z.infer<typeof ProviderHealthResponseSchema>
+
+
+export const RunnerEnvResponseSchema = z.object({
+    success: z.boolean(),
+    path: z.string().optional(),
+    content: z.string().optional(),
+    error: z.string().optional(),
+})
+export type RunnerEnvResponse = z.infer<typeof RunnerEnvResponseSchema>

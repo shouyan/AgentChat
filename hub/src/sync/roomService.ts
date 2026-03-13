@@ -1,9 +1,9 @@
-import type { Room, RoomMessage, RoomMetadata, RoomRole, RoomTask } from '@hapi/protocol/types'
+import type { Room, RoomMessage, RoomMetadata, RoomRole, RoomTask } from '@agentchat/protocol/types'
 import {
   getRoomCoordinatorRoleKey,
   resolveRoomMentionTargets,
   uniqueRoomStrings,
-} from '@hapi/protocol/roomRouting'
+} from '@agentchat/protocol/roomRouting'
 import type { Store } from '../store'
 import { RoomAutomationService } from './roomAutomationService'
 import type { EventPublisher } from './eventPublisher'

@@ -11,7 +11,7 @@ import { SDKToLogConverter } from "./utils/sdkToLogConverter";
 import { PLAN_FAKE_REJECT } from "./sdk/prompts";
 import { EnhancedMode } from "./loop";
 import { OutgoingMessageQueue } from "./utils/OutgoingMessageQueue";
-import type { ClaudePermissionMode } from "@hapi/protocol/types";
+import type { ClaudePermissionMode } from "@agentchat/protocol/types";
 import {
     RemoteLauncherBase,
     type RemoteLauncherDisplayContext,

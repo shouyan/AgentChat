@@ -1,4 +1,4 @@
-import type { Room, RoomRole } from '@hapi/protocol/types'
+import type { Room, RoomRole } from '@agentchat/protocol/types'
 
 export const ROOM_EXECUTION_TOOL_NAMES = [
     'room_get_context',

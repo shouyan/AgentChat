@@ -9,13 +9,13 @@ import { apiValidationError } from '@/utils/errorUtils'
 import { AsyncLock } from '@/utils/lock'
 import type { RawJSONLines } from '@/claude/types'
 import { configuration } from '@/configuration'
-import type { ClientToServerEvents, ServerToClientEvents, Update } from '@hapi/protocol'
+import type { ClientToServerEvents, ServerToClientEvents, Update } from '@agentchat/protocol'
 import {
     TerminalClosePayloadSchema,
     TerminalOpenPayloadSchema,
     TerminalResizePayloadSchema,
     TerminalWritePayloadSchema
-} from '@hapi/protocol'
+} from '@agentchat/protocol'
 import type {
     AgentState,
     MessageContent,
@@ -440,7 +440,7 @@ export class ApiSessionClient extends EventEmitter {
     keepAlive(
         thinking: boolean,
         mode: 'local' | 'remote',
-        runtime?: { permissionMode?: SessionPermissionMode; modelMode?: SessionModelMode }
+        runtime?: { permissionMode?: SessionPermissionMode; modelMode?: SessionModelMode; model?: string }
     ): void {
         this.socket.volatile.emit('session-alive', {
             sid: this.sessionId,

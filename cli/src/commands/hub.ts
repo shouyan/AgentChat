@@ -1,6 +1,6 @@
 import chalk from 'chalk'
-import { isRunnerRunningCurrentlyInstalledHappyVersion } from '@/runner/controlClient'
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI'
+import { isRunnerRunningCurrentlyInstalledAgentChatVersion } from '@/runner/controlClient'
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI'
 import type { CommandDefinition, CommandContext } from './types'
 
 function parseHubArgs(args: string[]): { host?: string; port?: string } {
@@ -39,7 +39,7 @@ export const hubCommand: CommandDefinition = {
             const listenPort = port || process.env.AGENTCHAT_LISTEN_PORT || process.env.WEBAPP_PORT || '3217'
             const runnerApiUrl =
                 process.env.AGENTCHAT_API_URL ||
-                process.env.HAPI_API_URL ||
+                process.env.AGENTCHAT_API_URL ||
                 `http://127.0.0.1:${listenPort}`
 
             const maybeAutoStartRunner = async () => {
@@ -71,11 +71,11 @@ export const hubCommand: CommandDefinition = {
                     return
                 }
 
-                if (await isRunnerRunningCurrentlyInstalledHappyVersion()) {
+                if (await isRunnerRunningCurrentlyInstalledAgentChatVersion()) {
                     return
                 }
 
-                const child = spawnHappyCLI(['runner', 'start-sync'], {
+                const child = spawnAgentchatCLI(['runner', 'start-sync'], {
                     detached: true,
                     stdio: 'ignore',
                     env: {

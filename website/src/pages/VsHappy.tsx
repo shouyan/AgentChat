@@ -9,12 +9,12 @@ export default function VsHappy() {
       <section className="py-20 md:py-32 bg-secondary/10">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">HAPI vs Happy</h1>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">AgentChat vs Happy</h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              <a href="https://github.com/slopus/happy" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold">Happy</a> is an excellent project. So why build HAPI?
+              <a href="https://github.com/slopus/happy" target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold">Happy</a> is an excellent project. So why build AgentChat?
             </p>
             <p className="mt-4 text-lg">
-              The short answer: <strong>Happy is Cloud-First. HAPI is Local-First.</strong>
+              The short answer: <strong>Happy is Cloud-First. AgentChat is Local-First.</strong>
             </p>
           </div>
 
@@ -48,13 +48,13 @@ export default function VsHappy() {
               </CardContent>
             </Card>
 
-            {/* HAPI Card */}
+            {/* AgentChat Card */}
             <Card className="border-2 border-primary shadow-hard-lg bg-card relative overflow-hidden transform md:-translate-y-4">
               <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-3 mb-2">
                   <HardDrive className="h-8 w-8 text-primary" />
-                  <CardTitle className="text-2xl">HAPI</CardTitle>
+                  <CardTitle className="text-2xl">AgentChat</CardTitle>
                 </div>
                 <p className="text-sm font-bold text-primary uppercase tracking-wider">Local-First Design</p>
               </CardHeader>
@@ -89,7 +89,7 @@ export default function VsHappy() {
                   <tr className="bg-muted/10">
                     <th className="p-4 text-left font-bold border-b border-border w-1/3">Dimension</th>
                     <th className="p-4 text-left font-bold border-b border-border w-1/3 text-blue-600">Happy</th>
-                    <th className="p-4 text-left font-bold border-b border-border w-1/3 text-primary">HAPI</th>
+                    <th className="p-4 text-left font-bold border-b border-border w-1/3 text-primary">AgentChat</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -134,14 +134,14 @@ export default function VsHappy() {
               </div>
               
               <div className="p-6 rounded-xl bg-primary/10 border-2 border-primary/20">
-                <h3 className="font-bold text-lg mb-2 text-primary">Choose HAPI if...</h3>
+                <h3 className="font-bold text-lg mb-2 text-primary">Choose AgentChat if...</h3>
                 <p className="text-sm text-muted-foreground">You want personal use, complete data sovereignty, and the simplest possible setup.</p>
               </div>
             </div>
 
             <Button size="lg" className="text-lg px-8 h-14 font-bold shadow-hard hover:translate-y-0.5 hover:shadow-none transition-all border-2 border-border mt-8" asChild>
               <a href="/#installation">
-                Get Started with HAPI <ArrowRight className="ml-2 h-5 w-5" />
+                Get Started with AgentChat <ArrowRight className="ml-2 h-5 w-5" />
               </a>
             </Button>
           </div>

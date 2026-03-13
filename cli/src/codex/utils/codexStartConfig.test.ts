@@ -3,7 +3,7 @@ import { buildCodexStartConfig } from './codexStartConfig';
 import { codexSystemPrompt } from './systemPrompt';
 
 describe('buildCodexStartConfig', () => {
-    const mcpServers = { hapi: { command: 'node', args: ['mcp'] } };
+    const mcpServers = { agentchat: { command: 'node', args: ['mcp'] } };
 
     it('applies CLI overrides when permission mode is default', () => {
         const config = buildCodexStartConfig({

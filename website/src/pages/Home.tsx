@@ -50,7 +50,7 @@ export default function Home() {
                     {t('hero.startBtn')} <ArrowRight className="ml-2 h-5 w-5" />
                   </a>
                 </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/tiann/hapi', '_blank')}>
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/tiann/agentchat', '_blank')}>
                   {t('hero.githubBtn')}
                 </Button>
               </div>
@@ -194,8 +194,8 @@ export default function Home() {
                     <MessageSquare className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">{t('features.telegram.title')}</h3>
-                    <p className="text-muted-foreground">{t('features.telegram.desc')}</p>
+                    <h3 className="text-xl font-bold mb-2">{t('features.notifications.title')}</h3>
+                    <p className="text-muted-foreground">{t('features.notifications.desc')}</p>
                   </div>
                 </div>
 
@@ -274,8 +274,8 @@ export default function Home() {
                   <h3 className="font-bold">{t('installation.npm.step1')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
-                  <code>npx @twsxtd/hapi hub --relay</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/hapi hub --relay", "hub")}>
+                  <code>npx @twsxtd/agentchat hub --relay</code>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/agentchat hub --relay", "hub")}>
                     {copied === "hub" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -286,8 +286,8 @@ export default function Home() {
                   <h3 className="font-bold">{t('installation.npm.step2')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
-                  <code>npx @twsxtd/hapi</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/hapi", "session")}>
+                  <code>npx @twsxtd/agentchat</code>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/agentchat", "session")}>
                     {copied === "session" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>

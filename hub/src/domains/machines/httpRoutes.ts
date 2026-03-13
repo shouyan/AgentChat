@@ -7,13 +7,14 @@ import {
     MachinePathsExistsResponseSchema,
     MachinesResponseSchema,
     ProviderHealthResponseSchema,
-} from '@hapi/protocol/contracts/machines'
+    RunnerEnvResponseSchema,
+} from '@agentchat/protocol/contracts/machines'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireMachine } from '../../web/routes/guards'
-import { cleanupMachineSessions, restartMachineRunner, spawnMachineSession } from './commands'
+import { cleanupMachineSessions, restartMachineRunner, saveMachineRunnerEnv, spawnMachineSession } from './commands'
 import { uniqueNonEmptyPaths } from './helpers'
-import { checkMachinePaths, checkMachineProviderHealth, listMachineDirectory, listOnlineMachines } from './queries'
+import { checkMachinePaths, checkMachineProviderHealth, getMachineRunnerEnv, listMachineDirectory, listOnlineMachines } from './queries'
 
 const spawnBodySchema = z.object({
     directory: z.string().min(1),
@@ -30,6 +31,11 @@ const pathsExistsSchema = z.object({
 
 const machineDirectoryQuerySchema = z.object({
     path: z.string().optional(),
+})
+
+
+const runnerEnvBodySchema = z.object({
+    content: z.string(),
 })
 
 export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () => SyncEngine | null): void {
@@ -187,6 +193,58 @@ export function registerMachineRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
             return c.json(ProviderHealthResponseSchema.parse(result))
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to run provider health checks' }, 500)
+        }
+    })
+
+    app.get('/machines/:id/runner-env', async (c) => {
+        const engine = getSyncEngine()
+        if (!engine) {
+            return c.json({ error: 'Not connected' }, 503)
+        }
+
+        const machineId = c.req.param('id')
+        const machine = requireMachine(c, engine, machineId)
+        if (machine instanceof Response) {
+            return machine
+        }
+        if (!machine.active) {
+            return c.json({ error: 'Machine is offline' }, 409)
+        }
+
+        try {
+            const result = await getMachineRunnerEnv(engine, machineId, c.get('namespace'))
+            return c.json(RunnerEnvResponseSchema.parse(result))
+        } catch (error) {
+            return c.json({ error: error instanceof Error ? error.message : 'Failed to load runner env' }, 500)
+        }
+    })
+
+    app.put('/machines/:id/runner-env', async (c) => {
+        const engine = getSyncEngine()
+        if (!engine) {
+            return c.json({ error: 'Not connected' }, 503)
+        }
+
+        const machineId = c.req.param('id')
+        const machine = requireMachine(c, engine, machineId)
+        if (machine instanceof Response) {
+            return machine
+        }
+        if (!machine.active) {
+            return c.json({ error: 'Machine is offline' }, 409)
+        }
+
+        const body = await c.req.json().catch(() => null)
+        const parsed = runnerEnvBodySchema.safeParse(body)
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid body' }, 400)
+        }
+
+        try {
+            const result = await saveMachineRunnerEnv(engine, machineId, c.get('namespace'), parsed.data.content)
+            return c.json(RunnerEnvResponseSchema.parse(result))
+        } catch (error) {
+            return c.json({ error: error instanceof Error ? error.message : 'Failed to save runner env' }, 500)
         }
     })
 }

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import type { AppendMessage, AttachmentAdapter, ThreadMessageLike } from '@assistant-ui/react'
 import { useExternalMessageConverter, useExternalStoreRuntime } from '@assistant-ui/react'
-import { safeStringify } from '@hapi/protocol'
+import { safeStringify } from '@agentchat/protocol'
 import { renderEventLabel } from '@/chat/presentation'
 import type { ChatBlock, CliOutputBlock } from '@/chat/types'
 import type { AgentEvent, ToolCallBlock } from '@/chat/types'

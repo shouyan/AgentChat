@@ -1,7 +1,7 @@
 import type { ToolCallMessagePartProps } from '@assistant-ui/react'
 import type { ChatBlock } from '@/chat/types'
 import type { ToolCallBlock } from '@/chat/types'
-import { isObject, safeStringify } from '@hapi/protocol'
+import { isObject, safeStringify } from '@agentchat/protocol'
 import { getEventPresentation } from '@/chat/presentation'
 import { CodeBlock } from '@/components/CodeBlock'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'

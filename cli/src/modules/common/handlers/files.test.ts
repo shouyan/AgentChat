@@ -21,7 +21,7 @@ describe('file RPC handlers', () => {
             await rm(rootDir, { recursive: true, force: true })
         }
 
-        rootDir = await createTempDir('hapi-file-handler')
+        rootDir = await createTempDir('agentchat-file-handler')
         await mkdir(join(rootDir, 'src'), { recursive: true })
         await writeFile(join(rootDir, 'src', 'index.ts'), 'console.log("ok")\n')
 

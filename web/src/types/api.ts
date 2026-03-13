@@ -11,7 +11,7 @@ import type {
     SyncEvent as ProtocolSyncEvent,
     WorktreeMetadata,
     RunnerState as ProtocolRunnerState
-} from '@hapi/protocol/types'
+} from '@agentchat/protocol/types'
 import type {
     DeleteUploadResponse as ProtocolDeleteUploadResponse,
     FileReadResponse as ProtocolFileReadResponse,
@@ -20,11 +20,11 @@ import type {
     ListDirectoryResponse as ProtocolListDirectoryResponse,
     PathMutationResponse as ProtocolPathMutationResponse,
     UploadFileResponse as ProtocolUploadFileResponse,
-} from '@hapi/protocol/contracts/files'
+} from '@agentchat/protocol/contracts/files'
 import type {
     DirectoryEntry as ProtocolDirectoryEntry,
     FileSearchItem as ProtocolFileSearchItem,
-} from '@hapi/protocol/files'
+} from '@agentchat/protocol/files'
 import type {
     MachineActionResponse as ProtocolMachineActionResponse,
     MachineCleanupResponse as ProtocolMachineCleanupResponse,
@@ -32,20 +32,21 @@ import type {
     MachineDirectoryResponse as ProtocolMachineDirectoryResponse,
     MachinePathsExistsResponse as ProtocolMachinePathsExistsResponse,
     MachinesResponse as ProtocolMachinesResponse,
-    ProviderHealthResponse as ProtocolProviderHealthResponse
-} from '@hapi/protocol/contracts/machines'
+    ProviderHealthResponse as ProtocolProviderHealthResponse,
+    RunnerEnvResponse as ProtocolRunnerEnvResponse
+} from '@agentchat/protocol/contracts/machines'
 import type {
     CreateRoomResponse as ProtocolCreateRoomResponse,
     DeleteRoomResponse as ProtocolDeleteRoomResponse,
     RoomMessagesResponse as ProtocolRoomMessagesResponse,
     RoomResponse as ProtocolRoomResponse,
     RoomsResponse as ProtocolRoomsResponse,
-} from '@hapi/protocol/contracts/rooms'
+} from '@agentchat/protocol/contracts/rooms'
 import type {
     MessagesResponse as ProtocolMessagesResponse,
     SessionResponse as ProtocolSessionResponse,
     SessionsResponse as ProtocolSessionsResponse,
-} from '@hapi/protocol/contracts/sessions'
+} from '@agentchat/protocol/contracts/sessions'
 
 export type {
     AgentState,
@@ -73,7 +74,7 @@ export type {
     TeamTask,
     TodoItem,
     WorktreeMetadata
-} from '@hapi/protocol/types'
+} from '@agentchat/protocol/types'
 
 export type SessionMetadataSummary = {
     path: string
@@ -126,6 +127,7 @@ export type MachineDirectoryResponse = ProtocolMachineDirectoryResponse
 export type MachineActionResponse = ProtocolMachineActionResponse
 export type MachineCleanupResponse = ProtocolMachineCleanupResponse
 export type ProviderHealthResponse = ProtocolProviderHealthResponse
+export type RunnerEnvResponse = ProtocolRunnerEnvResponse
 
 export type SpawnResponse =
     | { type: 'success'; sessionId: string }

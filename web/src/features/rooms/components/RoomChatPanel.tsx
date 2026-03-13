@@ -3,7 +3,7 @@ import { AgentAvatar, hashStringToIndex, normalizeAgentFlavor } from '@/componen
 import { OnlineBadge } from '@/features/rooms/components/OnlineBadge'
 import type { Room, RoomMessage, SessionSummary } from '@/types/api'
 import type { useRoomActions } from '@/features/rooms/hooks/useRoomActions'
-import { getRoomComposerRoutingPreview } from '@hapi/protocol/roomRouting'
+import { getRoomComposerRoutingPreview } from '@agentchat/protocol/roomRouting'
 import {
     formatRoomMessageTime,
     getMessageRoutingLabel,

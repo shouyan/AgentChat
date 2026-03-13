@@ -20,7 +20,7 @@ import {
     SpawnRoomRoleResponseSchema,
     UpdateRoomBodySchema,
     UpdateRoomTaskBodySchema,
-} from '@hapi/protocol/contracts/rooms'
+} from '@agentchat/protocol/contracts/rooms'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSyncEngine } from '../../web/routes/guards'

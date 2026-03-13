@@ -30,3 +30,7 @@ export async function restartMachineRunner(engine: SyncEngine, machineId: string
 export async function cleanupMachineSessions(engine: SyncEngine, machineId: string, namespace: string) {
     return await engine.cleanupDeadSessions(machineId, namespace)
 }
+
+export async function saveMachineRunnerEnv(engine: SyncEngine, machineId: string, namespace: string, content: string) {
+    return await engine.setRunnerEnv(machineId, namespace, content)
+}

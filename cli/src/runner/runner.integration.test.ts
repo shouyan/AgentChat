@@ -10,14 +10,15 @@
  * and the runner will not work properly!
  * 
  * The integration test environment uses .env.integration-test which sets:
- * - HAPI_HOME=~/.hapi-dev-test (DIFFERENT from dev's ~/.hapi-dev!)
- * - HAPI_API_URL=http://localhost:3006 (local hapi-hub)
+ * - AGENTCHAT_HOME=~/.agentchat-dev-test (DIFFERENT from dev's ~/.agentchat-dev!)
+ * - AGENTCHAT_API_URL=http://localhost:3217 (local AgentChat hub)
  * - CLI_API_TOKEN=... (must match the hub)
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execSync, spawn } from 'child_process';
 import { existsSync, unlinkSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { testTmpPath } from '@agentchat/protocol/testPaths';
 import path, { join } from 'path';
 import { configuration } from '@/configuration';
 import { 
@@ -30,7 +31,7 @@ import {
 } from '@/runner/controlClient';
 import { readRunnerState, clearRunnerState } from '@/persistence';
 import { Metadata } from '@/api/types';
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI';
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI';
 import { getLatestRunnerLog } from '@/ui/logger';
 import { isProcessAlive, isWindows, killProcess, killProcessByChildProcess } from '@/utils/process';
 
@@ -87,7 +88,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
     
     // Start fresh runner for this test
     // This will return and start a background process - we don't need to wait for it
-    void spawnHappyCLI(['runner', 'start'], {
+    void spawnAgentchatCLI(['runner', 'start'], {
       stdio: 'ignore'
     });
     
@@ -122,9 +123,9 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
       path: '/test/path',
       host: 'test-host',
       homeDir: '/test/home',
-      happyHomeDir: '/test/happy-home',
-      happyLibDir: '/test/happy-lib',
-      happyToolsDir: '/test/happy-tools',
+      agentchatHomeDir: '/test/agentchat-home',
+      agentchatLibDir: '/test/agentchat-lib',
+      agentchatToolsDir: '/test/agentchat-tools',
       hostPid: 99999,
       startedBy: 'terminal',
       machineId: 'test-machine-123'
@@ -137,13 +138,13 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
     expect(sessions).toHaveLength(1);
     
     const tracked = sessions[0];
-    expect(tracked.startedBy).toBe('hapi directly - likely by user from terminal');
+    expect(tracked.startedBy).toBe('agentchat directly - likely by user from terminal');
     expect(tracked.happySessionId).toBe('test-session-123');
     expect(tracked.pid).toBe(99999);
   });
 
   it('should spawn & stop a session via HTTP (not testing RPC route, but similar enough)', async () => {
-    const response = await spawnRunnerSession('/tmp', 'spawned-test-456');
+    const response = await spawnRunnerSession(testTmpPath('runner-test'), 'spawned-test-456');
 
     expect(response).toHaveProperty('success', true);
     expect(response).toHaveProperty('sessionId');
@@ -166,7 +167,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
     const promises = [];
     const sessionCount = 20;
     for (let i = 0; i < sessionCount; i++) {
-      promises.push(spawnRunnerSession('/tmp'));
+      promises.push(spawnRunnerSession(testTmpPath('runner-test')));
     }
 
     // Wait for all sessions to be spawned
@@ -193,23 +194,23 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
   });
 
   it('should track both runner-spawned and terminal sessions', async () => {
-    // Spawn a real hapi process that looks like it was started from terminal
-    const terminalHappyProcess = spawnHappyCLI([
-      '--hapi-starting-mode', 'remote',
+    // Spawn a real agentchat process that looks like it was started from terminal
+    const terminalHappyProcess = spawnAgentchatCLI([
+      '--agentchat-starting-mode', 'remote',
       '--started-by', 'terminal'
     ], {
-      cwd: '/tmp',
+      cwd: testTmpPath('runner-test'),
       detached: true,
       stdio: 'ignore'
     });
     if (!terminalHappyProcess || !terminalHappyProcess.pid) {
-      throw new Error('Failed to spawn terminal hapi process');
+      throw new Error('Failed to spawn terminal agentchat process');
     }
     // Give time to start & report itself
     await new Promise(resolve => setTimeout(resolve, 5_000));
 
     // Spawn a runner session
-    const spawnResponse = await spawnRunnerSession('/tmp', 'runner-session-bbb');
+    const spawnResponse = await spawnRunnerSession(testTmpPath('runner-test'), 'runner-session-bbb');
 
     // List all sessions
     const sessions = await listRunnerSessions();
@@ -224,7 +225,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
     );
 
     expect(terminalSession).toBeDefined();
-    expect(terminalSession.startedBy).toBe('hapi directly - likely by user from terminal');
+    expect(terminalSession.startedBy).toBe('agentchat directly - likely by user from terminal');
     
     expect(runnerSession).toBeDefined();
     expect(runnerSession.startedBy).toBe('runner');
@@ -243,7 +244,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
 
   it('should update session metadata when webhook is called', async () => {
     // Spawn a session
-    const spawnResponse = await spawnRunnerSession('/tmp');
+    const spawnResponse = await spawnRunnerSession(testTmpPath('runner-test'));
 
     // Verify webhook was processed (session ID updated)
     const sessions = await listRunnerSessions();
@@ -285,7 +286,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
     const promises = [];
     for (let i = 0; i < 3; i++) {
       promises.push(
-        spawnRunnerSession('/tmp')
+        spawnRunnerSession(testTmpPath('runner-test'))
       );
     }
 
@@ -391,13 +392,13 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
    * 3. Test runs `yarn build` to recompile with new version
    * 4. Runner's heartbeat (every 30s) reads package.json and compares to its compiled version
    * 5. Runner detects mismatch: package.json != configuration.currentCliVersion
-   * 6. Runner spawns new runner via spawnHappyCLI(['runner', 'start'])
+   * 6. Runner spawns new runner via spawnAgentchatCLI(['runner', 'start'])
    * 7. New runner starts, reads runner.state.json, sees old version != its compiled version
    * 8. New runner calls stopRunner() to kill old runner, then takes over
    * 
-   * This simulates what happens during `npm upgrade hapi`:
+   * This simulates what happens during `npm upgrade agentchat`:
    * - Running runner has OLD version loaded in memory (configuration.currentCliVersion)
-   * - npm replaces node_modules/hapi/ with NEW version files
+   * - npm replaces node_modules/agentchat/ with NEW version files
    * - package.json on disk now has NEW version
    * - Runner reads package.json, detects mismatch, triggers self-update
    * - Key difference: npm atomically replaces the entire module directory, while
@@ -439,7 +440,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
       // and think it is a new version
       // We are not using yarn build here because it cleans out dist/
       // and we want to avoid that, 
-      // otherwise runner will spawn a non existing happy js script.
+      // otherwise runner will spawn a non existing AgentChat entry script.
       // We need to remove index, but not the other files, otherwise some of our code might fail when called from within the runner.
       execSync('yarn build', { stdio: 'ignore' });
       
@@ -449,7 +450,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
 
       // The runner should automatically detect the version mismatch and restart itself
       // We check once per minute, wait for a little longer than that
-      await new Promise(resolve => setTimeout(resolve, parseInt(process.env.HAPI_RUNNER_HEARTBEAT_INTERVAL || '30000') + 10_000));
+      await new Promise(resolve => setTimeout(resolve, parseInt(process.env.AGENTCHAT_RUNNER_HEARTBEAT_INTERVAL || '30000') + 10_000));
 
       // Check that the runner is running with the new version
       const finalState = await readRunnerState();
@@ -469,7 +470,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
 
   // TODO: Add a test to see if a corrupted file will work
   
-  // TODO: Test npm uninstall scenario - runner should gracefully handle when hapi is uninstalled
+  // TODO: Test npm uninstall scenario - runner should gracefully handle when agentchat is uninstalled
   // Current behavior: runner tries to spawn new runner on version mismatch but entrypoint is gone
   // Expected: runner should detect missing entrypoint and either exit cleanly or at minimum not respawn infinitely
 });

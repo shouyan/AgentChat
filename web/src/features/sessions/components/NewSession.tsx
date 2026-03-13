@@ -7,7 +7,7 @@ import { useSessions } from '@/hooks/queries/useSessions'
 import { useActiveSuggestions, type Suggestion } from '@/hooks/useActiveSuggestions'
 import { useDirectorySuggestions } from '@/hooks/useDirectorySuggestions'
 import { useRecentPaths } from '@/hooks/useRecentPaths'
-import type { AgentType, SessionType } from '@/components/NewSession/types'
+import { getDefaultModelForAgent, type AgentType, type SessionType } from '@/components/NewSession/types'
 import { ActionButtons } from '@/components/NewSession/ActionButtons'
 import { AgentSelector } from '@/components/NewSession/AgentSelector'
 import { DirectorySection } from '@/components/NewSession/DirectorySection'
@@ -58,7 +58,7 @@ export function NewSession(props: {
     }, [sessionType])
 
     useEffect(() => {
-        setModel('auto')
+        setModel(getDefaultModelForAgent(agent))
     }, [agent])
 
     useEffect(() => {
@@ -265,6 +265,11 @@ export function NewSession(props: {
                 isDisabled={isFormDisabled}
                 onChange={handleMachineChange}
             />
+            {!props.isLoading && props.machines.length === 0 ? (
+                <div className="px-3 py-2 text-xs text-[var(--app-hint)]">
+                    No machines online yet. Start the runner on a machine, confirm it points to the same hub URL and token, then reopen this dialog.
+                </div>
+            ) : null}
             {runnerSpawnError ? (
                 <div className="px-3 py-2 text-xs text-red-600">
                     Runner last spawn error: {runnerSpawnError}

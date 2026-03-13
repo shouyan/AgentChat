@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { applyTeamStateDelta } from './teams'
-import type { TeamState, TeamTask } from '@hapi/protocol/types'
+import type { TeamState, TeamTask } from '@agentchat/protocol/types'
 
 const baseTeamState: TeamState = {
     teamName: 'test-team',

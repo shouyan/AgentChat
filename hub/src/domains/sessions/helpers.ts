@@ -1,4 +1,5 @@
-import { getPermissionModesForFlavor, isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor } from '@hapi/protocol'
+import { getPermissionModesForFlavor, isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor } from '@agentchat/protocol'
+import { ModelModeSchema } from '@agentchat/protocol/schemas'
 import type { Session } from '../../sync/syncEngine'
 
 export function mapResumeErrorCodeToStatus(code: string) {
@@ -20,10 +21,21 @@ export function validatePermissionModeForSession(session: Session, mode: Paramet
     return { ok: true as const }
 }
 
-export function validateModelModeForSession(session: Session, model: Parameters<typeof isModelModeAllowedForFlavor>[0]) {
+export function validateModelModeForSession(session: Session, model: string) {
     const flavor = session.metadata?.flavor ?? 'claude'
-    if (!isModelModeAllowedForFlavor(model, flavor)) {
-        return { ok: false as const, error: 'Model mode is only supported for Claude sessions' }
+    if (flavor === 'claude') {
+        const parsed = ModelModeSchema.safeParse(model)
+        if (!parsed.success || !isModelModeAllowedForFlavor(parsed.data, flavor)) {
+            return { ok: false as const, error: 'Invalid Claude model mode' }
+        }
+        return { ok: true as const, type: 'mode' as const, value: parsed.data }
     }
-    return { ok: true as const }
+    if (flavor === 'codex' || flavor === 'gemini') {
+        const trimmed = model.trim()
+        if (!trimmed) {
+            return { ok: false as const, error: 'Model is required' }
+        }
+        return { ok: true as const, type: 'model' as const, value: trimmed }
+    }
+    return { ok: false as const, error: 'In-session model switching is only supported for Claude, Codex, and Gemini sessions' }
 }

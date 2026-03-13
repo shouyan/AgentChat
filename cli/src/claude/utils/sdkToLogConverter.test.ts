@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { SDKToLogConverter, convertSDKToLog } from './sdkToLogConverter'
 import type { SDKMessage, SDKUserMessage, SDKAssistantMessage, SDKSystemMessage, SDKResultMessage } from '@/claude/sdk'
-import type { ClaudePermissionMode } from '@hapi/protocol/types'
+import type { ClaudePermissionMode } from '@agentchat/protocol/types'
 
 describe('SDKToLogConverter', () => {
     let converter: SDKToLogConverter

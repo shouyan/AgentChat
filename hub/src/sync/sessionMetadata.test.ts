@@ -1,18 +1,19 @@
 import { describe, expect, it } from 'bun:test'
 import { mergeSessionMetadataPreservingSystemFields } from './sessionMetadata'
+import { testProjectPath } from '@agentchat/protocol/testPaths'
 
 describe('mergeSessionMetadataPreservingSystemFields', () => {
     it('preserves room markers when later metadata updates omit them', () => {
         const merged = mergeSessionMetadataPreservingSystemFields(
             {
-                path: '/tmp/project',
+                path: testProjectPath('project'),
                 host: 'localhost',
                 flavor: 'claude',
                 roomSpawned: true,
                 roomId: 'room-123'
             },
             {
-                path: '/tmp/project',
+                path: testProjectPath('project'),
                 host: 'localhost',
                 tools: ['Edit', 'Read']
             }
@@ -26,12 +27,12 @@ describe('mergeSessionMetadataPreservingSystemFields', () => {
     it('keeps the newer summary when it is more recent', () => {
         const merged = mergeSessionMetadataPreservingSystemFields(
             {
-                path: '/tmp/project',
+                path: testProjectPath('project'),
                 host: 'localhost',
                 summary: { text: 'older', updatedAt: 100 }
             },
             {
-                path: '/tmp/project',
+                path: testProjectPath('project'),
                 host: 'localhost',
                 summary: { text: 'newer', updatedAt: 200 }
             }

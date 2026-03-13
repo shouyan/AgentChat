@@ -20,6 +20,7 @@ export type SessionBootstrapOptions = {
     flavor: string
     startedBy?: SessionStartedBy
     workingDirectory?: string
+    model?: string
     tag?: string
     agentState?: AgentState | null
 }
@@ -34,15 +35,15 @@ export type SessionBootstrapResult = {
     workingDirectory: string
 }
 
-export function buildMachineMetadata(): MachineMetadata {
+export function buildMachineMetadata(env: NodeJS.ProcessEnv = process.env): MachineMetadata {
     return {
-        host: process.env.HAPI_HOSTNAME || os.hostname(),
+        host: env.AGENTCHAT_HOSTNAME || os.hostname(),
         platform: os.platform(),
-        happyCliVersion: packageJson.version,
+        agentchatCliVersion: packageJson.version,
         homeDir: os.homedir(),
-        happyHomeDir: configuration.happyHomeDir,
-        happyLibDir: runtimePath(),
-        providers: buildMachineProviderStatus()
+        agentchatHomeDir: configuration.agentchatHomeDir,
+        agentchatLibDir: runtimePath(),
+        providers: buildMachineProviderStatus(env)
     }
 }
 
@@ -51,9 +52,10 @@ export function buildSessionMetadata(options: {
     startedBy: SessionStartedBy
     workingDirectory: string
     machineId: string
+    model?: string
     now?: number
 }): Metadata {
-    const happyLibDir = runtimePath()
+    const agentchatLibDir = runtimePath()
     const worktreeInfo = readWorktreeEnv()
     const now = options.now ?? Date.now()
 
@@ -61,12 +63,13 @@ export function buildSessionMetadata(options: {
         path: options.workingDirectory,
         host: os.hostname(),
         version: packageJson.version,
+        model: options.model,
         os: os.platform(),
         machineId: options.machineId,
         homeDir: os.homedir(),
-        happyHomeDir: configuration.happyHomeDir,
-        happyLibDir,
-        happyToolsDir: resolve(happyLibDir, 'tools', 'unpacked'),
+        agentchatHomeDir: configuration.agentchatHomeDir,
+        agentchatLibDir,
+        agentchatToolsDir: resolve(agentchatLibDir, 'tools', 'unpacked'),
         startedFromRunner: options.startedBy === 'runner',
         hostPid: process.pid,
         startedBy: options.startedBy,
@@ -120,7 +123,8 @@ export async function bootstrapSession(options: SessionBootstrapOptions): Promis
         flavor: options.flavor,
         startedBy,
         workingDirectory,
-        machineId
+        machineId,
+        model: options.model
     })
 
     const sessionInfo = await api.getOrCreateSession({

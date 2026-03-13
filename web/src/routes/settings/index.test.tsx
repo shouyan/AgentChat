@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { AppContextProvider } from '@/lib/app-context'
 import { I18nContext, I18nProvider } from '@/lib/i18n-context'
 import { en } from '@/lib/locales'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@agentchat/protocol'
 import SettingsPage from './index'
 
 // Mock the router hooks
@@ -94,15 +94,10 @@ describe('SettingsPage', () => {
         expect(screen.getAllByText(String(PROTOCOL_VERSION)).length).toBeGreaterThanOrEqual(1)
     })
 
-    it('displays the website link with correct URL and security attributes', () => {
+    it('displays the website field with an empty value', () => {
         renderWithProviders(<SettingsPage />)
         expect(screen.getAllByText('Website').length).toBeGreaterThanOrEqual(1)
-        const links = screen.getAllByRole('link', { name: 'github.com/tiann/hapi' })
-        expect(links.length).toBeGreaterThanOrEqual(1)
-        const link = links[0]
-        expect(link).toHaveAttribute('href', 'https://github.com/tiann/hapi')
-        expect(link).toHaveAttribute('target', '_blank')
-        expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+        expect(screen.queryByRole('link', { name: 'github.com/tiann/agentchat' })).not.toBeInTheDocument()
     })
 
     it('uses correct i18n keys for About section', () => {

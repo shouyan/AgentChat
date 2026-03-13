@@ -1,25 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getTelegramWebApp, isTelegramEnvironment } from './useTelegram'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AuthSource } from './useAuth'
 
-const ACCESS_TOKEN_PREFIX = 'hapi_access_token::'
-
-function getTelegramInitData(): string | null {
-    const tg = getTelegramWebApp()
-    if (tg?.initData) {
-        return tg.initData
-    }
-
-    // Fallback: check URL parameters (for testing or alternative flows)
-    const query = new URLSearchParams(window.location.search)
-    const tgWebAppData = query.get('tgWebAppData')
-    if (tgWebAppData) {
-        return tgWebAppData
-    }
-
-    const initData = query.get('initData')
-    return initData || null
-}
+const ACCESS_TOKEN_PREFIX = 'agentchat_access_token::'
 
 function getTokenFromUrlParams(): string | null {
     if (typeof window === 'undefined') return null
@@ -58,43 +40,25 @@ function clearStoredAccessToken(key: string): void {
 export function useAuthSource(baseUrl: string): {
     authSource: AuthSource | null
     isLoading: boolean
-    isTelegram: boolean
     setAccessToken: (token: string) => void
     clearAuth: () => void
 } {
     const [authSource, setAuthSource] = useState<AuthSource | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const [isTelegram, setIsTelegram] = useState(false)
-    const retryCountRef = useRef(0)
     const accessTokenKey = useMemo(() => getAccessTokenKey(baseUrl), [baseUrl])
 
-    // Initialize auth source on mount, with retry for delayed Telegram initData
     useEffect(() => {
-        retryCountRef.current = 0
         setAuthSource(null)
-        setIsTelegram(false)
         setIsLoading(true)
 
-        const telegramInitData = getTelegramInitData()
-
-        if (telegramInitData) {
-            // Telegram Mini App environment
-            setAuthSource({ type: 'telegram', initData: telegramInitData })
-            setIsTelegram(true)
-            setIsLoading(false)
-            return
-        }
-
-        // Check for URL token parameter (for direct access links)
         const urlToken = getTokenFromUrlParams()
         if (urlToken) {
-            storeAccessToken(accessTokenKey, urlToken) // Save to localStorage for refresh
+            storeAccessToken(accessTokenKey, urlToken)
             setAuthSource({ type: 'accessToken', token: urlToken })
             setIsLoading(false)
             return
         }
 
-        // Check for stored access token as fallback
         const storedToken = getStoredAccessToken(accessTokenKey)
         if (storedToken) {
             setAuthSource({ type: 'accessToken', token: storedToken })
@@ -102,37 +66,7 @@ export function useAuthSource(baseUrl: string): {
             return
         }
 
-        // Check if we're in a Telegram environment before polling
-        if (!isTelegramEnvironment()) {
-            // Plain browser - show login prompt immediately
-            setIsLoading(false)
-            return
-        }
-
-        // Telegram environment detected - poll for delayed initData
-        // Telegram WebApp SDK may initialize slightly after page mount
-        const maxRetries = 20
-        const retryInterval = 250 // ms
-
-        const interval = setInterval(() => {
-            retryCountRef.current += 1
-            const initData = getTelegramInitData()
-
-            if (initData) {
-                setAuthSource({ type: 'telegram', initData })
-                setIsTelegram(true)
-                setIsLoading(false)
-                clearInterval(interval)
-            } else if (retryCountRef.current >= maxRetries) {
-                // Give up - show login prompt for browser access
-                setIsLoading(false)
-                clearInterval(interval)
-            }
-        }, retryInterval)
-
-        return () => {
-            clearInterval(interval)
-        }
+        setIsLoading(false)
     }, [accessTokenKey])
 
     const setAccessToken = useCallback((token: string) => {
@@ -148,7 +82,6 @@ export function useAuthSource(baseUrl: string): {
     return {
         authSource,
         isLoading,
-        isTelegram,
         setAccessToken,
         clearAuth
     }

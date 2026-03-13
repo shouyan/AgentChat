@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { AgentFlavor } from '@/components/rooms/roleTemplates'
-import { MODEL_OPTIONS } from '@/components/NewSession/types'
+import { getDefaultModelForAgent as getDefaultModelForSessionAgent, MODEL_OPTIONS } from '@/components/NewSession/types'
 
 export type AgentModelOption = {
   value: string
@@ -50,8 +50,8 @@ const AGENT_RING_CLASSES = [
   'bg-gradient-to-br from-indigo-500 to-blue-400',
 ]
 
-export function getDefaultModelForAgent(_agent: AgentFlavor): string {
-  return 'auto'
+export function getDefaultModelForAgent(agent: AgentFlavor): string {
+  return getDefaultModelForSessionAgent(agent)
 }
 
 export function normalizeAgentFlavor(value: string | null | undefined, fallback: AgentFlavor = 'claude'): AgentFlavor {

@@ -22,7 +22,7 @@ describe('listSkills', () => {
     let homeDir: string
 
     beforeEach(async () => {
-        sandboxDir = await mkdtemp(join(tmpdir(), 'hapi-skills-'))
+        sandboxDir = await mkdtemp(join(tmpdir(), 'agentchat-skills-'))
         homeDir = join(sandboxDir, 'home')
         process.env.HOME = homeDir
         await mkdir(homeDir, { recursive: true })

@@ -4,7 +4,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { isObject } from '@hapi/protocol';
+import { isObject } from '@agentchat/protocol';
 import { logger } from '@/ui/logger';
 import { isProcessAlive, killProcess } from '@/utils/process';
 import type { CodexSessionConfig, CodexToolResponse } from './types';
@@ -172,7 +172,7 @@ export class CodexMcpClient {
 
     constructor() {
         this.client = new Client(
-            { name: 'hapi-codex-client', version: '1.0.0' },
+            { name: 'agentchat-codex-client', version: '1.0.0' },
             { capabilities: { elicitation: {} } }
         );
 

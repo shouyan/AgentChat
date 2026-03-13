@@ -5,7 +5,7 @@ import type {
   TemplateAgentFlavor as AgentFlavor,
   TemplateCatalog,
   TemplateOverrideState,
-} from '@hapi/protocol/templates'
+} from '@agentchat/protocol/templates'
 import type { RoomMetadata } from '@/types/api'
 
 export type RoleTemplateRoleDraft = {

@@ -11,8 +11,6 @@
 import { getSettingsFile, readSettings, writeSettings } from './settings'
 
 export interface ServerSettings {
-    telegramBotToken: string | null
-    telegramNotification: boolean
     listenHost: string
     listenPort: number
     publicUrl: string
@@ -22,8 +20,6 @@ export interface ServerSettings {
 export interface ServerSettingsResult {
     settings: ServerSettings
     sources: {
-        telegramBotToken: 'env' | 'file' | 'default'
-        telegramNotification: 'env' | 'file' | 'default'
         listenHost: 'env' | 'file' | 'default'
         listenPort: 'env' | 'file' | 'default'
         publicUrl: 'env' | 'file' | 'default'
@@ -85,44 +81,15 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     let needsSave = false
     const sources: ServerSettingsResult['sources'] = {
-        telegramBotToken: 'default',
-        telegramNotification: 'default',
         listenHost: 'default',
         listenPort: 'default',
         publicUrl: 'default',
         corsOrigins: 'default',
     }
-    // telegramBotToken: env > file > null
-    let telegramBotToken: string | null = null
-    if (process.env.TELEGRAM_BOT_TOKEN) {
-        telegramBotToken = process.env.TELEGRAM_BOT_TOKEN
-        sources.telegramBotToken = 'env'
-        if (settings.telegramBotToken === undefined) {
-            settings.telegramBotToken = telegramBotToken
-            needsSave = true
-        }
-    } else if (settings.telegramBotToken !== undefined) {
-        telegramBotToken = settings.telegramBotToken
-        sources.telegramBotToken = 'file'
-    }
-
-    // telegramNotification: env > file > true (default enabled for backward compatibility)
-    let telegramNotification = true
-    if (process.env.TELEGRAM_NOTIFICATION !== undefined) {
-        telegramNotification = process.env.TELEGRAM_NOTIFICATION === 'true'
-        sources.telegramNotification = 'env'
-        if (settings.telegramNotification === undefined) {
-            settings.telegramNotification = telegramNotification
-            needsSave = true
-        }
-    } else if (settings.telegramNotification !== undefined) {
-        telegramNotification = settings.telegramNotification
-        sources.telegramNotification = 'file'
-    }
 
     // listenHost: env > file (new or old name) > default
     let listenHost = '127.0.0.1'
-    const envListenHost = process.env.AGENTCHAT_LISTEN_HOST || process.env.HAPI_LISTEN_HOST
+    const envListenHost = process.env.AGENTCHAT_LISTEN_HOST
     if (envListenHost) {
         listenHost = envListenHost
         sources.listenHost = 'env'
@@ -144,7 +111,7 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     // listenPort: env > file (new or old name) > default
     let listenPort = 3217
-    const envListenPort = process.env.AGENTCHAT_LISTEN_PORT || process.env.HAPI_LISTEN_PORT
+    const envListenPort = process.env.AGENTCHAT_LISTEN_PORT
     if (envListenPort) {
         const parsed = parseInt(envListenPort, 10)
         if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -170,7 +137,7 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     // publicUrl: env > file (new or old name) > default
     let publicUrl = `http://localhost:${listenPort}`
-    const envPublicUrl = process.env.AGENTCHAT_PUBLIC_URL || process.env.HAPI_PUBLIC_URL
+    const envPublicUrl = process.env.AGENTCHAT_PUBLIC_URL
     if (envPublicUrl) {
         publicUrl = envPublicUrl
         sources.publicUrl = 'env'
@@ -213,8 +180,6 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     return {
         settings: {
-            telegramBotToken,
-            telegramNotification,
             listenHost,
             listenPort,
             publicUrl,

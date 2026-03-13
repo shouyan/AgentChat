@@ -1,17 +1,17 @@
 import {
-    ModelModeBodySchema,
     PermissionModeBodySchema,
     RenameSessionBodySchema,
     ResumeSessionSuccessResponseSchema,
+    SessionModelBodySchema,
     SessionResponseSchema,
     SessionsResponseSchema,
-} from '@hapi/protocol/contracts/sessions'
+} from '@agentchat/protocol/contracts/sessions'
 import { Hono } from 'hono'
 import { registerUploadRoutes } from '../files/httpRoutes'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../../web/middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from '../../web/routes/guards'
-import { abortSessionCommand, applySessionModelModeCommand, applySessionPermissionModeCommand, archiveSessionCommand, deleteSessionCommand, renameSessionCommand, switchSessionToRemoteCommand } from './commands'
+import { abortSessionCommand, applySessionModelCommand, applySessionModelModeCommand, applySessionPermissionModeCommand, archiveSessionCommand, deleteSessionCommand, renameSessionCommand, switchSessionToRemoteCommand } from './commands'
 import { listSortedSessions } from './queries'
 import { mapResumeErrorCodeToStatus, validateModelModeForSession, validatePermissionModeForSession } from './helpers'
 
@@ -152,7 +152,7 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         const body = await c.req.json().catch(() => null)
-        const parsed = ModelModeBodySchema.safeParse(body)
+        const parsed = SessionModelBodySchema.safeParse(body)
         if (!parsed.success) {
             return c.json({ error: 'Invalid body' }, 400)
         }
@@ -163,10 +163,14 @@ export function registerSessionRoutes(app: Hono<WebAppEnv>, getSyncEngine: () =>
         }
 
         try {
-            await applySessionModelModeCommand(engine, sessionResult.sessionId, parsed.data.model)
+            if (validation.type === 'mode') {
+                await applySessionModelModeCommand(engine, sessionResult.sessionId, validation.value)
+            } else {
+                await applySessionModelCommand(engine, sessionResult.sessionId, validation.value)
+            }
             return c.json({ ok: true })
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Failed to apply model mode'
+            const message = error instanceof Error ? error.message : 'Failed to apply session model'
             return c.json({ error: message }, 409)
         }
     })

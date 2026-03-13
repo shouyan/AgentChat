@@ -1,4 +1,4 @@
-import type { ModelMode, PermissionMode } from '@hapi/protocol'
+import type { ModelMode, PermissionMode } from '@agentchat/protocol'
 import type { SyncEngine } from '../../sync/syncEngine'
 
 export async function abortSessionCommand(engine: SyncEngine, sessionId: string) {
@@ -19,6 +19,10 @@ export async function applySessionPermissionModeCommand(engine: SyncEngine, sess
 
 export async function applySessionModelModeCommand(engine: SyncEngine, sessionId: string, model: ModelMode) {
     await engine.applySessionConfig(sessionId, { modelMode: model })
+}
+
+export async function applySessionModelCommand(engine: SyncEngine, sessionId: string, model: string) {
+    await engine.applySessionConfig(sessionId, { model })
 }
 
 export async function renameSessionCommand(engine: SyncEngine, sessionId: string, name: string) {

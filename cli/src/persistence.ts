@@ -1,7 +1,7 @@
 /**
- * Minimal persistence functions for HAPI CLI
+ * Minimal persistence functions for AgentChat CLI
  * 
- * Handles settings, encryption key, and runner state storage in ~/.hapi/ (or HAPI_HOME override)
+ * Handles settings, encryption key, and runner state storage in ~/.agentchat/ (or AGENTCHAT_HOME override)
  */
 
 import { FileHandle } from 'node:fs/promises'
@@ -15,9 +15,9 @@ interface Settings {
   // All machine operations use this ID
   machineId?: string
   machineIdConfirmedByServer?: boolean
-  runnerAutoStartWhenRunningHappy?: boolean
+  runnerAutoStartWhenRunningAgentChat?: boolean
   cliApiToken?: string
-  // API URL for server connections (priority: env HAPI_API_URL > this > default)
+  // API URL for server connections (priority: env AGENTCHAT_API_URL > this > default)
   apiUrl?: string
   // Legacy field name (for migration, read-only)
   serverUrl?: string
@@ -53,8 +53,8 @@ export async function readSettings(): Promise<Settings> {
 }
 
 export async function writeSettings(settings: Settings): Promise<void> {
-  if (!existsSync(configuration.happyHomeDir)) {
-    await mkdir(configuration.happyHomeDir, { recursive: true })
+  if (!existsSync(configuration.agentchatHomeDir)) {
+    await mkdir(configuration.agentchatHomeDir, { recursive: true })
   }
 
   await writeFile(configuration.settingsFile, JSON.stringify(settings, null, 2))
@@ -73,8 +73,8 @@ export async function updateSettings(
   const MAX_LOCK_ATTEMPTS = 50;        // Maximum number of attempts (5 seconds total)
   const STALE_LOCK_TIMEOUT_MS = 10000; // Consider lock stale after 10 seconds
 
-  if (!existsSync(configuration.happyHomeDir)) {
-    await mkdir(configuration.happyHomeDir, { recursive: true });
+  if (!existsSync(configuration.agentchatHomeDir)) {
+    await mkdir(configuration.agentchatHomeDir, { recursive: true });
   }
 
   const lockFile = configuration.settingsFile + '.lock';
@@ -135,8 +135,8 @@ export async function updateSettings(
 //
 
 export async function writeCredentialsDataKey(credentials: { publicKey: Uint8Array, machineKey: Uint8Array, token: string }): Promise<void> {
-  if (!existsSync(configuration.happyHomeDir)) {
-    await mkdir(configuration.happyHomeDir, { recursive: true })
+  if (!existsSync(configuration.agentchatHomeDir)) {
+    await mkdir(configuration.agentchatHomeDir, { recursive: true })
   }
   await writeFile(configuration.privateKeyFile, JSON.stringify({
     encryption: { publicKey: Buffer.from(credentials.publicKey).toString('base64'), machineKey: Buffer.from(credentials.machineKey).toString('base64') },

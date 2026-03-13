@@ -1,4 +1,4 @@
-import type { ClientToServerEvents } from '@hapi/protocol'
+import type { ClientToServerEvents } from '@agentchat/protocol'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 import type { Store, StoredMachine } from '../../../store'

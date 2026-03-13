@@ -1,6 +1,6 @@
 import type { EnhancedMode } from '../loop';
 import type { CodexCliOverrides } from './codexCliOverrides';
-import type { McpServersConfig } from './buildHapiMcpBridge';
+import type { McpServersConfig } from './buildAgentchatMcpBridge';
 import { codexSystemPrompt } from './systemPrompt';
 import type {
     ApprovalPolicy,

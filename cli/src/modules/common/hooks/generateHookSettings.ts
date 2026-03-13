@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { configuration } from '@/configuration';
 import { logger } from '@/ui/logger';
-import { getHappyCliCommand } from '@/utils/spawnHappyCLI';
+import { getAgentchatCliCommand } from '@/utils/spawnAgentchatCLI';
 
 type HookCommandConfig = {
     matcher: string;
@@ -73,13 +73,13 @@ export function generateHookSettingsFile(
     token: string,
     options: HookSettingsOptions
 ): string {
-    const hooksDir = join(configuration.happyHomeDir, 'tmp', 'hooks');
+    const hooksDir = join(configuration.agentchatHomeDir, 'tmp', 'hooks');
     mkdirSync(hooksDir, { recursive: true });
 
     const filename = `${options.filenamePrefix}-${process.pid}.json`;
     const filepath = join(hooksDir, filename);
 
-    const { command, args } = getHappyCliCommand([
+    const { command, args } = getAgentchatCliCommand([
         'hook-forwarder',
         '--port',
         String(port),

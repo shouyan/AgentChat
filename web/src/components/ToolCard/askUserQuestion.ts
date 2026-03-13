@@ -1,4 +1,4 @@
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 
 export type AskUserQuestionOption = {
     label: string

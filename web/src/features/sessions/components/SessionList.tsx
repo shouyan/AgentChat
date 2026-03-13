@@ -214,7 +214,7 @@ export function SessionItem(props: {
 
           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
             <span className="rounded-full bg-[var(--app-subtle-bg)] px-2 py-0.5 text-[var(--app-hint)]">
-              {t('session.item.modelMode')}: {s.modelMode || 'default'}
+              {t('session.item.modelMode')}: {s.metadata?.model ?? s.modelMode ?? 'default'}
             </span>
             {s.thinking ? (
               <span className="rounded-full bg-[#007AFF]/10 px-2 py-0.5 text-[#007AFF]">

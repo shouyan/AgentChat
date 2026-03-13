@@ -27,7 +27,7 @@ const COMMON_ASSETS: EmbeddedAsset[] = [
 ];
 
 async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
-    if (feature('HAPI_TARGET_DARWIN_ARM64')) {
+    if (feature('AGENTCHAT_TARGET_DARWIN_ARM64')) {
         const [
             { default: difftasticArm64Darwin },
             { default: ripgrepArm64Darwin },
@@ -45,7 +45,7 @@ async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
         ];
     }
 
-    if (feature('HAPI_TARGET_DARWIN_X64')) {
+    if (feature('AGENTCHAT_TARGET_DARWIN_X64')) {
         const [
             { default: difftasticX64Darwin },
             { default: ripgrepX64Darwin },
@@ -63,7 +63,7 @@ async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
         ];
     }
 
-    if (feature('HAPI_TARGET_LINUX_ARM64')) {
+    if (feature('AGENTCHAT_TARGET_LINUX_ARM64')) {
         const [
             { default: difftasticArm64Linux },
             { default: ripgrepArm64Linux },
@@ -81,7 +81,7 @@ async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
         ];
     }
 
-    if (feature('HAPI_TARGET_LINUX_X64')) {
+    if (feature('AGENTCHAT_TARGET_LINUX_X64')) {
         const [
             { default: difftasticX64Linux },
             { default: ripgrepX64Linux },
@@ -99,7 +99,7 @@ async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
         ];
     }
 
-    if (feature('HAPI_TARGET_WIN32_X64')) {
+    if (feature('AGENTCHAT_TARGET_WIN32_X64')) {
         const [
             { default: difftasticX64Win32 },
             { default: ripgrepX64Win32 },
@@ -117,7 +117,7 @@ async function selectEmbeddedAssets(): Promise<EmbeddedAsset[]> {
         ];
     }
 
-    throw new Error('No build target feature flag set. Build with --feature=HAPI_TARGET_*.');
+    throw new Error('No build target feature flag set. Build with --feature=AGENTCHAT_TARGET_*.');
 }
 
 export async function loadEmbeddedAssets(): Promise<EmbeddedAsset[]> {

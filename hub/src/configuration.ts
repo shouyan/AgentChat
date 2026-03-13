@@ -1,24 +1,22 @@
 /**
- * Configuration for hapi-hub (Direct Connect)
+ * Configuration for agentchat-hub (Direct Connect)
  *
  * Configuration is loaded with priority: environment variable > settings.json > default
  * When values are read from environment variables and not present in settings.json,
  * they are automatically saved for future use
  *
  * Optional environment variables:
- * - CLI_API_TOKEN: Shared secret for hapi CLI authentication (auto-generated if not set)
- * - TELEGRAM_BOT_TOKEN: Telegram Bot API token from @BotFather
- * - TELEGRAM_NOTIFICATION: Enable/disable Telegram notifications (default: true)
- * - HAPI_LISTEN_HOST: Host/IP to bind the HTTP service (default: 127.0.0.1)
- * - HAPI_LISTEN_PORT: Port for HTTP service (default: 3217)
- * - HAPI_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
+ * - CLI_API_TOKEN: Shared secret for AgentChat CLI authentication (auto-generated if not set)
+ * - AGENTCHAT_LISTEN_HOST: Host/IP to bind the HTTP service (default: 127.0.0.1)
+ * - AGENTCHAT_LISTEN_PORT: Port for HTTP service (default: 3217)
+ * - AGENTCHAT_PUBLIC_URL: Public URL for external access
  * - CORS_ORIGINS: Comma-separated CORS origins
- * - HAPI_RELAY_API: Relay API domain for tunwg (default: relay.hapi.run)
- * - HAPI_RELAY_AUTH: Relay auth key for tunwg (default: hapi)
- * - HAPI_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
- * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@hapi.run)
- * - HAPI_HOME: Data directory (default: ~/.hapi)
- * - DB_PATH: SQLite database path (default: {HAPI_HOME}/hapi.db)
+ * - AGENTCHAT_RELAY_API: Relay API domain for tunwg (default: relay.agentchat.run)
+ * - AGENTCHAT_RELAY_AUTH: Relay auth key for tunwg (default: agentchat)
+ * - AGENTCHAT_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
+ * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@agentchat.run)
+ * - AGENTCHAT_HOME: Data directory (default: ~/.agentchat)
+ * - DB_PATH: SQLite database path (default: {AGENTCHAT_HOME}/agentchat.db)
  */
 
 import { existsSync, mkdirSync } from 'node:fs'
@@ -31,8 +29,6 @@ import { loadServerSettings, type ServerSettings, type ServerSettingsResult } fr
 export type ConfigSource = 'env' | 'file' | 'default'
 
 export interface ConfigSources {
-    telegramBotToken: ConfigSource
-    telegramNotification: ConfigSource
     listenHost: ConfigSource
     listenPort: ConfigSource
     publicUrl: ConfigSource
@@ -40,16 +36,41 @@ export interface ConfigSources {
     cliApiToken: 'env' | 'file' | 'generated'
 }
 
+type FeishuUserBindingMap = Record<string, string>
+
+function parseCommaSeparatedList(raw: string | undefined): string[] {
+    if (!raw) {
+        return []
+    }
+    return raw
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+}
+
+function parseFeishuUserBindings(raw: string | undefined): FeishuUserBindingMap {
+    const bindings: FeishuUserBindingMap = {}
+    if (!raw) {
+        return bindings
+    }
+    for (const entry of raw.split(',')) {
+        const trimmed = entry.trim()
+        if (!trimmed) continue
+        const separatorIndex = trimmed.includes('=') ? trimmed.indexOf('=') : trimmed.indexOf(':')
+        if (separatorIndex <= 0) {
+            continue
+        }
+        const openId = trimmed.slice(0, separatorIndex).trim()
+        const namespace = trimmed.slice(separatorIndex + 1).trim()
+        if (!openId || !namespace) {
+            continue
+        }
+        bindings[openId] = namespace
+    }
+    return bindings
+}
+
 class Configuration {
-    /** Telegram Bot API token */
-    public readonly telegramBotToken: string | null
-
-    /** Telegram bot enabled status (token present) */
-    public readonly telegramEnabled: boolean
-
-    /** Telegram notifications enabled */
-    public readonly telegramNotification: boolean
-
     /** CLI auth token (shared secret) */
     public cliApiToken: string
 
@@ -74,7 +95,7 @@ class Configuration {
     /** Host/IP to bind the HTTP service to */
     public readonly listenHost: string
 
-    /** Public URL for external access (e.g., Telegram Mini App) */
+    /** Public URL for external access */
     public readonly publicUrl: string
 
     /** Allowed CORS origins for Mini App + Socket.IO (comma-separated env override) */
@@ -82,6 +103,36 @@ class Configuration {
 
     /** Sources of each configuration value */
     public readonly sources: ConfigSources
+
+    /** Feishu bot enabled */
+    public readonly feishuEnabled: boolean
+
+    /** Feishu long connection enabled */
+    public readonly feishuLongConnection: boolean
+
+    /** Feishu app id */
+    public readonly feishuAppId: string | null
+
+    /** Feishu app secret */
+    public readonly feishuAppSecret: string | null
+
+    /** Optional external base URL for deep links */
+    public readonly feishuBaseUrl: string | null
+
+    /** Optional allow list for Feishu open_ids */
+    public readonly feishuAllowOpenIds: string[]
+
+    /** Optional explicit Feishu open_id -> namespace bindings */
+    public readonly feishuUserBindings: FeishuUserBindingMap
+
+    /** Auto-create session on first private message */
+    public readonly feishuAutoCreateSession: boolean
+
+    /** Preferred machine for Feishu auto-created sessions */
+    public readonly feishuDefaultMachineId: string | null
+
+    /** Wait time for collecting assistant reply */
+    public readonly feishuReplyTimeoutMs: number
 
     /** Private constructor - use createConfiguration() instead */
     private constructor(
@@ -95,13 +146,24 @@ class Configuration {
         this.settingsFile = getSettingsFile(dataDir)
 
         // Apply server settings
-        this.telegramBotToken = serverSettings.telegramBotToken
-        this.telegramEnabled = Boolean(this.telegramBotToken)
-        this.telegramNotification = serverSettings.telegramNotification
         this.listenHost = serverSettings.listenHost
         this.listenPort = serverSettings.listenPort
         this.publicUrl = serverSettings.publicUrl
         this.corsOrigins = serverSettings.corsOrigins
+        this.feishuEnabled = process.env.FEISHU_ENABLED === 'true'
+        this.feishuLongConnection = process.env.FEISHU_LONG_CONNECTION !== 'false'
+        this.feishuAppId = process.env.FEISHU_APP_ID?.trim() || null
+        this.feishuAppSecret = process.env.FEISHU_APP_SECRET?.trim() || null
+        this.feishuBaseUrl = process.env.FEISHU_BASE_URL?.trim() || null
+        this.feishuAllowOpenIds = parseCommaSeparatedList(process.env.FEISHU_ALLOW_OPEN_IDS)
+        this.feishuUserBindings = parseFeishuUserBindings(process.env.FEISHU_USER_BINDINGS)
+        this.feishuAutoCreateSession = process.env.FEISHU_AUTO_CREATE_SESSION !== 'false'
+        this.feishuDefaultMachineId = process.env.FEISHU_DEFAULT_MACHINE_ID?.trim() || null
+        this.feishuReplyTimeoutMs = (() => {
+            const raw = process.env.FEISHU_REPLY_TIMEOUT_MS
+            const parsed = raw ? Number(raw) : NaN
+            return Number.isFinite(parsed) && parsed > 0 ? parsed : 90_000
+        })()
 
         // CLI API token - will be set by _setCliApiToken() before create() returns
         this.cliApiToken = ''
@@ -117,12 +179,16 @@ class Configuration {
         if (!existsSync(this.dataDir)) {
             mkdirSync(this.dataDir, { recursive: true })
         }
+
+        if (this.feishuEnabled && (!this.feishuAppId || !this.feishuAppSecret)) {
+            throw new Error('FEISHU_ENABLED=true requires FEISHU_APP_ID and FEISHU_APP_SECRET')
+        }
     }
 
     /** Create configuration asynchronously */
     static async create(): Promise<Configuration> {
         // 1. Determine data directory (env only - not persisted)
-        const homeOverride = process.env.AGENTCHAT_HOME || process.env.HAPI_HOME
+        const homeOverride = process.env.AGENTCHAT_HOME
         const dataDir = homeOverride
             ? homeOverride.replace(/^~/, homedir())
             : join(homedir(), '.agentchat')

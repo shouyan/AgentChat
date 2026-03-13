@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export type HappyMcpToolDefinition = {
+export type AgentChatMcpToolDefinition = {
     name:
         | 'change_title'
         | 'room_get_context'
@@ -17,7 +17,7 @@ export type HappyMcpToolDefinition = {
     inputSchema: z.ZodTypeAny
 }
 
-export const happyMcpToolDefinitions: HappyMcpToolDefinition[] = [
+export const agentchatMcpToolDefinitions: AgentChatMcpToolDefinition[] = [
     {
         name: 'change_title',
         title: 'Change Chat Title',

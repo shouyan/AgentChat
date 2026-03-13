@@ -5,6 +5,7 @@ import type {
     MachinePathsExistsResponse,
     MachinesResponse,
     ProviderHealthResponse,
+    RunnerEnvResponse,
     SpawnResponse,
 } from '@/types/api'
 import { ApiClient } from '../core'
@@ -26,6 +27,8 @@ declare module '../core' {
         restartRunner(machineId: string): Promise<MachineActionResponse>
         cleanupDeadSessions(machineId: string): Promise<MachineCleanupResponse>
         runProviderHealthCheck(machineId: string): Promise<ProviderHealthResponse>
+        getRunnerEnv(machineId: string): Promise<RunnerEnvResponse>
+        saveRunnerEnv(machineId: string, content: string): Promise<RunnerEnvResponse>
     }
 }
 
@@ -81,6 +84,17 @@ Object.assign(ApiClient.prototype, {
     async runProviderHealthCheck(this: ApiClient, machineId: string): Promise<ProviderHealthResponse> {
         return await this.request<ProviderHealthResponse>(`/api/machines/${encodeURIComponent(machineId)}/provider-health`, {
             method: 'POST',
+        })
+    },
+
+    async getRunnerEnv(this: ApiClient, machineId: string): Promise<RunnerEnvResponse> {
+        return await this.request<RunnerEnvResponse>(`/api/machines/${encodeURIComponent(machineId)}/runner-env`)
+    },
+
+    async saveRunnerEnv(this: ApiClient, machineId: string, content: string): Promise<RunnerEnvResponse> {
+        return await this.request<RunnerEnvResponse>(`/api/machines/${encodeURIComponent(machineId)}/runner-env`, {
+            method: 'PUT',
+            body: JSON.stringify({ content }),
         })
     },
 })

@@ -8,8 +8,8 @@ import type { CodexSession } from './session';
 import { parseCodexCliOverrides } from './utils/codexCliOverrides';
 import { bootstrapSession } from '@/agent/sessionFactory';
 import { createModeChangeHandler, createRunnerLifecycle, setControlledByUser } from '@/agent/runnerLifecycle';
-import { isPermissionModeAllowedForFlavor } from '@hapi/protocol';
-import { PermissionModeSchema } from '@hapi/protocol/schemas';
+import { isPermissionModeAllowedForFlavor } from '@agentchat/protocol';
+import { PermissionModeSchema } from '@agentchat/protocol/schemas';
 import { formatMessageWithAttachments } from '@/utils/attachmentFormatter';
 import { getEffectiveCwd } from '@/utils/effectiveCwd';
 
@@ -34,6 +34,7 @@ export async function runCodex(opts: {
         flavor: 'codex',
         startedBy,
         workingDirectory,
+        model: opts.model,
         agentState: state
     });
 
@@ -51,7 +52,7 @@ export async function runCodex(opts: {
     const sessionWrapperRef: { current: CodexSession | null } = { current: null };
 
     let currentPermissionMode: PermissionMode = opts.permissionMode ?? 'default';
-    const currentModel = opts.model;
+    let currentModel = opts.model;
     let currentCollaborationMode: EnhancedMode['collaborationMode'];
 
     const lifecycle = createRunnerLifecycle({
@@ -69,6 +70,11 @@ export async function runCodex(opts: {
             return;
         }
         sessionInstance.setPermissionMode(currentPermissionMode);
+        sessionInstance.setModel(currentModel);
+        session.updateMetadata((currentMetadata) => ({
+            ...currentMetadata,
+            model: currentModel,
+        }));
         logger.debug(`[Codex] Synced session permission mode for keepalive: ${currentPermissionMode}`);
     };
 
@@ -119,7 +125,7 @@ export async function runCodex(opts: {
         if (!payload || typeof payload !== 'object') {
             throw new Error('Invalid session config payload');
         }
-        const config = payload as { permissionMode?: unknown; collaborationMode?: unknown };
+        const config = payload as { permissionMode?: unknown; collaborationMode?: unknown; model?: unknown };
 
         if (config.permissionMode !== undefined) {
             currentPermissionMode = resolvePermissionMode(config.permissionMode);
@@ -129,8 +135,15 @@ export async function runCodex(opts: {
             currentCollaborationMode = resolveCollaborationMode(config.collaborationMode);
         }
 
+        if (config.model !== undefined) {
+            if (typeof config.model !== 'string' || !config.model.trim()) {
+                throw new Error('Invalid model');
+            }
+            currentModel = config.model.trim();
+        }
+
         syncSessionMode();
-        return { applied: { permissionMode: currentPermissionMode, collaborationMode: currentCollaborationMode } };
+        return { applied: { permissionMode: currentPermissionMode, model: currentModel, collaborationMode: currentCollaborationMode } };
     });
 
     try {

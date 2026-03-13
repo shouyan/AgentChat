@@ -1,7 +1,7 @@
-import type { ClientToServerEvents } from '@hapi/protocol'
+import type { ClientToServerEvents } from '@agentchat/protocol'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
-import type { ModelMode, PermissionMode } from '@hapi/protocol/types'
+import type { ModelMode, PermissionMode } from '@agentchat/protocol/types'
 import type { Store, StoredSession } from '../../../store'
 import type { SyncEvent } from '../../../sync/syncEngine'
 import { mergeSessionMetadataPreservingSystemFields } from '../../../sync/sessionMetadata'
@@ -100,7 +100,7 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
         const teamDelta = extractTeamStateFromMessageContent(content)
         if (teamDelta) {
             const existingSession = store.sessions.getSession(sid)
-            const existingTeamState = existingSession?.teamState as import('@hapi/protocol/types').TeamState | null | undefined
+            const existingTeamState = existingSession?.teamState as import('@agentchat/protocol/types').TeamState | null | undefined
             const newTeamState = applyTeamStateDelta(existingTeamState ?? null, teamDelta)
             const updated = store.sessions.setSessionTeamState(sid, newTeamState, msg.createdAt, session.namespace)
             if (updated) {

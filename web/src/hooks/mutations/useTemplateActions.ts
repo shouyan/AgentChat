@@ -4,7 +4,7 @@ import type {
   RoleSlotTemplate,
   RoomTemplateDefinition,
   TemplateOverrideState,
-} from '@hapi/protocol/templates'
+} from '@agentchat/protocol/templates'
 import { queryKeys } from '@/lib/query-keys'
 
 function syncTemplates(queryClient: ReturnType<typeof useQueryClient>, nextCatalog: TemplatesResponse) {

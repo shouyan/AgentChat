@@ -1,10 +1,11 @@
 import { logger } from '@/ui/logger'
+import { resolveDefaultShell } from '@/utils/shell'
 import type {
     TerminalErrorPayload,
     TerminalExitPayload,
     TerminalOutputPayload,
     TerminalReadyPayload
-} from '@hapi/protocol'
+} from '@agentchat/protocol'
 import type { TerminalSession } from './types'
 
 type TerminalRuntime = TerminalSession & {
@@ -28,9 +29,8 @@ const DEFAULT_IDLE_TIMEOUT_MS = 15 * 60_000
 const DEFAULT_MAX_TERMINALS = 4
 const SENSITIVE_ENV_KEYS = new Set([
     'CLI_API_TOKEN',
-    'HAPI_API_URL',
-    'HAPI_HTTP_MCP_URL',
-    'TELEGRAM_BOT_TOKEN',
+    'AGENTCHAT_API_URL',
+    'AGENTCHAT_HTTP_MCP_URL',
     'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY',
     'GEMINI_API_KEY',
@@ -46,15 +46,6 @@ function resolveEnvNumber(name: string, fallback: number): number {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
-function resolveShell(): string {
-    if (process.env.SHELL) {
-        return process.env.SHELL
-    }
-    if (process.platform === 'darwin') {
-        return '/bin/zsh'
-    }
-    return '/bin/bash'
-}
 
 function buildFilteredEnv(): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {}
@@ -89,8 +80,8 @@ export class TerminalManager {
         this.onOutput = options.onOutput
         this.onExit = options.onExit
         this.onError = options.onError
-        this.idleTimeoutMs = options.idleTimeoutMs ?? resolveEnvNumber('HAPI_TERMINAL_IDLE_TIMEOUT_MS', DEFAULT_IDLE_TIMEOUT_MS)
-        this.maxTerminals = options.maxTerminals ?? resolveEnvNumber('HAPI_TERMINAL_MAX_TERMINALS', DEFAULT_MAX_TERMINALS)
+        this.idleTimeoutMs = options.idleTimeoutMs ?? resolveEnvNumber('AGENTCHAT_TERMINAL_IDLE_TIMEOUT_MS', DEFAULT_IDLE_TIMEOUT_MS)
+        this.maxTerminals = options.maxTerminals ?? resolveEnvNumber('AGENTCHAT_TERMINAL_MAX_TERMINALS', DEFAULT_MAX_TERMINALS)
         this.filteredEnv = buildFilteredEnv()
     }
 
@@ -121,7 +112,7 @@ export class TerminalManager {
         }
 
         const sessionPath = this.getSessionPath() ?? process.cwd()
-        const shell = resolveShell()
+        const shell = resolveDefaultShell(this.filteredEnv)
         const decoder = new TextDecoder()
 
         try {

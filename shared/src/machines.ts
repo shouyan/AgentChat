@@ -50,11 +50,11 @@ export type MachineProviderHealthMap = z.infer<typeof MachineProviderHealthMapSc
 export const MachineMetadataSchema = z.object({
     host: z.string(),
     platform: z.string(),
-    happyCliVersion: z.string(),
+    agentchatCliVersion: z.string(),
     displayName: z.string().optional(),
     homeDir: z.string(),
-    happyHomeDir: z.string(),
-    happyLibDir: z.string(),
+    agentchatHomeDir: z.string(),
+    agentchatLibDir: z.string(),
     providers: MachineProviderStatusMapSchema.optional()
 })
 export type MachineMetadata = z.infer<typeof MachineMetadataSchema>

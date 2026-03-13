@@ -1,5 +1,5 @@
 /**
- * WebSocket client for machine/runner communication with hapi-hub
+ * WebSocket client for machine/runner communication with agentchat-hub
  */
 
 import { io, type Socket } from 'socket.io-client'
@@ -8,7 +8,7 @@ import { dirname, resolve } from 'node:path'
 import { homedir } from 'node:os'
 import { logger } from '@/ui/logger'
 import { configuration } from '@/configuration'
-import type { Update, UpdateMachineBody } from '@hapi/protocol'
+import type { Update, UpdateMachineBody } from '@agentchat/protocol'
 import type { RunnerState, Machine, MachineMetadata } from './types'
 import { RunnerStateSchema, MachineMetadataSchema } from './types'
 import { backoff } from '@/utils/time'
@@ -18,7 +18,8 @@ import type { SpawnSessionOptions, SpawnSessionResult } from '../modules/common/
 import { applyVersionedAck } from './versionedUpdate'
 import { listDirectoryEntries } from '../modules/common/directoryListing'
 import { isProcessAlive } from '@/utils/process'
-import type { MachineProviderHealthMap } from '@hapi/protocol/machines'
+import type { MachineProviderHealthMap } from '@agentchat/protocol/machines'
+import { ensureRunnerEnvFile, readRunnerEnvFileText, writeRunnerEnvFileText } from '@/runner/envFile'
 
 interface ServerToRunnerEvents {
     update: (data: Update) => void
@@ -100,6 +101,17 @@ interface MachineListDirectoryResponse {
     error?: string
 }
 
+interface MachineRunnerEnvResponse {
+    success: boolean
+    path?: string
+    content?: string
+    error?: string
+}
+
+interface MachineUpdateRunnerEnvRequest {
+    content?: string
+}
+
 export class ApiMachineClient {
     private socket!: Socket<ServerToRunnerEvents, RunnerToServerEvents>
     private keepAliveInterval: NodeJS.Timeout | null = null
@@ -171,10 +183,48 @@ export class ApiMachineClient {
                 }
             }
         })
+
+        this.rpcHandlerManager.registerHandler<undefined, MachineRunnerEnvResponse>('get-runner-env', async () => {
+            try {
+                await ensureRunnerEnvFile()
+                return {
+                    success: true,
+                    path: configuration.runnerEnvFile,
+                    content: await readRunnerEnvFileText(),
+                }
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : 'Failed to read runner env file'
+                }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineUpdateRunnerEnvRequest, MachineRunnerEnvResponse>('set-runner-env', async (params) => {
+            try {
+                if (typeof params?.content !== 'string') {
+                    return {
+                        success: false,
+                        error: 'Runner env content is required'
+                    }
+                }
+                await writeRunnerEnvFileText(params.content)
+                return {
+                    success: true,
+                    path: configuration.runnerEnvFile,
+                    content: await readRunnerEnvFileText(),
+                }
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : 'Failed to save runner env file'
+                }
+            }
+        })
     }
 
     setRPCHandlers({ spawnSession, stopSession, listSessions, requestShutdown, getProviderHealth }: MachineRpcHandlers): void {
-        this.rpcHandlerManager.registerHandler('spawn-happy-session', async (params: any) => {
+        this.rpcHandlerManager.registerHandler('spawn-agentchat-session', async (params: any) => {
             const { directory, sessionId, resumeSessionId, machineId, approvedNewDirectoryCreation, agent, model, yolo, token, sessionType, worktreeName } = params || {}
 
             if (!directory) {
@@ -335,12 +385,12 @@ export class ApiMachineClient {
             logger.debug('[API MACHINE] Connected to bot')
             this.rpcHandlerManager.onSocketConnect(this.socket)
             this.updateMachineMetadata(() => this.machine.metadata ?? {
-                host: process.env.HAPI_HOSTNAME || this.machine.id,
+                host: process.env.AGENTCHAT_HOSTNAME || this.machine.id,
                 platform: process.platform,
-                happyCliVersion: 'unknown',
+                agentchatCliVersion: 'unknown',
                 homeDir: process.env.HOME || '',
-                happyHomeDir: process.env.AGENTCHAT_HOME || process.env.HAPI_HOME || '',
-                happyLibDir: process.cwd()
+                agentchatHomeDir: process.env.AGENTCHAT_HOME || '',
+                agentchatLibDir: process.cwd()
             }).catch((error) => {
                 logger.debug('[API MACHINE] Failed to update metadata on connect', error)
             })

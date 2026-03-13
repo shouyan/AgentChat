@@ -7,7 +7,7 @@ describe('extractErrorInfo', () => {
             message: 'Request failed with status code 400',
             response: {
                 status: 400,
-                headers: { 'x-hapi-protocol-version': '2' },
+                headers: { 'x-agentchat-protocol-version': '2' },
                 data: { error: 'Invalid body' }
             }
         }
@@ -30,7 +30,7 @@ describe('extractErrorInfo', () => {
             serverProtocolVersion: 3,
             response: {
                 status: 200,
-                headers: { 'x-hapi-protocol-version': '5' },
+                headers: { 'x-agentchat-protocol-version': '5' },
                 data: {}
             }
         })
@@ -49,7 +49,7 @@ describe('extractErrorInfo', () => {
             message: 'fail',
             response: {
                 status: 200,
-                headers: { 'x-hapi-protocol-version': 'abc' },
+                headers: { 'x-agentchat-protocol-version': 'abc' },
                 data: {}
             }
         }
@@ -61,7 +61,7 @@ describe('extractErrorInfo', () => {
 describe('apiValidationError', () => {
     it('creates error with serverProtocolVersion from response header', () => {
         const fakeResponse = {
-            headers: { 'x-hapi-protocol-version': '1' }
+            headers: { 'x-agentchat-protocol-version': '1' }
         }
         const err = apiValidationError('Invalid /cli/machines response', fakeResponse as any)
         expect(err.message).toBe('Invalid /cli/machines response')
@@ -77,7 +77,7 @@ describe('apiValidationError', () => {
 
     it('round-trips through extractErrorInfo', () => {
         const fakeResponse = {
-            headers: { 'x-hapi-protocol-version': '2' }
+            headers: { 'x-agentchat-protocol-version': '2' }
         }
         const err = apiValidationError('Invalid /cli/machines response', fakeResponse as any)
         const info = extractErrorInfo(err)

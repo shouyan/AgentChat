@@ -26,7 +26,7 @@ vi.mock('@/hooks/queries/useSession', () => ({
         session: {
             id: 'session-1',
             active: true,
-            metadata: { path: '/tmp/project' }
+            metadata: { path: 'workspace/project' }
         }
     })
 }))

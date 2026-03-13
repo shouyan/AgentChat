@@ -1,4 +1,4 @@
-import { getPermissionModeOptionsForFlavor, MODEL_MODE_LABELS, MODEL_MODES } from '@hapi/protocol'
+import { getPermissionModeOptionsForFlavor, MODEL_MODE_LABELS, MODEL_MODES } from '@agentchat/protocol'
 import { ComposerPrimitive, useAssistantApi, useAssistantState } from '@assistant-ui/react'
 import {
     type ChangeEvent as ReactChangeEvent,
@@ -36,10 +36,11 @@ export interface TextInputState {
 
 const defaultSuggestionHandler = async (): Promise<Suggestion[]> => []
 
-export function HappyComposer(props: {
+export function AgentChatComposer(props: {
     disabled?: boolean
     permissionMode?: PermissionMode
     modelMode?: ModelMode
+    modelValue?: string | null
     active?: boolean
     allowSendWhenInactive?: boolean
     thinking?: boolean
@@ -48,7 +49,7 @@ export function HappyComposer(props: {
     controlledByUser?: boolean
     agentFlavor?: string | null
     onPermissionModeChange?: (mode: PermissionMode) => void
-    onModelModeChange?: (mode: ModelMode) => void
+    onModelChange?: (model: string) => void
     onSwitchToRemote?: () => void
     onTerminal?: () => void
     autocompletePrefixes?: string[]
@@ -64,6 +65,7 @@ export function HappyComposer(props: {
         disabled = false,
         permissionMode: rawPermissionMode,
         modelMode: rawModelMode,
+        modelValue,
         active = true,
         allowSendWhenInactive = false,
         thinking = false,
@@ -72,7 +74,7 @@ export function HappyComposer(props: {
         controlledByUser = false,
         agentFlavor,
         onPermissionModeChange,
-        onModelModeChange,
+        onModelChange,
         onSwitchToRemote,
         onTerminal,
         autocompletePrefixes = ['@', '/', '$'],
@@ -117,6 +119,7 @@ export function HappyComposer(props: {
     const [isAborting, setIsAborting] = useState(false)
     const [isSwitching, setIsSwitching] = useState(false)
     const [showContinueHint, setShowContinueHint] = useState(false)
+    const [customModel, setCustomModel] = useState(modelValue ?? '')
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const prevControlledByUser = useRef(controlledByUser)
@@ -130,6 +133,10 @@ export function HappyComposer(props: {
             return { text: composerText, selection: { start: newPos, end: newPos } }
         })
     }, [composerText])
+
+    useEffect(() => {
+        setCustomModel(modelValue ?? '')
+    }, [modelValue])
 
     // Track one-time "continue" hint after switching from local to remote.
     useEffect(() => {
@@ -324,18 +331,18 @@ export function HappyComposer(props: {
 
     useEffect(() => {
         const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
-            if (e.key === 'm' && (e.metaKey || e.ctrlKey) && onModelModeChange && isClaudeFlavor(agentFlavor)) {
+            if (e.key === 'm' && (e.metaKey || e.ctrlKey) && onModelChange && isClaudeFlavor(agentFlavor)) {
                 e.preventDefault()
                 const currentIndex = MODEL_MODES.indexOf(modelMode as typeof MODEL_MODES[number])
                 const nextIndex = (currentIndex + 1) % MODEL_MODES.length
-                onModelModeChange(MODEL_MODES[nextIndex])
+                onModelChange(MODEL_MODES[nextIndex])
                 haptic('light')
             }
         }
 
         window.addEventListener('keydown', handleGlobalKeyDown)
         return () => window.removeEventListener('keydown', handleGlobalKeyDown)
-    }, [modelMode, onModelModeChange, haptic, agentFlavor])
+    }, [modelMode, onModelChange, haptic, agentFlavor])
 
     const handleChange = useCallback((e: ReactChangeEvent<HTMLTextAreaElement>) => {
         const selection = {
@@ -390,15 +397,25 @@ export function HappyComposer(props: {
         haptic('light')
     }, [onPermissionModeChange, controlsDisabled, haptic])
 
-    const handleModelChange = useCallback((mode: ModelMode) => {
-        if (!onModelModeChange || controlsDisabled) return
-        onModelModeChange(mode)
+    const handleModelModeChange = useCallback((mode: ModelMode) => {
+        if (!onModelChange || controlsDisabled) return
+        onModelChange(mode)
         setShowSettings(false)
         haptic('light')
-    }, [onModelModeChange, controlsDisabled, haptic])
+    }, [onModelChange, controlsDisabled, haptic])
+
+    const handleCustomModelSave = useCallback(() => {
+        const nextModel = customModel.trim()
+        if (!onModelChange || controlsDisabled || nextModel.length === 0) return
+        onModelChange(nextModel)
+        setShowSettings(false)
+        haptic('light')
+    }, [customModel, onModelChange, controlsDisabled, haptic])
 
     const showPermissionSettings = Boolean(onPermissionModeChange && permissionModeOptions.length > 0)
-    const showModelSettings = Boolean(onModelModeChange && isClaudeFlavor(agentFlavor))
+    const showClaudeModelSettings = Boolean(onModelChange && isClaudeFlavor(agentFlavor))
+    const showCustomModelSettings = Boolean(onModelChange && (agentFlavor === 'codex' || agentFlavor === 'gemini'))
+    const showModelSettings = showClaudeModelSettings || showCustomModelSettings
     const showSettingsButton = Boolean(showPermissionSettings || showModelSettings)
     const showAbortButton = true
     const voiceEnabled = Boolean(onVoiceToggle)
@@ -453,7 +470,7 @@ export function HappyComposer(props: {
                             <div className="mx-3 h-px bg-[var(--app-divider)]" />
                         ) : null}
 
-                        {showModelSettings ? (
+                        {showClaudeModelSettings ? (
                             <div className="py-2">
                                 <div className="px-3 pb-1 text-xs font-semibold text-[var(--app-hint)]">
                                     {t('misc.model')}
@@ -468,7 +485,7 @@ export function HappyComposer(props: {
                                                 ? 'cursor-not-allowed opacity-50'
                                                 : 'cursor-pointer hover:bg-[var(--app-secondary-bg)]'
                                         }`}
-                                        onClick={() => handleModelChange(mode)}
+                                        onClick={() => handleModelModeChange(mode)}
                                         onMouseDown={(e) => e.preventDefault()}
                                     >
                                         <div
@@ -487,6 +504,38 @@ export function HappyComposer(props: {
                                         </span>
                                     </button>
                                 ))}
+                            </div>
+                        ) : null}
+
+                        {showCustomModelSettings ? (
+                            <div className="py-2">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--app-hint)]">
+                                    {t('misc.model')}
+                                </div>
+                                <div className="px-3">
+                                    <input
+                                        type="text"
+                                        value={customModel}
+                                        disabled={controlsDisabled}
+                                        onChange={(event) => setCustomModel(event.target.value)}
+                                        placeholder={agentFlavor === 'gemini' ? 'gemini-2.5-pro' : 'gpt-5.4'}
+                                        className="w-full rounded-xl border border-[var(--app-divider)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--app-fg)] outline-none transition focus:border-[var(--app-link)] disabled:cursor-not-allowed disabled:opacity-50"
+                                    />
+                                    <div className="mt-2 flex items-center justify-between gap-2">
+                                        <div className="min-w-0 truncate text-xs text-[var(--app-hint)]">
+                                            {modelValue ? `Current: ${modelValue}` : 'Use the model default if left unchanged.'}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            disabled={controlsDisabled || customModel.trim().length === 0}
+                                            className="rounded-full bg-[var(--app-link)] px-3 py-1 text-xs font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+                                            onClick={handleCustomModelSave}
+                                            onMouseDown={(e) => e.preventDefault()}
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ) : null}
                     </FloatingOverlay>
@@ -520,7 +569,8 @@ export function HappyComposer(props: {
         modelMode,
         permissionModeOptions,
         handlePermissionChange,
-        handleModelChange,
+        handleModelModeChange,
+        handleCustomModelSave,
         handleSuggestionSelect
     ])
 

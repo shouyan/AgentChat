@@ -85,18 +85,18 @@ describe('codexSessionScanner', () => {
 
         await mkdir(outsideDir, { recursive: true });
         const baseLines = [
-            JSON.stringify({ type: 'session_meta', payload: { id: matchingSessionId, cwd: '/data/github/happy/hapi', timestamp: '2025-12-22T00:00:30.000Z' } }),
+            JSON.stringify({ type: 'session_meta', payload: { id: matchingSessionId, cwd: '/data/github/agentchat/source', timestamp: '2025-12-22T00:00:30.000Z' } }),
             JSON.stringify({ type: 'event_msg', payload: { type: 'agent_message', message: 'hello' } })
         ];
         await writeFile(matchingFile, baseLines.join('\n') + '\n');
         await writeFile(
             outsideFile,
-            JSON.stringify({ type: 'session_meta', payload: { id: outsideSessionId, cwd: '/data/github/happy/hapi', timestamp: '2025-12-20T00:00:00.000Z' } }) + '\n'
+            JSON.stringify({ type: 'session_meta', payload: { id: outsideSessionId, cwd: '/data/github/agentchat/source', timestamp: '2025-12-20T00:00:00.000Z' } }) + '\n'
         );
 
         scanner = await createCodexSessionScanner({
             sessionId: null,
-            cwd: '/data/github/happy/hapi',
+            cwd: '/data/github/agentchat/source',
             startupTimestampMs: referenceTimestampMs,
             sessionStartWindowMs: windowMs,
             onEvent: (event) => events.push(event)

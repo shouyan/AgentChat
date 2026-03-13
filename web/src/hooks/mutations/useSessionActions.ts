@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { isPermissionModeAllowedForFlavor } from '@hapi/protocol'
+import { isPermissionModeAllowedForFlavor } from '@agentchat/protocol'
 import type { ApiClient } from '@/api/client'
-import type { ModelMode, PermissionMode } from '@/types/api'
+import type { PermissionMode } from '@/types/api'
 import { queryKeys } from '@/lib/query-keys'
 import { clearMessageWindow } from '@/lib/message-window-store'
 import { isKnownFlavor } from '@/lib/agentFlavorUtils'
@@ -15,7 +15,7 @@ export function useSessionActions(
     archiveSession: () => Promise<void>
     switchSession: () => Promise<void>
     setPermissionMode: (mode: PermissionMode) => Promise<void>
-    setModelMode: (mode: ModelMode) => Promise<void>
+    setSessionModel: (model: string) => Promise<void>
     renameSession: (name: string) => Promise<void>
     deleteSession: () => Promise<void>
     isPending: boolean
@@ -72,11 +72,11 @@ export function useSessionActions(
     })
 
     const modelMutation = useMutation({
-        mutationFn: async (mode: ModelMode) => {
+        mutationFn: async (model: string) => {
             if (!api || !sessionId) {
                 throw new Error('Session unavailable')
             }
-            await api.setModelMode(sessionId, mode)
+            await api.setSessionModel(sessionId, model)
         },
         onSuccess: () => void invalidateSession(),
     })
@@ -112,7 +112,7 @@ export function useSessionActions(
         archiveSession: archiveMutation.mutateAsync,
         switchSession: switchMutation.mutateAsync,
         setPermissionMode: permissionMutation.mutateAsync,
-        setModelMode: modelMutation.mutateAsync,
+        setSessionModel: modelMutation.mutateAsync,
         renameSession: renameMutation.mutateAsync,
         deleteSession: deleteMutation.mutateAsync,
         isPending: abortMutation.isPending

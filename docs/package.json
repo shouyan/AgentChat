@@ -1,14 +1,14 @@
 {
-  "name": "hapi-docs",
+  "name": "agentchat-docs",
   "version": "1.0.0",
-  "description": "HAPI Documentation",
+  "description": "AgentChat Documentation",
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
-  "keywords": ["hapi", "ai", "agent", "documentation"],
+  "keywords": ["agentchat", "ai", "agent", "documentation"],
   "author": "",
   "license": "AGPL-3.0-only",
   "devDependencies": {

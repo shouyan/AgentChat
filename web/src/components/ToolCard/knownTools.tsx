@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { SessionMetadataSummary } from '@/types/api'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import { BulbIcon, ClipboardIcon, EyeIcon, FileDiffIcon, GlobeIcon, MessageSquareIcon, PuzzleIcon, QuestionIcon, RocketIcon, SearchIcon, TerminalIcon, UsersIcon, WrenchIcon } from '@/components/ToolCard/icons'
 import type { ChecklistItem } from '@/components/ToolCard/checklist'
 import { extractTodoChecklist, extractUpdatePlanChecklist } from '@/components/ToolCard/checklist'
@@ -8,7 +8,7 @@ import { basename, resolveDisplayPath } from '@/utils/path'
 import { getInputStringAny, truncate } from '@/lib/toolInputUtils'
 
 const DEFAULT_ICON_CLASS = 'h-3.5 w-3.5'
-// Tool presentation registry for `hapi/web` (aligned with `hapi-app`).
+// Tool presentation registry for `agentchat/web` (aligned with `agentchat-app`).
 
 export type ToolPresentation = {
     icon: ReactNode

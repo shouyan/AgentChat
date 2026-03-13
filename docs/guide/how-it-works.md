@@ -1,223 +1,140 @@
 # How it Works
 
-HAPI consists of three interconnected components that work together to provide remote AI agent control.
+AgentChat has three core pieces working together:
+
+- **CLI** runs the coding agent on your machine
+- **Hub** stores state and exposes APIs
+- **Web/PWA** gives you remote control from another device
 
 ## Architecture Overview
 
+```text
+┌──────────────┐   Socket.IO   ┌──────────────┐   REST + SSE   ┌──────────────┐
+│ AgentChat CLI│◄────────────►│ AgentChat Hub│◄──────────────►│  Web / PWA   │
+│ + AI Agent   │              │ + SQLite     │                │  on phone     │
+└──────────────┘              └──────────────┘                └──────────────┘
+        │                             │
+        │ local process               │ http://localhost:3217
+        ▼                             ▼
+   project files               optional HTTPS / tunnel
 ```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                     Your Machine (Local or Hub Host)                       │
-│                                                                            │
-│   ┌──────────────┐         ┌──────────────┐         ┌──────────────┐       │
-│   │              │         │              │         │              │       │
-│   │   HAPI CLI   │◄───────►│  HAPI Hub    │◄───────►│   Web App    │       │
-│   │              │ Socket  │              │   SSE   │  (embedded)  │       │
-│   │  + AI Agent  │   .IO   │  + SQLite    │         │              │       │
-│   │              │         │  + REST API  │         │              │       │
-│   └──────────────┘         └──────┬───────┘         └──────────────┘       │
-│                                   │                                        │
-│                                   │ localhost:3006                         │
-└───────────────────────────────────┼────────────────────────────────────────┘
-                                    │
-                          ┌─────────▼─────────┐
-                          │  Tunnel (Optional)│
-                          │  Cloudflare/ngrok │
-                          └─────────┬─────────┘
-                                    │
-┌───────────────────────────────────┼────────────────────────────────────────┐
-│                           Public Internet                                  │
-│                                   │                                        │
-│         ┌─────────────────────────┼─────────────────────────┐              │
-│         │                         ▼                         │              │
-│         │    ┌──────────────┐           ┌──────────────┐    │              │
-│         │    │              │           │              │    │              │
-│         │    │  Telegram    │           │    PWA /     │    │              │
-│         │    │  Mini App    │           │   Browser    │    │              │
-│         │    │              │           │              │    │              │
-│         │    └──────────────┘           └──────────────┘    │              │
-│         │                                                   │              │
-│         └───────────────────────────────────────────────────┘              │
-│                            Your Phone                                      │
-└────────────────────────────────────────────────────────────────────────────┘
-```
-
-> **Note:** The hub can run on your local desktop or a remote host (VPS, cloud, etc.). If deployed on a host with a public IP, tunneling is not required.
 
 ## Components
 
-### HAPI CLI
+### AgentChat CLI
 
-The CLI is a wrapper around AI coding agents (Claude Code, Codex, Cursor Agent, Gemini, OpenCode). It:
+The CLI wraps Claude Code, Codex, Cursor Agent, Gemini, and OpenCode. It:
 
-- Starts and manages coding sessions
-- Registers sessions with the HAPI hub
-- Relays messages and permission requests
-- Provides MCP (Model Context Protocol) tools
+- Starts and manages sessions
+- Registers them with the hub
+- Streams messages and permission requests
+- Exposes AgentChat MCP tools to supported agents
 
-**Key Commands:**
-```bash
-hapi              # Start Claude Code session
-hapi codex       # Start OpenAI Codex session
-hapi cursor      # Start Cursor Agent session
-hapi gemini      # Start Google Gemini session
-hapi opencode    # Start OpenCode session
-hapi runner start # Run background service for remote session spawning
-```
+### AgentChat Hub
 
-### HAPI Hub
+The hub is the central coordination service. It provides:
 
-The hub is the central service that connects everything:
+- REST endpoints for session actions
+- Socket.IO for CLI connectivity and RPC
+- SSE for live browser updates
+- SQLite persistence for sessions, messages, and machines
+- Web Push notifications for permission and ready events
 
-- **HTTP API** - RESTful endpoints for sessions, messages, permissions
-- **Socket.IO** - Real-time bidirectional communication with CLI
-- **SSE (Server-Sent Events)** - Live updates pushed to web clients
-- **SQLite Database** - Persistent storage for sessions and messages
-- **Telegram Bot** - Notifications and Mini App integration
+### Web App / PWA
 
-### Web App
+The web app is the remote control surface. It lets you:
 
-A React-based PWA that provides the mobile interface:
-
-- **Session List** - View all active and past sessions
-- **Chat Interface** - Send messages and view agent responses
-- **Permission Management** - Approve or deny tool access
-- **File Browser** - Browse project files and view git diffs
-- **Remote Spawn** - Start new sessions on any connected machine
+- Browse current and past sessions
+- Read and send messages
+- Approve or deny permissions
+- Inspect files, diffs, and terminal output
+- Spawn sessions on runner-connected machines
 
 ## Data Flow
 
 ### Starting a Session
 
-```
-1. User runs `hapi` in terminal
-         │
-         ▼
-2. CLI starts Claude Code (or other agent)
-         │
-         ▼
-3. CLI connects to hub via Socket.IO
-         │
-         ▼
-4. Hub creates session in database
-         │
-         ▼
-5. Web clients receive SSE update
-         │
-         ▼
-6. Session appears in mobile app
+```text
+1. User runs `agentchat`
+2. CLI starts the selected agent
+3. CLI connects to the hub over Socket.IO
+4. Hub stores the session and metadata
+5. Web clients receive the update over SSE
+6. The session appears on phone or desktop web
 ```
 
-### Permission Request Flow
+### Permission Requests
 
-```
-1. AI agent requests tool permission (e.g., file edit)
-         │
-         ▼
-2. CLI sends permission request to hub
-         │
-         ▼
-3. Hub stores request and notifies via SSE + Telegram
-         │
-         ▼
-4. User receives notification on phone
-         │
-         ▼
-5. User approves/denies in web app or Telegram
-         │
-         ▼
-6. Hub relays decision to CLI via Socket.IO
-         │
-         ▼
-7. CLI informs AI agent, execution continues
+```text
+1. Agent requests a permission
+2. CLI sends the request to the hub
+3. Hub stores it and publishes SSE / push events
+4. User opens the web app or PWA
+5. User approves or denies
+6. Hub relays the decision back to the CLI
 ```
 
 ### Message Flow
 
-```
-User (Phone)                 Hub                     CLI
-     │                         │                       │
-     │──── Send message ──────►│                       │
-     │                         │─── Socket.IO emit ───►│
-     │                         │                       │
-     │                         │                       ├── AI processes
-     │                         │                       │
-     │                         │◄── Stream response ───│
-     │◄─────── SSE ────────────│                       │
-     │                         │                       │
+```text
+Phone / Browser        Hub                CLI
+     │                  │                  │
+     │ send message     │                  │
+     ├─────────────────►│                  │
+     │                  ├─────────────────►│
+     │                  │   Socket.IO      │
+     │                  │                  ├─ agent runs
+     │                  │◄─────────────────┤
+     │     SSE update   │                  │
+     ◄──────────────────┤                  │
 ```
 
 ## Communication Protocols
 
-### CLI ↔ Hub: Socket.IO
+### CLI ↔ Hub
 
-Real-time bidirectional communication for:
-- Session registration and heartbeat
-- Message relay (user input → agent)
-- Permission requests and responses
-- Metadata and state updates
-- RPC method invocation
+Socket.IO handles:
 
-### Hub ↔ Web: REST + SSE
+- Session registration
+- Keepalive and status updates
+- Permission requests
+- RPC calls for runner and machine operations
 
-- **REST API** for actions (send message, approve permission)
-- **SSE stream** for real-time updates (new messages, status changes)
+### Hub ↔ Web
 
-### External Access: Tunnel
+REST handles actions such as:
 
-For remote access outside your local network:
-- **Cloudflare Tunnel** (recommended) - Free, secure, reliable
-- **Tailscale** - Mesh VPN for private networks
-- **ngrok** - Quick setup for testing
+- Send message
+- Approve permission
+- Spawn session
 
-## Seamless Handoff
+SSE handles live updates such as:
 
-HAPI's defining feature is the ability to seamlessly hand off control between local terminal and remote devices without losing session state.
+- New messages
+- Session state changes
+- Machine updates
+
+## Local and Remote Modes
 
 ### Local Mode
 
-When working in local mode, you have the full terminal experience — it is native Claude Code, Codex, or OpenCode:
+Best for focused work at your terminal:
 
-- Direct keyboard input with instant response
-- Full terminal UI with syntax highlighting
-- Best for focused, uninterrupted coding sessions
-- All AI processing happens locally on your machine
+- Native agent interface
+- Fastest feedback loop
+- Full keyboard-driven flow
 
 ### Remote Mode
 
-Switch to remote mode when you need to step away:
+Best when you step away from the terminal:
 
-- Control via Web/PWA/Telegram from any device
-- Approve permissions on the go
-- Monitor progress while away from your desk
-- Session continues running on your local machine
+- Web/PWA access from any device
+- Remote approvals and messages
+- Session keeps running on your machine
 
-### How Switching Works
+### Switching
 
-```
-┌─────────────────┐                    ┌─────────────────┐
-│   Local Mode    │◄──────────────────►│   Remote Mode   │
-│   (Terminal)    │                    │   (Phone/Web)   │
-└─────────────────┘                    └─────────────────┘
-        │                                      │
-        │  ┌────────────────────────────┐      │
-        └─►│  Same Session, Same State  │◄─────┘
-           └────────────────────────────┘
-```
+- **Local → Remote** happens when remote input arrives
+- **Remote → Local** happens when you take control back from the terminal
 
-**Local → Remote:**
-- Receive a message from phone/web
-- Session automatically switches to remote mode
-- Terminal shows "Remote mode - waiting for input"
-
-**Remote → Local:**
-- Press double-space in terminal
-- Instantly regain local control
-- Continue typing as if you never left
-
-### Use Cases
-
-1. **Remote Control While Away** - Start a session at your desk, continue from your phone during commute or coffee break
-
-2. **Permission Approval** - AI requests file access, you get notified on phone, approve with one tap, session continues
-
-3. **Multi-Device Collaboration** - View session progress on your phone while your desktop does the heavy lifting
+The same session keeps running either way. AgentChat changes the control surface, not the session identity.

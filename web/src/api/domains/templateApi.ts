@@ -1,5 +1,5 @@
-import type { TemplatesResponse } from '@hapi/protocol/contracts/templates'
-import type { RoleSlotTemplate, RoomTemplateDefinition, TemplateOverrideState } from '@hapi/protocol/templates'
+import type { TemplatesResponse } from '@agentchat/protocol/contracts/templates'
+import type { RoleSlotTemplate, RoomTemplateDefinition, TemplateOverrideState } from '@agentchat/protocol/templates'
 import { ApiClient } from '../core'
 
 declare module '../core' {

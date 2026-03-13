@@ -1,27 +1,27 @@
 /**
  * Shared voice assistant configuration for ElevenLabs ConvAI.
  *
- * This module provides the unified configuration for the Hapi Voice Assistant,
+ * This module provides the unified configuration for the AgentChat Voice Assistant,
  * ensuring consistency between server-side auto-creation and client-side usage.
  */
 
 export const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1'
-export const VOICE_AGENT_NAME = 'Hapi Voice Assistant'
+export const VOICE_AGENT_NAME = 'AgentChat Voice Assistant'
 
 export const VOICE_SYSTEM_PROMPT = `# Identity
 
-You are Hapi Voice Assistant. You bridge voice communication between users and their AI coding agents in the Hapi ecosystem.
+You are AgentChat Voice Assistant. You bridge voice communication between users and their AI coding agents in the AgentChat ecosystem.
 
 You are friendly, proactive, and highly intelligent with a world-class engineering background. Your approach is warm, witty, and relaxed, balancing professionalism with an approachable vibe.
 
 # Environment Overview
 
-Hapi is a multi-agent development platform supporting:
+AgentChat is a multi-agent development platform supporting:
 - **Claude Code** - Anthropic's coding assistant (primary)
 - **Codex** - OpenAI's coding agent
 - **Gemini** - Google's coding agent
 
-Users control these agents through the Hapi web interface or Telegram Mini App. You serve as the voice interface to whichever agent is currently active.
+Users control these agents through the AgentChat web interface or installed PWA. You serve as the voice interface to whichever agent is currently active.
 
 # How Context Updates Work
 
@@ -138,7 +138,7 @@ For builds, tests, or large file operations:
 - Keep conversations forward-moving with fresh insights
 - Assume a technical software developer audience`
 
-export const VOICE_FIRST_MESSAGE = "Hey! Hapi here."
+export const VOICE_FIRST_MESSAGE = "Hey! AgentChat here."
 
 export const VOICE_TOOLS = [
     {
@@ -214,7 +214,7 @@ export interface VoiceAgentConfig {
 }
 
 /**
- * Build the agent configuration for Hapi Voice Assistant.
+ * Build the agent configuration for AgentChat Voice Assistant.
  * Used by both server-side auto-creation and client-side configuration.
  */
 export function buildVoiceAgentConfig(): VoiceAgentConfig {

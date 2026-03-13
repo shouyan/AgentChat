@@ -1,4 +1,4 @@
-import type { Session } from '@hapi/protocol/types'
+import type { Session } from '@agentchat/protocol/types'
 
 export function planMachineSessionCleanup(
     sessions: Session[],

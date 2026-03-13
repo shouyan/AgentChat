@@ -1,5 +1,5 @@
 /**
- * Global configuration for HAPI CLI
+ * Global configuration for AgentChat CLI
  *
  * Centralizes all configuration including environment variables and paths
  * Environment files should be loaded using Node's --env-file flag
@@ -17,47 +17,49 @@ class Configuration {
     public readonly isRunnerProcess: boolean
 
     // Directories and paths (from persistence)
-    public readonly happyHomeDir: string
+    public readonly agentchatHomeDir: string
     public readonly logsDir: string
     public readonly settingsFile: string
     public readonly privateKeyFile: string
     public readonly runnerStateFile: string
     public readonly runnerLockFile: string
+    public readonly runnerEnvFile: string
     public readonly currentCliVersion: string
 
     public readonly isExperimentalEnabled: boolean
 
     constructor() {
         // Server configuration
-        this._apiUrl = process.env.AGENTCHAT_API_URL || process.env.HAPI_API_URL || 'http://localhost:3217'
+        this._apiUrl = process.env.AGENTCHAT_API_URL || 'http://localhost:3217'
         this._cliApiToken = process.env.CLI_API_TOKEN || ''
 
         // Check if we're running as runner based on process args
         const args = getCliArgs()
         this.isRunnerProcess = args.length >= 2 && args[0] === 'runner' && (args[1] === 'start-sync')
 
-        // Directory configuration - Priority: HAPI_HOME env > default home dir
-        const homeOverride = process.env.AGENTCHAT_HOME || process.env.HAPI_HOME
+        // Directory configuration - Priority: AGENTCHAT_HOME env > default home dir
+        const homeOverride = process.env.AGENTCHAT_HOME
         if (homeOverride) {
             // Expand ~ to home directory if present
             const expandedPath = homeOverride.replace(/^~/, homedir())
-            this.happyHomeDir = expandedPath
+            this.agentchatHomeDir = expandedPath
         } else {
-            this.happyHomeDir = join(homedir(), '.agentchat')
+            this.agentchatHomeDir = join(homedir(), '.agentchat')
         }
 
-        this.logsDir = join(this.happyHomeDir, 'logs')
-        this.settingsFile = join(this.happyHomeDir, 'settings.json')
-        this.privateKeyFile = join(this.happyHomeDir, 'access.key')
-        this.runnerStateFile = join(this.happyHomeDir, 'runner.state.json')
-        this.runnerLockFile = join(this.happyHomeDir, 'runner.state.json.lock')
+        this.logsDir = join(this.agentchatHomeDir, 'logs')
+        this.settingsFile = join(this.agentchatHomeDir, 'settings.json')
+        this.privateKeyFile = join(this.agentchatHomeDir, 'access.key')
+        this.runnerStateFile = join(this.agentchatHomeDir, 'runner.state.json')
+        this.runnerLockFile = join(this.agentchatHomeDir, 'runner.state.json.lock')
+        this.runnerEnvFile = join(this.agentchatHomeDir, 'runner.env')
 
-        this.isExperimentalEnabled = ['true', '1', 'yes'].includes(process.env.HAPI_EXPERIMENTAL?.toLowerCase() || '')
+        this.isExperimentalEnabled = ['true', '1', 'yes'].includes(process.env.AGENTCHAT_EXPERIMENTAL?.toLowerCase() || '')
 
         this.currentCliVersion = packageJson.version
 
-        if (!existsSync(this.happyHomeDir)) {
-            mkdirSync(this.happyHomeDir, { recursive: true })
+        if (!existsSync(this.agentchatHomeDir)) {
+            mkdirSync(this.agentchatHomeDir, { recursive: true })
         }
         // Ensure directories exist
         if (!existsSync(this.logsDir)) {

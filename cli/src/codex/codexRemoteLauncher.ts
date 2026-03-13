@@ -9,7 +9,7 @@ import { DiffProcessor } from './utils/diffProcessor';
 import { logger } from '@/ui/logger';
 import { CodexDisplay } from '@/ui/ink/CodexDisplay';
 import type { CodexSessionConfig } from './types';
-import { buildHapiMcpBridge } from './utils/buildHapiMcpBridge';
+import { buildAgentchatMcpBridge } from './utils/buildAgentchatMcpBridge';
 import { emitReadyIfIdle } from './utils/emitReadyIfIdle';
 import type { CodexSession } from './session';
 import type { EnhancedMode } from './loop';
@@ -25,7 +25,7 @@ import {
     type RemoteLauncherExitReason
 } from '@/modules/common/remote/RemoteLauncherBase';
 
-type HappyServer = Awaited<ReturnType<typeof buildHapiMcpBridge>>['server'];
+type HappyServer = Awaited<ReturnType<typeof buildAgentchatMcpBridge>>['server'];
 
 function shouldUseAppServer(): boolean {
     const useMcpServer = process.env.CODEX_USE_MCP_SERVER === '1';
@@ -40,7 +40,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
     private permissionHandler: CodexPermissionHandler | null = null;
     private reasoningProcessor: ReasoningProcessor | null = null;
     private diffProcessor: DiffProcessor | null = null;
-    private happyServer: HappyServer | null = null;
+    private agentchatServer: HappyServer | null = null;
     private abortController: AbortController = new AbortController();
     private currentThreadId: string | null = null;
     private currentTurnId: string | null = null;
@@ -541,8 +541,8 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             });
         }
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
-        this.happyServer = happyServer;
+        const { server: agentchatServer, mcpServers } = await buildAgentchatMcpBridge(session.client);
+        this.agentchatServer = agentchatServer;
 
         this.setupAbortHandlers(session.client.rpcHandlerManager, {
             onAbort: () => this.handleAbort(),
@@ -577,7 +577,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             await appServerClient.connect();
             await appServerClient.initialize({
                 clientInfo: {
-                    name: 'hapi-codex-client',
+                    name: 'agentchat-codex-client',
                     version: '1.0.0'
                 }
             });
@@ -827,9 +827,9 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
 
         this.clearAbortHandlers(this.session.client.rpcHandlerManager);
 
-        if (this.happyServer) {
-            this.happyServer.stop();
-            this.happyServer = null;
+        if (this.agentchatServer) {
+            this.agentchatServer.stop();
+            this.agentchatServer = null;
         }
 
         this.permissionHandler?.reset();

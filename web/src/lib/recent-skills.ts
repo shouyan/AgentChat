@@ -1,4 +1,4 @@
-const RECENT_SKILLS_KEY = 'hapi-recent-skills'
+const RECENT_SKILLS_KEY = 'agentchat-recent-skills'
 const MAX_RECENT_SKILLS = 200
 
 type RecentSkillsMap = Record<string, number>

@@ -30,10 +30,10 @@ Set the environment variable before starting the hub:
 
 ```bash
 export ELEVENLABS_API_KEY="your-api-key"
-hapi hub --relay
+agentchat hub --relay
 ```
 
-The hub automatically creates a "Hapi Voice Assistant" agent in your ElevenLabs account on first use.
+The hub automatically creates a "AgentChat Voice Assistant" agent in your ElevenLabs account on first use.
 
 ### 3. (Optional) Custom Agent
 
@@ -85,10 +85,10 @@ The voice assistant has two tools to interact with your coding agent:
 ### Architecture
 
 ```
-Browser → WebRTC → ElevenLabs ConvAI → Voice Assistant → HAPI Hub → Coding Agent
+Browser → WebRTC → ElevenLabs ConvAI → Voice Assistant → AgentChat Hub → Coding Agent
 ```
 
-The voice connection uses WebRTC for low-latency audio streaming. The HAPI hub provides conversation tokens and handles authentication.
+The voice connection uses WebRTC for low-latency audio streaming. The AgentChat hub provides conversation tokens and handles authentication.
 
 ## Tips
 

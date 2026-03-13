@@ -3,7 +3,7 @@
  *
  * Automatically starts the AgentChat hub when CLI is launched
  * if specific conditions are met:
- * 1. AGENTCHAT_API_URL / HAPI_API_URL is not set (using default localhost:3217)
+ * 1. AGENTCHAT_API_URL is not set (using default localhost:3217)
  * 2. cliApiToken exists in settings.json (hub was previously started)
  * 3. Default hub port is not currently listening
  */
@@ -12,7 +12,7 @@ import chalk from 'chalk'
 import { createConnection } from 'node:net'
 import { configuration } from '@/configuration'
 import { readSettings } from '@/persistence'
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI'
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI'
 import { logger } from '@/ui/logger'
 
 const DEFAULT_SERVER_PORT = 3217
@@ -90,8 +90,8 @@ async function waitForServerReady(
  * Determine if hub should be auto-started
  */
 async function shouldAutoStartServer(): Promise<boolean> {
-    // Condition 1: AGENTCHAT_API_URL / HAPI_API_URL not set (using default localhost:3217)
-    if (process.env.AGENTCHAT_API_URL || process.env.HAPI_API_URL) {
+    // Condition 1: AGENTCHAT_API_URL not set (using default localhost:3217)
+    if (process.env.AGENTCHAT_API_URL) {
         logger.debug('[AUTO-START] API URL override is set, skipping auto-start')
         return false
     }
@@ -135,7 +135,7 @@ async function shouldAutoStartServer(): Promise<boolean> {
  * Start hub as a child process (will exit when CLI exits)
  */
 function startServerAsChild(): void {
-    const serverProcess = spawnHappyCLI(['hub'], {
+    const serverProcess = spawnAgentchatCLI(['hub'], {
         detached: false,
         stdio: 'ignore',
         env: process.env

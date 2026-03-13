@@ -8,10 +8,10 @@ const machine: Machine = {
     metadata: {
         host: 'devbox',
         platform: 'darwin',
-        happyCliVersion: '0.0.1',
-        homeDir: '/Users/test',
-        happyHomeDir: '/tmp/agentchat-home',
-        happyLibDir: '/app/cli',
+        agentchatCliVersion: '0.0.1',
+        homeDir: 'home/test',
+        agentchatHomeDir: 'data/agentchat-home',
+        agentchatLibDir: '/app/cli',
         providers: {
             claude: {
                 configured: true,

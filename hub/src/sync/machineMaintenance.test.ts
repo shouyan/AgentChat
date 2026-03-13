@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
-import type { Session } from '@hapi/protocol/types'
+import type { Session } from '@agentchat/protocol/types'
 import { planMachineSessionCleanup } from './machineMaintenance'
+import { testProjectPath } from '@agentchat/protocol/testPaths'
 
 function makeSession(overrides: Partial<Session> & { id: string }): Session {
     const { id, metadata, ...rest } = overrides
@@ -13,7 +14,7 @@ function makeSession(overrides: Partial<Session> & { id: string }): Session {
         active: false,
         activeAt: Date.now(),
         metadata: {
-            path: '/tmp/project',
+            path: testProjectPath('project'),
             host: 'devbox',
             machineId: 'machine-1',
             ...metadata,
@@ -43,7 +44,7 @@ describe('planMachineSessionCleanup', () => {
 
     it('keeps active sessions whose host process is alive', () => {
         const sessions = [
-            makeSession({ id: 'live-runner', active: true, metadata: { path: '/tmp/project', host: 'devbox', machineId: 'machine-1', hostPid: 1234 } }),
+            makeSession({ id: 'live-runner', active: true, metadata: { path: testProjectPath('project'), host: 'devbox', machineId: 'machine-1', hostPid: 1234 } }),
         ]
 
         const result = planMachineSessionCleanup(sessions, new Map([[1234, true]]))
@@ -54,8 +55,8 @@ describe('planMachineSessionCleanup', () => {
 
     it('deletes active sessions whose host process is gone but keeps unknown-pid sessions', () => {
         const sessions = [
-            makeSession({ id: 'dead-process', active: true, metadata: { path: '/tmp/project', host: 'devbox', machineId: 'machine-1', hostPid: 4321 } }),
-            makeSession({ id: 'unknown-pid', active: true, metadata: { path: '/tmp/project', host: 'devbox', machineId: 'machine-1' } }),
+            makeSession({ id: 'dead-process', active: true, metadata: { path: testProjectPath('project'), host: 'devbox', machineId: 'machine-1', hostPid: 4321 } }),
+            makeSession({ id: 'unknown-pid', active: true, metadata: { path: testProjectPath('project'), host: 'devbox', machineId: 'machine-1' } }),
         ]
 
         const result = planMachineSessionCleanup(sessions, new Map([[4321, false]]))

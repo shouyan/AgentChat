@@ -62,7 +62,7 @@
   },
   "lifestyle": {
     "title": "\"Vibe Coding\" 生活方式",
-    "subtitle": "HAPI 不仅仅是一个工具；它是你从办公桌解放的独立宣言。",
+    "subtitle": "AgentChat 不仅仅是一个工具；它是你从办公桌解放的独立宣言。",
     "cards": {
       "explore": {
         "title": "去探索",
@@ -74,15 +74,15 @@
       },
       "walk": {
         "title": "潇洒离开",
-        "desc": "字面意思。离开屏幕。HAPI 会保持会话活跃且安全，直到你回来。"
+        "desc": "字面意思。离开屏幕。AgentChat 会保持会话活跃且安全，直到你回来。"
       }
     }
   },
   "features": {
     "title": "随需而动的力量",
-    "telegram": {
-      "title": "即时通讯集成",
-      "desc": "距离与控制的完美平衡。通过 Telegram 或其他应用，只在真正需要你输入时才通知你。"
+    "notifications": {
+      "title": "推送通知",
+      "desc": "尽量远离终端，只有真的需要输入或审批时，AgentChat 才会提醒你。"
     },
     "yolo": {
       "title": "YOLO 模式",
@@ -97,11 +97,11 @@
     "title": "工作原理",
     "step1": {
       "title": "1. 桌面启动",
-      "desc": "在你的机器上启动 HAPI。它会保持会话活跃，随时准备远程访问。"
+      "desc": "在你的机器上启动 AgentChat。它会保持会话活跃，随时准备远程访问。"
     },
     "step2": {
       "title": "2. 移动连接",
-      "desc": "打开 PWA 或小程序。你现在完全掌控了本地开发环境。"
+      "desc": "打开 PWA 或浏览器。你现在完全掌控了本地开发环境。"
     },
     "step3": {
       "title": "3. Vibe Code",
@@ -127,7 +127,7 @@
     "desc": "Vibe Coding 随时随地。 <br/> 为热爱自由的开发者打造的本地优先 AI 代理平台。",
     "product": "产品",
     "community": "社区",
-    "copyright": "© {{year}} HAPI Team. 基于 AGPL 协议开源。",
+    "copyright": "© {{year}} AgentChat Team. 基于 AGPL 协议开源。",
     "designedWith": "为 Vibe Coding <span class=\"text-red-500\">♥</span> 精心设计。"
   }
 }

@@ -1,5 +1,5 @@
 import type { AgentBackend, AgentMessage, AgentSessionConfig, PermissionRequest, PermissionResponse, PromptContent } from '@/agent/types';
-import { asString, isObject } from '@hapi/protocol';
+import { asString, isObject } from '@agentchat/protocol';
 import { AcpStdioTransport, type AcpStderrError } from './AcpStdioTransport';
 import { AcpMessageHandler } from './AcpMessageHandler';
 import { logger } from '@/ui/logger';
@@ -65,7 +65,7 @@ export class AcpSdkBackend implements AgentBackend {
                     terminal: false
                 },
                 clientInfo: {
-                    name: 'hapi',
+                    name: 'agentchat',
                     version: packageJson.version
                 }
             }),

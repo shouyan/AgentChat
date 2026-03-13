@@ -1,9 +1,9 @@
 /**
- * Update the Homebrew formula for hapi.
+ * Update the Homebrew formula for agentchat.
  *
  * This script:
  * 1. Reads checksums from release-artifacts/checksums.txt
- * 2. Generates an updated hapi.rb formula
+ * 2. Generates an updated agentchat.rb formula
  * 3. Optionally clones the tap repo, commits, and pushes
  *
  * Usage:
@@ -66,38 +66,38 @@ function generateFormula(version: string, shas: PlatformSha): string {
     return `# typed: false
 # frozen_string_literal: true
 
-class Hapi < Formula
+class AgentChat < Formula
   desc "App for agentic coding - access coding agent anywhere"
-  homepage "https://github.com/tiann/hapi"
+  homepage "https://github.com/tiann/agentchat"
   version "${version}"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/hapi-darwin-arm64.tar.gz"
+      url "https://github.com/tiann/agentchat/releases/download/v#{version}/agentchat-darwin-arm64.tar.gz"
       sha256 "${shas.darwinArm64}"
     else
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/hapi-darwin-x64.tar.gz"
+      url "https://github.com/tiann/agentchat/releases/download/v#{version}/agentchat-darwin-x64.tar.gz"
       sha256 "${shas.darwinX64}"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/hapi-linux-arm64.tar.gz"
+      url "https://github.com/tiann/agentchat/releases/download/v#{version}/agentchat-linux-arm64.tar.gz"
       sha256 "${shas.linuxArm64}"
     else
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/hapi-linux-x64.tar.gz"
+      url "https://github.com/tiann/agentchat/releases/download/v#{version}/agentchat-linux-x64.tar.gz"
       sha256 "${shas.linuxX64}"
     end
   end
 
   def install
-    bin.install "hapi"
+    bin.install "agentchat"
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/hapi --version")
+    assert_match version.to_s, shell_output("#{bin}/agentchat --version")
   end
 end
 `;
@@ -165,7 +165,7 @@ async function main(): Promise<void> {
         const localFormulaDir = join(projectRoot, 'release-artifacts', 'Formula');
         mkdirSync(localFormulaDir, { recursive: true });
 
-        const localFormulaPath = join(localFormulaDir, 'hapi.rb');
+        const localFormulaPath = join(localFormulaDir, 'agentchat.rb');
         writeFileSync(localFormulaPath, formulaContent);
 
         console.log(`Formula generated: ${localFormulaPath}\n`);
@@ -196,7 +196,7 @@ async function main(): Promise<void> {
         mkdirSync(formulaDir, { recursive: true });
 
         // Write formula
-        const formulaPath = join(formulaDir, 'hapi.rb');
+        const formulaPath = join(formulaDir, 'agentchat.rb');
         writeFileSync(formulaPath, formulaContent);
         console.log(`Updated: ${formulaPath}`);
 
@@ -207,18 +207,18 @@ async function main(): Promise<void> {
         }
 
         // Commit and push
-        execSync('git add Formula/hapi.rb', { cwd: tempDir, stdio: 'pipe' });
+        execSync('git add Formula/agentchat.rb', { cwd: tempDir, stdio: 'pipe' });
 
         try {
-            execSync(`git commit -m "Update hapi to v${version}"`, { cwd: tempDir, stdio: 'pipe' });
+            execSync(`git commit -m "Update agentchat to v${version}"`, { cwd: tempDir, stdio: 'pipe' });
             execSync('git push origin main', { cwd: tempDir, stdio: 'pipe' });
-            console.log(`\nSuccessfully pushed hapi v${version} to homebrew-tap`);
+            console.log(`\nSuccessfully pushed agentchat v${version} to homebrew-tap`);
         } catch {
             console.log('\nNo changes to commit (formula already up to date)');
         }
 
         console.log('\nUsers can now install via:');
-        console.log('  brew install tiann/tap/hapi');
+        console.log('  brew install tiann/tap/agentchat');
     } finally {
         // Cleanup
         rmSync(tempDir, { recursive: true, force: true });

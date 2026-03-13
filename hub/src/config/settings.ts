@@ -5,15 +5,12 @@ import { dirname, join } from 'node:path'
 export interface Settings {
     machineId?: string
     machineIdConfirmedByServer?: boolean
-    runnerAutoStartWhenRunningHappy?: boolean
+    runnerAutoStartWhenRunningAgentChat?: boolean
     cliApiToken?: string
     vapidKeys?: {
         publicKey: string
         privateKey: string
     }
-    // Server configuration (persisted from environment variables)
-    telegramBotToken?: string
-    telegramNotification?: boolean
     listenHost?: string
     listenPort?: number
     publicUrl?: string

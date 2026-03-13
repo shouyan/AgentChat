@@ -5,11 +5,10 @@ import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { serveStatic } from 'hono/bun'
 import { configuration } from '../configuration'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@agentchat/protocol'
 import type { SyncEngine } from '../sync/syncEngine'
 import { createAuthMiddleware, type WebAppEnv } from './middleware/auth'
 import { createAuthRoutes } from './routes/auth'
-import { createBindRoutes } from './routes/bind'
 import { createEventsRoutes } from './routes/events'
 import { createSessionsRoutes } from './routes/sessions'
 import { createMessagesRoutes } from './routes/messages'
@@ -29,6 +28,7 @@ import type { WebSocketData } from '@socket.io/bun-engine'
 import { loadEmbeddedAssetMap, type EmbeddedWebAsset } from './embeddedAssets'
 import { isBunCompiled } from '../utils/bunCompiled'
 import type { Store } from '../store'
+import type { FeishuStatus } from '../integrations/feishu/types'
 
 function findWebappDistDir(): { distDir: string; indexHtmlPath: string } {
     const candidates = [
@@ -67,13 +67,18 @@ function createWebApp(options: {
     embeddedAssetMap: Map<string, EmbeddedWebAsset> | null
     relayMode?: boolean
     officialWebUrl?: string
+    getFeishuStatus?: () => FeishuStatus | null
 }): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
     app.use('*', logger())
 
     // Health check endpoint (no auth required)
-    app.get('/health', (c) => c.json({ status: 'ok', protocolVersion: PROTOCOL_VERSION }))
+    app.get('/health', (c) => c.json({
+        status: 'ok',
+        protocolVersion: PROTOCOL_VERSION,
+        feishu: options.getFeishuStatus?.() ?? null,
+    }))
 
     const corsOrigins = options.corsOrigins ?? configuration.corsOrigins
     const corsOriginOption = corsOrigins.includes('*') ? '*' : corsOrigins
@@ -87,8 +92,7 @@ function createWebApp(options: {
 
     app.route('/cli', createCliRoutes(options.getSyncEngine))
 
-    app.route('/api', createAuthRoutes(options.jwtSecret, options.store))
-    app.route('/api', createBindRoutes(options.jwtSecret, options.store))
+    app.route('/api', createAuthRoutes(options.jwtSecret))
 
     app.use('/api/*', createAuthMiddleware(options.jwtSecret))
     app.route('/api', createEventsRoutes(options.getSseManager, options.getSyncEngine, options.getVisibilityTracker))
@@ -104,7 +108,7 @@ function createWebApp(options: {
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {
-        const officialUrl = options.officialWebUrl || 'https://app.hapi.run'
+        const officialUrl = options.officialWebUrl || 'https://app.agentchat.run'
         app.get('/', (c) => {
             return c.html(`<!DOCTYPE html>
 <html>
@@ -216,6 +220,7 @@ export async function startWebServer(options: {
     corsOrigins?: string[]
     relayMode?: boolean
     officialWebUrl?: string
+    getFeishuStatus?: () => FeishuStatus | null
 }): Promise<BunServer<WebSocketData>> {
     const isCompiled = isBunCompiled()
     const embeddedAssetMap = isCompiled ? await loadEmbeddedAssetMap() : null
@@ -229,7 +234,8 @@ export async function startWebServer(options: {
         corsOrigins: options.corsOrigins,
         embeddedAssetMap,
         relayMode: options.relayMode,
-        officialWebUrl: options.officialWebUrl
+        officialWebUrl: options.officialWebUrl,
+        getFeishuStatus: options.getFeishuStatus,
     })
 
     const socketHandler = options.socketEngine.handler()

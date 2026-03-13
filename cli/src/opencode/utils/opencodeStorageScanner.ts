@@ -3,7 +3,7 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import type { Dirent } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { homedir } from 'node:os';
-import { isObject } from '@hapi/protocol';
+import { isObject } from '@agentchat/protocol';
 import type { OpencodeHookEvent } from '../types';
 
 export type OpencodeStorageScannerHandle = {

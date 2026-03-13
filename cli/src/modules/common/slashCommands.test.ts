@@ -11,7 +11,7 @@ describe('listSlashCommands', () => {
     let projectDir: string
 
     beforeEach(async () => {
-        sandboxDir = await mkdtemp(join(tmpdir(), 'hapi-slash-commands-'))
+        sandboxDir = await mkdtemp(join(tmpdir(), 'agentchat-slash-commands-'))
         claudeConfigDir = join(sandboxDir, 'global-claude')
         projectDir = join(sandboxDir, 'project')
 

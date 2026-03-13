@@ -9,20 +9,21 @@ import { logger } from '@/ui/logger';
 import { authAndSetupMachineIfNeeded } from '@/ui/auth';
 import packageJson from '../../package.json';
 import { getEnvironmentInfo } from '@/ui/doctor';
-import { spawnHappyCLI } from '@/utils/spawnHappyCLI';
+import { spawnAgentchatCLI } from '@/utils/spawnAgentchatCLI';
 import { writeRunnerState, RunnerLocallyPersistedState, readRunnerState, acquireRunnerLock, releaseRunnerLock } from '@/persistence';
 import { isProcessAlive, isWindows, killProcess, killProcessByChildProcess } from '@/utils/process';
 import { withRetry } from '@/utils/time';
 import { isRetryableConnectionError } from '@/utils/errorUtils';
 
-import { cleanupRunnerState, getInstalledCliMtimeMs, isRunnerRunningCurrentlyInstalledHappyVersion, stopRunner } from './controlClient';
+import { cleanupRunnerState, getInstalledCliMtimeMs, isRunnerRunningCurrentlyInstalledAgentChatVersion, stopRunner } from './controlClient';
 import { startRunnerControlServer } from './controlServer';
 import { createWorktree, removeWorktree, type WorktreeInfo } from './worktree';
 import { join } from 'path';
 import { buildMachineMetadata } from '@/agent/sessionFactory';
 import { buildMachineProviderHealth } from '@/agent/providerHealth';
+import { buildRunnerManagedEnv } from './envFile';
 
-type ShutdownSource = 'hapi-app' | 'hapi-cli' | 'os-signal' | 'exception'
+type ShutdownSource = 'agentchat-app' | 'agentchat-cli' | 'os-signal' | 'exception'
 
 export async function startRunner(): Promise<void> {
   // We don't have cleanup function at the time of server construction
@@ -103,7 +104,7 @@ export async function startRunner(): Promise<void> {
 
   // Check if already running
   // Check if running runner version matches current CLI version
-  const runningRunnerVersionMatches = await isRunnerRunningCurrentlyInstalledHappyVersion();
+  const runningRunnerVersionMatches = await isRunnerRunningCurrentlyInstalledAgentChatVersion();
   if (!runningRunnerVersionMatches) {
     logger.debug('[RUNNER RUN] Runner version mismatch detected, restarting runner with current CLI version');
     await stopRunner();
@@ -152,7 +153,7 @@ export async function startRunner(): Promise<void> {
     // Helper functions
     const getCurrentChildren = () => Array.from(pidToTrackedSession.values());
 
-    // Handle webhook from HAPI session reporting itself
+    // Handle webhook from AgentChat session reporting itself
     const onHappySessionWebhook = (sessionId: string, sessionMetadata: Metadata) => {
       logger.debugLargeJson(`[RUNNER RUN] Session reported`, sessionMetadata);
 
@@ -185,7 +186,7 @@ export async function startRunner(): Promise<void> {
       } else if (!existingSession) {
         // New session started externally
         const trackedSession: TrackedSession = {
-          startedBy: 'hapi directly - likely by user from terminal',
+          startedBy: 'agentchat directly - likely by user from terminal',
           happySessionId: sessionId,
           happySessionMetadataFromLocalWebhook: sessionMetadata,
           pid
@@ -207,7 +208,7 @@ export async function startRunner(): Promise<void> {
       let directoryCreated = false;
       let spawnDirectory = directory;
       let worktreeInfo: WorktreeInfo | null = null;
-      let happyProcess: ReturnType<typeof spawnHappyCLI> | null = null;
+      let agentchatProcess: ReturnType<typeof spawnAgentchatCLI> | null = null;
 
       if (sessionType === 'simple') {
         try {
@@ -298,7 +299,7 @@ export async function startRunner(): Promise<void> {
         if (!worktreeInfo) {
           return;
         }
-        const pid = happyProcess?.pid;
+        const pid = agentchatProcess?.pid;
         if (pid && isProcessAlive(pid)) {
           logger.debug(`[RUNNER RUN] Skipping worktree cleanup after ${reason}; child still running`, {
             pid,
@@ -317,7 +318,7 @@ export async function startRunner(): Promise<void> {
           if (options.agent === 'codex') {
 
             // Create a temporary directory for Codex
-            const codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'hapi-codex-'));
+            const codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'agentchat-codex-'));
 
             // Write the token to the temporary directory
             await fs.writeFile(join(codexHomeDir, 'auth.json'), options.token);
@@ -336,11 +337,11 @@ export async function startRunner(): Promise<void> {
         if (worktreeInfo) {
           extraEnv = {
             ...extraEnv,
-            HAPI_WORKTREE_BASE_PATH: worktreeInfo.basePath,
-            HAPI_WORKTREE_BRANCH: worktreeInfo.branch,
-            HAPI_WORKTREE_NAME: worktreeInfo.name,
-            HAPI_WORKTREE_PATH: worktreeInfo.worktreePath,
-            HAPI_WORKTREE_CREATED_AT: String(worktreeInfo.createdAt)
+            AGENTCHAT_WORKTREE_BASE_PATH: worktreeInfo.basePath,
+            AGENTCHAT_WORKTREE_BRANCH: worktreeInfo.branch,
+            AGENTCHAT_WORKTREE_NAME: worktreeInfo.name,
+            AGENTCHAT_WORKTREE_PATH: worktreeInfo.worktreePath,
+            AGENTCHAT_WORKTREE_CREATED_AT: String(worktreeInfo.createdAt)
           };
         }
 
@@ -364,7 +365,7 @@ export async function startRunner(): Promise<void> {
                 args.push('--resume', options.resumeSessionId);
             }
         }
-        args.push('--hapi-starting-mode', 'remote', '--started-by', 'runner');
+        args.push('--agentchat-starting-mode', 'remote', '--started-by', 'runner');
         if (options.model && agent !== 'opencode') {
           args.push('--model', options.model);
         }
@@ -391,17 +392,18 @@ export async function startRunner(): Promise<void> {
           logger.debug('[RUNNER RUN] Child stderr tail', trimmed);
         };
 
-        happyProcess = spawnHappyCLI(args, {
+        const runnerManagedEnv = await buildRunnerManagedEnv(process.env);
+        agentchatProcess = spawnAgentchatCLI(args, {
           cwd: spawnDirectory,
           detached: true,  // Sessions stay alive when runner stops
           stdio: ['ignore', 'pipe', 'pipe'],  // Capture stdout/stderr for debugging
           env: {
-            ...process.env,
+            ...runnerManagedEnv,
             ...extraEnv
           }
         });
 
-        happyProcess.stderr?.on('data', (data) => {
+        agentchatProcess.stderr?.on('data', (data) => {
           stderrTail = appendTail(stderrTail, data);
         });
 
@@ -409,16 +411,16 @@ export async function startRunner(): Promise<void> {
         const captureSpawnErrorBeforePidCheck = (error: Error) => {
           spawnErrorBeforePidCheck = error;
         };
-        happyProcess.once('error', captureSpawnErrorBeforePidCheck);
+        agentchatProcess.once('error', captureSpawnErrorBeforePidCheck);
 
-        if (!happyProcess.pid) {
+        if (!agentchatProcess.pid) {
           // Allow the async 'error' event to fire before we read it
           await new Promise((resolve) => setImmediate(resolve));
           const details = [`cwd=${spawnDirectory}`];
           if (spawnErrorBeforePidCheck) {
             details.push(formatSpawnError(spawnErrorBeforePidCheck));
           }
-          const errorMessage = `Failed to spawn HAPI process - no PID returned (${details.join('; ')})`;
+          const errorMessage = `Failed to spawn AgentChat process - no PID returned (${details.join('; ')})`;
           logger.debug('[RUNNER RUN] Failed to spawn process - no PID returned', spawnErrorBeforePidCheck ?? null);
           reportSpawnOutcomeToHub?.({
             type: 'error',
@@ -432,9 +434,9 @@ export async function startRunner(): Promise<void> {
             errorMessage
           };
         }
-        happyProcess.removeListener('error', captureSpawnErrorBeforePidCheck);
+        agentchatProcess.removeListener('error', captureSpawnErrorBeforePidCheck);
 
-        const pid = happyProcess.pid;
+        const pid = agentchatProcess.pid;
         logger.debug(`[RUNNER RUN] Spawned process with PID ${pid}`);
         let observedExitCode: number | null = null;
         let observedExitSignal: NodeJS.Signals | null = null;
@@ -469,14 +471,14 @@ export async function startRunner(): Promise<void> {
         const trackedSession: TrackedSession = {
           startedBy: 'runner',
           pid,
-          childProcess: happyProcess,
+          childProcess: agentchatProcess,
           directoryCreated,
           message: directoryCreated ? `The path '${directory}' did not exist. We created a new folder and spawned a new session there.` : undefined
         };
 
         pidToTrackedSession.set(pid, trackedSession);
 
-        happyProcess.on('exit', (code, signal) => {
+        agentchatProcess.on('exit', (code, signal) => {
           observedExitCode = typeof code === 'number' ? code : null;
           observedExitSignal = signal ?? null;
           logger.debug(`[RUNNER RUN] Child PID ${pid} exited with code ${code}, signal ${signal}`);
@@ -492,7 +494,7 @@ export async function startRunner(): Promise<void> {
           onChildExited(pid);
         });
 
-        happyProcess.on('error', (error) => {
+        agentchatProcess.on('error', (error) => {
           logger.debug(`[RUNNER RUN] Child process error:`, error);
           const errorAwaiter = pidToErrorAwaiter.get(pid);
           if (errorAwaiter) {
@@ -620,7 +622,7 @@ export async function startRunner(): Promise<void> {
       getChildren: getCurrentChildren,
       stopSession,
       spawnSession,
-      requestShutdown: () => requestShutdown('hapi-cli'),
+      requestShutdown: () => requestShutdown('agentchat-cli'),
       onHappySessionWebhook
     });
 
@@ -648,12 +650,13 @@ export async function startRunner(): Promise<void> {
 
     // Create API client
     const api = await ApiClient.create();
+    const runnerManagedEnvForMetadata = await buildRunnerManagedEnv(process.env);
 
     // Get or create machine (with retry for transient connection errors)
     const machine = await withRetry(
       () => api.getOrCreateMachine({
         machineId,
-        metadata: buildMachineMetadata(),
+        metadata: buildMachineMetadata(runnerManagedEnvForMetadata),
         runnerState: initialRunnerState
       }),
       {
@@ -668,7 +671,7 @@ export async function startRunner(): Promise<void> {
       }
     );
     logger.debug(`[RUNNER RUN] Machine registered: ${machine.id}`);
-    machine.metadata = buildMachineMetadata();
+    machine.metadata = buildMachineMetadata(runnerManagedEnvForMetadata);
 
     // Create realtime machine session
     const apiMachine = api.machineSyncClient(machine);
@@ -678,8 +681,8 @@ export async function startRunner(): Promise<void> {
       spawnSession,
       stopSession,
       listSessions: getCurrentChildren,
-      requestShutdown: (options) => requestShutdown('hapi-app', undefined, options),
-      getProviderHealth: async () => await buildMachineProviderHealth()
+      requestShutdown: (options) => requestShutdown('agentchat-app', undefined, options),
+      getProviderHealth: async () => await buildMachineProviderHealth(fetch, await buildRunnerManagedEnv(process.env))
     });
 
     // Connect to server
@@ -728,7 +731,7 @@ export async function startRunner(): Promise<void> {
     // 2. Check if runner needs update
     // 3. If outdated, restart with latest version
     // 4. Write heartbeat
-    const heartbeatIntervalMs = parseInt(process.env.HAPI_RUNNER_HEARTBEAT_INTERVAL || '60000');
+    const heartbeatIntervalMs = parseInt(process.env.AGENTCHAT_RUNNER_HEARTBEAT_INTERVAL || '60000');
     let heartbeatRunning = false
     const restartOnStaleVersionAndHeartbeat = setInterval(async () => {
       if (heartbeatRunning) {
@@ -765,7 +768,7 @@ export async function startRunner(): Promise<void> {
         // 3. Next it will start a new runner with the latest version with runner-sync :D
         // Done!
         try {
-          spawnHappyCLI(['runner', 'start'], {
+          spawnAgentchatCLI(['runner', 'start'], {
             detached: true,
             stdio: 'ignore'
           });
@@ -838,7 +841,7 @@ export async function startRunner(): Promise<void> {
       if (restartAfterShutdown) {
         logger.debug('[RUNNER RUN] Restart requested, spawning fresh runner');
         try {
-          const child = spawnHappyCLI(['runner', 'start-sync'], {
+          const child = spawnAgentchatCLI(['runner', 'start-sync'], {
             detached: true,
             stdio: 'ignore',
             env: process.env

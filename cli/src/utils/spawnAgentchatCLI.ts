@@ -48,12 +48,12 @@ function resolveEntrypoint(projectRoot: string): string {
   throw new Error('No CLI entrypoint found (expected dist/index.js or src/index.ts)');
 }
 
-export interface HappyCliCommand {
+export interface AgentChatCliCommand {
   command: string;
   args: string[];
 }
 
-export function getHappyCliCommand(args: string[]): HappyCliCommand {
+export function getAgentchatCliCommand(args: string[]): AgentChatCliCommand {
   // Compiled binary mode: just use the executable directly
   if (isBunCompiled()) {
     return {
@@ -82,7 +82,7 @@ export function getHappyCliCommand(args: string[]): HappyCliCommand {
   };
 }
 
-export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): ChildProcess {
+export function spawnAgentchatCLI(args: string[], options: SpawnOptions = {}): ChildProcess {
 
   let directory: string | URL | undefined;
   if ('cwd' in options) {
@@ -98,7 +98,7 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
   const fullCommand = `agentchat ${args.join(' ')}`;
   logger.debug(`[SPAWN AGENTCHAT CLI] Spawning: ${fullCommand} in ${directory}`);
   
-  const { command: spawnCommand, args: spawnArgs } = getHappyCliCommand(args);
+  const { command: spawnCommand, args: spawnArgs } = getAgentchatCliCommand(args);
   const finalOptions: SpawnOptions = { ...options };
 
   if (!isBunCompiled()) {

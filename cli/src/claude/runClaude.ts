@@ -13,12 +13,12 @@ import { registerKillSessionHandler } from './registerKillSessionHandler';
 import type { Session } from './session';
 import { bootstrapSession } from '@/agent/sessionFactory';
 import { createModeChangeHandler, createRunnerLifecycle, setControlledByUser } from '@/agent/runnerLifecycle';
-import { isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor } from '@hapi/protocol';
-import { ModelModeSchema, PermissionModeSchema } from '@hapi/protocol/schemas';
+import { isModelModeAllowedForFlavor, isPermissionModeAllowedForFlavor } from '@agentchat/protocol';
+import { ModelModeSchema, PermissionModeSchema } from '@agentchat/protocol/schemas';
 import { formatMessageWithAttachments } from '@/utils/attachmentFormatter';
 import { getEffectiveCwd } from '@/utils/effectiveCwd';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
-import { happyMcpToolDefinitions } from '@/mcp/toolDefinitions';
+import { buildAgentchatMcpBridge } from '@/codex/utils/buildAgentchatMcpBridge';
+import { agentchatMcpToolDefinitions } from '@/mcp/toolDefinitions';
 
 export interface StartOptions {
     model?: string
@@ -35,7 +35,7 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
     const startedBy = options.startedBy ?? 'terminal';
 
     // Log environment info at startup
-    logger.debugLargeJson('[START] HAPI process started', getEnvironmentInfo());
+    logger.debugLargeJson('[START] AgentChat process started', getEnvironmentInfo());
     logger.debug(`[START] Options: startedBy=${startedBy}, startingMode=${options.startingMode}`);
 
     // Validate runner spawn requirements
@@ -71,11 +71,11 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
         }
     });
 
-    // Build HAPI MCP bridge using the same stdio-backed config path as Codex.
+    // Build AgentChat MCP bridge using the same stdio-backed config path as Codex.
     // Claude's HTTP MCP configuration was exposing allowed tool names but the
     // underlying SDK session was not actually registering them reliably.
-    const happyBridge = await buildHapiMcpBridge(session);
-    logger.debug(`[START] HAPI MCP bridge ready`);
+    const agentchatBridge = await buildAgentchatMcpBridge(session);
+    logger.debug(`[START] AgentChat MCP bridge ready`);
 
     // Variable to track current session instance (updated via onSessionReady callback)
     const currentSessionRef: { current: Session | null } = { current: null };
@@ -121,7 +121,7 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
         logTag: 'claude',
         stopKeepAlive: () => currentSessionRef.current?.stopKeepAlive(),
         onAfterClose: () => {
-            happyBridge.server.stop();
+            agentchatBridge.server.stop();
             hookServer.stop();
             cleanupHookSettingsFile(hookSettingsPath, 'generateHookSettings');
         }
@@ -323,13 +323,13 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
             startingMode,
             messageQueue,
             api,
-            allowedTools: happyMcpToolDefinitions.map(tool => `mcp__hapi__${tool.name}`),
+            allowedTools: agentchatMcpToolDefinitions.map(tool => `mcp__agentchat__${tool.name}`),
             onModeChange: createModeChangeHandler(session),
             onSessionReady: (sessionInstance) => {
                 currentSessionRef.current = sessionInstance;
                 syncSessionModes();
             },
-            mcpServers: happyBridge.mcpServers,
+            mcpServers: agentchatBridge.mcpServers,
             session,
             claudeEnvVars: options.claudeEnvVars,
             claudeArgs: options.claudeArgs,

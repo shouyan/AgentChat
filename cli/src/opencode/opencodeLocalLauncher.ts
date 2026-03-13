@@ -5,12 +5,12 @@ import { ensureOpencodeHookPlugin } from './utils/hookPlugin';
 import { buildOpencodeEnv } from './utils/config';
 import { ensureOpencodeConfig } from './utils/opencodeConfig';
 import { TITLE_INSTRUCTION } from './utils/systemPrompt';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildAgentchatMcpBridge } from '@/codex/utils/buildAgentchatMcpBridge';
 import type { OpencodeHookEvent } from './types';
 import type { OpencodeHookServer } from './utils/startOpencodeHookServer';
 import { createOpencodeStorageScanner, type OpencodeStorageScannerHandle } from './utils/opencodeStorageScanner';
 import { randomUUID } from 'node:crypto';
-import { isObject } from '@hapi/protocol';
+import { isObject } from '@agentchat/protocol';
 import { join } from 'node:path';
 import { configuration } from '@/configuration';
 import type { PermissionCompletion } from '@/modules/common/permission/BasePermissionHandler';
@@ -250,7 +250,7 @@ function resolveOpencodeConfigDir(session: OpencodeSession): string {
     if (process.env.OPENCODE_CONFIG_DIR) {
         return process.env.OPENCODE_CONFIG_DIR;
     }
-    return join(configuration.happyHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
+    return join(configuration.agentchatHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
 }
 
 export async function opencodeLocalLauncher(
@@ -262,19 +262,19 @@ export async function opencodeLocalLauncher(
     const opencodeConfigDir = resolveOpencodeConfigDir(session);
     ensureOpencodeHookPlugin(opencodeConfigDir, hookUrl, opts.hookServer.token);
 
-    // Start the hapi MCP server for change_title support (optional feature)
-    let happyServer: { url: string; stop: () => void } | null = null;
+    // Start the agentchat MCP server for change_title support (optional feature)
+    let agentchatServer: { url: string; stop: () => void } | null = null;
     let opencodeConfigPath: string | null = null;
     try {
-        const bridge = await buildHapiMcpBridge(session.client);
-        happyServer = bridge.server;
-        logger.debug(`[opencode-local]: Started hapi MCP server at ${happyServer.url}`);
+        const bridge = await buildAgentchatMcpBridge(session.client);
+        agentchatServer = bridge.server;
+        logger.debug(`[opencode-local]: Started agentchat MCP server at ${agentchatServer.url}`);
 
         // Generate opencode.json config with MCP server and instructions
-        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers.hapi, TITLE_INSTRUCTION);
+        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers.agentchat, TITLE_INSTRUCTION);
         opencodeConfigPath = configPath;
     } catch (error) {
-        logger.debug('[opencode-local]: Failed to start hapi MCP server (change_title will be unavailable)', error);
+        logger.debug('[opencode-local]: Failed to start agentchat MCP server (change_title will be unavailable)', error);
     }
 
     const launcher = new BaseLocalLauncher({
@@ -286,8 +286,8 @@ export async function opencodeLocalLauncher(
         startingMode: session.startingMode,
         launch: async (abortSignal) => {
             const env = buildOpencodeEnv();
-            env.HAPI_OPENCODE_HOOK_URL = hookUrl;
-            env.HAPI_OPENCODE_HOOK_TOKEN = opts.hookServer.token;
+            env.AGENTCHAT_OPENCODE_HOOK_URL = hookUrl;
+            env.AGENTCHAT_OPENCODE_HOOK_TOKEN = opts.hookServer.token;
             if (!env.OPENCODE_CONFIG_DIR) {
                 env.OPENCODE_CONFIG_DIR = opencodeConfigDir;
             }
@@ -622,9 +622,9 @@ export async function opencodeLocalLauncher(
         if (storageScanner) {
             await storageScanner.cleanup();
         }
-        if (happyServer) {
-            happyServer.stop();
-            logger.debug('[opencode-local]: Stopped hapi MCP server');
+        if (agentchatServer) {
+            agentchatServer.stop();
+            logger.debug('[opencode-local]: Stopped agentchat MCP server');
         }
     }
 }

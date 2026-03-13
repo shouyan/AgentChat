@@ -1,15 +1,15 @@
 {
   "name": "@twsxtd/agentchat",
-  "version": "0.16.1",
+  "version": "0.0.1",
   "description": "App for agentic coding - access coding agent anywhere",
   "author": "Kirill Dubovitskiy & weishu",
   "license": "AGPL-3.0-only",
   "type": "module",
-  "homepage": "https://github.com/tiann/hapi",
-  "bugs": "https://github.com/tiann/hapi/issues",
+  "homepage": "https://github.com/tiann/agentchat",
+  "bugs": "https://github.com/tiann/agentchat/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiann/hapi.git",
+    "url": "git+https://github.com/tiann/agentchat.git",
     "directory": "cli"
   },
   "bin": {
@@ -26,11 +26,11 @@
     }
   },
   "optionalDependencies": {
-    "@twsxtd/hapi-darwin-arm64": "0.16.1",
-    "@twsxtd/hapi-darwin-x64": "0.16.1",
-    "@twsxtd/hapi-linux-arm64": "0.16.1",
-    "@twsxtd/hapi-linux-x64": "0.16.1",
-    "@twsxtd/hapi-win32-x64": "0.16.1"
+    "@twsxtd/agentchat-darwin-arm64": "0.0.1",
+    "@twsxtd/agentchat-darwin-x64": "0.0.1",
+    "@twsxtd/agentchat-linux-arm64": "0.0.1",
+    "@twsxtd/agentchat-linux-x64": "0.0.1",
+    "@twsxtd/agentchat-win32-x64": "0.0.1"
   },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && bun build src/index.ts --outdir dist --target bun",
@@ -53,7 +53,7 @@
     "release-all": "bun run scripts/release-all.ts"
   },
   "dependencies": {
-    "@hapi/protocol": "workspace:*",
+    "@agentchat/protocol": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@types/cross-spawn": "^6.0.6",
     "@types/ps-list": "^6.2.1",

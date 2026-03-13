@@ -117,5 +117,5 @@ export class ApiClient {
     }
 }
 
-export type AuthApi = Pick<ApiClient, 'authenticate' | 'bind'>
+export type AuthApi = Pick<ApiClient, 'authenticate'>
 export type { AuthResponse }

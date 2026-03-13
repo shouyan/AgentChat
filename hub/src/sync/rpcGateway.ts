@@ -1,4 +1,4 @@
-import type { ModelMode, PermissionMode } from '@hapi/protocol/types'
+import type { ModelMode, PermissionMode } from '@agentchat/protocol/types'
 import type {
     DeleteUploadResponse as RpcDeleteUploadResponse,
     FileReadResponse as RpcReadFileResponse,
@@ -6,8 +6,8 @@ import type {
     ListDirectoryResponse as RpcListDirectoryResponse,
     PathMutationResponse as RpcPathMutationResponse,
     UploadFileResponse as RpcUploadFileResponse,
-} from '@hapi/protocol/contracts/files'
-import type { DirectoryEntry as RpcDirectoryEntry } from '@hapi/protocol/files'
+} from '@agentchat/protocol/contracts/files'
+import type { DirectoryEntry as RpcDirectoryEntry } from '@agentchat/protocol/files'
 import type { Server } from 'socket.io'
 import type { RpcRegistry } from '../socket/rpcRegistry'
 
@@ -18,7 +18,7 @@ export type {
     ListDirectoryResponse as RpcListDirectoryResponse,
     PathMutationResponse as RpcPathMutationResponse,
     UploadFileResponse as RpcUploadFileResponse,
-} from '@hapi/protocol/contracts/files'
+} from '@agentchat/protocol/contracts/files'
 
 export type RpcCommandResponse = {
     success: boolean
@@ -85,6 +85,13 @@ export type RpcProviderHealthResponse = {
     error?: string
 }
 
+export type RpcRunnerEnvResponse = {
+    success: boolean
+    path?: string
+    content?: string
+    error?: string
+}
+
 export class RpcGateway {
     constructor(
         private readonly io: Server,
@@ -123,7 +130,7 @@ export class RpcGateway {
     }
 
     async abortSession(sessionId: string): Promise<void> {
-        await this.sessionRpc(sessionId, 'abort', { reason: 'User aborted via Telegram Bot' })
+        await this.sessionRpc(sessionId, 'abort', { reason: 'User aborted from the web app' })
     }
 
     async switchSession(sessionId: string, to: 'remote' | 'local'): Promise<void> {
@@ -135,6 +142,7 @@ export class RpcGateway {
         config: {
             permissionMode?: PermissionMode
             modelMode?: ModelMode
+            model?: string
         }
     ): Promise<unknown> {
         return await this.sessionRpc(sessionId, 'set-session-config', config)
@@ -157,7 +165,7 @@ export class RpcGateway {
         try {
             const result = await this.machineRpc(
                 machineId,
-                'spawn-happy-session',
+                'spawn-agentchat-session',
                 { type: 'spawn-in-directory', directory, agent, model, yolo, sessionType, worktreeName, resumeSessionId }
             )
             if (result && typeof result === 'object') {
@@ -247,6 +255,15 @@ export class RpcGateway {
 
     async checkProviderHealth(machineId: string): Promise<RpcProviderHealthResponse> {
         return await this.machineRpc(machineId, 'provider-health', {}) as RpcProviderHealthResponse
+    }
+
+
+    async getRunnerEnv(machineId: string): Promise<RpcRunnerEnvResponse> {
+        return await this.machineRpc(machineId, 'get-runner-env', {}) as RpcRunnerEnvResponse
+    }
+
+    async setRunnerEnv(machineId: string, content: string): Promise<RpcRunnerEnvResponse> {
+        return await this.machineRpc(machineId, 'set-runner-env', { content }) as RpcRunnerEnvResponse
     }
 
     async getGitStatus(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {

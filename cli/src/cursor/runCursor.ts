@@ -7,8 +7,8 @@ import type { AgentState } from '@/api/types';
 import type { CursorSession } from './session';
 import { bootstrapSession } from '@/agent/sessionFactory';
 import { createModeChangeHandler, createRunnerLifecycle, setControlledByUser } from '@/agent/runnerLifecycle';
-import { isPermissionModeAllowedForFlavor } from '@hapi/protocol';
-import { PermissionModeSchema } from '@hapi/protocol/schemas';
+import { isPermissionModeAllowedForFlavor } from '@agentchat/protocol';
+import { PermissionModeSchema } from '@agentchat/protocol/schemas';
 import { formatMessageWithAttachments } from '@/utils/attachmentFormatter';
 import { getEffectiveCwd } from '@/utils/effectiveCwd';
 

@@ -1,4 +1,4 @@
-import type { AttachmentMetadata, DecryptedMessage } from '@hapi/protocol/types'
+import type { AttachmentMetadata, DecryptedMessage } from '@agentchat/protocol/types'
 import type { Server } from 'socket.io'
 import type { Store } from '../store'
 import { EventPublisher } from './eventPublisher'
@@ -69,10 +69,10 @@ export class MessageService {
             text: string
             localId?: string | null
             attachments?: AttachmentMetadata[]
-            sentFrom?: 'telegram-bot' | 'webapp'
+            sentFrom?: 'webapp' | 'feishu-bot'
             meta?: Record<string, unknown>
         }
-    ): Promise<void> {
+    ): Promise<DecryptedMessage> {
         const sentFrom = payload.sentFrom ?? 'webapp'
 
         const content = {
@@ -119,5 +119,12 @@ export class MessageService {
                 createdAt: msg.createdAt
             }
         })
+        return {
+            id: msg.id,
+            seq: msg.seq,
+            localId: msg.localId,
+            content: msg.content,
+            createdAt: msg.createdAt
+        }
     }
 }

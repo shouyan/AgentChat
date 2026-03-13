@@ -6,7 +6,7 @@ export const notifyCommand: CommandDefinition = {
     requiresRuntimeAssets: true,
     run: async () => {
         console.error(chalk.red('The `agentchat notify` command is not available in direct-connect mode.'))
-        console.error(chalk.gray('Use Telegram notifications from AgentChat hub instead.'))
+        console.error(chalk.gray('Use AgentChat web push notifications instead.'))
         process.exit(1)
     }
 }

@@ -9,9 +9,7 @@ import { useTranslation } from '@/lib/use-translation'
 import type { ServerUrlResult } from '@/hooks/useServerUrl'
 
 type LoginPromptProps = {
-    mode?: 'login' | 'bind'
     onLogin?: (token: string) => void
-    onBind?: (token: string) => Promise<void>
     baseUrl: string
     serverUrl: string | null
     setServerUrl: (input: string) => ServerUrlResult
@@ -22,7 +20,6 @@ type LoginPromptProps = {
 
 export function LoginPrompt(props: LoginPromptProps) {
     const { t } = useTranslation()
-    const isBindMode = props.mode === 'bind'
     const [accessToken, setAccessToken] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -39,7 +36,7 @@ export function LoginPrompt(props: LoginPromptProps) {
             return
         }
 
-        if (!isBindMode && props.requireServerUrl && !props.serverUrl) {
+        if (props.requireServerUrl && !props.serverUrl) {
             setServerError(t('login.server.required'))
             setIsServerDialogOpen(true)
             return
@@ -49,30 +46,19 @@ export function LoginPrompt(props: LoginPromptProps) {
         setError(null)
 
         try {
-            if (isBindMode) {
-                if (!props.onBind) {
-                    setError(t('login.error.bindingUnavailable'))
-                    return
-                }
-                await props.onBind(trimmedToken)
-            } else {
-                // Validate token by attempting to authenticate
-                const client = new ApiClient('', { baseUrl: props.baseUrl })
-                await client.authenticate({ accessToken: trimmedToken })
-                // If successful, pass token to parent
-                if (!props.onLogin) {
-                    setError(t('login.error.loginUnavailable'))
-                    return
-                }
-                props.onLogin(trimmedToken)
+            const client = new ApiClient('', { baseUrl: props.baseUrl })
+            await client.authenticate({ accessToken: trimmedToken })
+            if (!props.onLogin) {
+                setError(t('login.error.loginUnavailable'))
+                return
             }
+            props.onLogin(trimmedToken)
         } catch (e) {
-            const fallbackMessage = isBindMode ? t('login.error.bindFailed') : t('login.error.authFailed')
-            setError(e instanceof Error ? e.message : fallbackMessage)
+            setError(e instanceof Error ? e.message : t('login.error.authFailed'))
         } finally {
             setIsLoading(false)
         }
-    }, [accessToken, props, t, isBindMode])
+    }, [accessToken, props, t])
 
     useEffect(() => {
         if (!isServerDialogOpen) {
@@ -109,30 +95,24 @@ export function LoginPrompt(props: LoginPromptProps) {
 
     const displayError = error || props.error
     const serverSummary = props.serverUrl ?? `${props.baseUrl} ${t('login.server.default')}`
-    const title = isBindMode ? t('login.bind.title') : t('login.title')
-    const subtitle = t('login.subtitle')
-    const submitLabel = isBindMode ? t('login.bind.submit') : t('login.submit')
 
     return (
         <div className="relative h-full flex items-center justify-center p-4">
-            {/* Language switcher */}
             <div className="absolute top-4 right-4">
                 <LanguageSwitcher />
             </div>
 
             <div className="w-full max-w-sm space-y-6">
-                {/* Header */}
                 <div className="text-center space-y-2">
                     <div className="flex justify-center">
                         <BrandMark className="h-[4.5rem] w-[4.5rem] rounded-[24px] shadow-lg" />
                     </div>
-                    <div className="text-2xl font-semibold">{title}</div>
+                    <div className="text-2xl font-semibold">{t('login.title')}</div>
                     <div className="text-sm text-[var(--app-hint)]">
-                        {subtitle}
+                        {t('login.subtitle')}
                     </div>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <input
@@ -161,20 +141,24 @@ export function LoginPrompt(props: LoginPromptProps) {
                         {isLoading ? (
                             <>
                                 <Spinner size="sm" label={null} className="text-[var(--app-button-text)]" />
-                                {isBindMode ? t('login.bind.submitting') : t('login.submitting')}
+                                {t('login.submitting')}
                             </>
                         ) : (
-                            submitLabel
+                            t('login.submit')
                         )}
                     </button>
                 </form>
 
-                {/* Help links */}
-                {!isBindMode && (
-                    <div className="flex items-center justify-between text-xs text-[var(--app-hint)]">
-                        <a href="https://github.com/tiann/hapi" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--app-fg)]">
-                            {t('login.help')}
-                        </a>
+                <div className="space-y-3">
+                    <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 text-xs text-[var(--app-hint)]">
+                        <div className="font-medium text-[var(--app-fg)]">Quick setup</div>
+                        <ol className="mt-2 list-decimal space-y-1 pl-4">
+                            <li>Start the hub and runner on the same token/namespace.</li>
+                            <li>Open <span className="font-mono text-[var(--app-fg)]">Machines & providers</span> after login and make sure one machine is online.</li>
+                            <li>If Claude or Gemini is not configured, edit <span className="font-mono text-[var(--app-fg)]">runner.env</span> for that machine, then create a <span className="font-medium text-[var(--app-fg)]">new</span> session.</li>
+                        </ol>
+                    </div>
+                    <div className="flex items-center justify-end text-xs text-[var(--app-hint)]">
                         <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
                             <DialogTrigger asChild>
                                 <button type="button" className="underline hover:text-[var(--app-fg)]">
@@ -229,10 +213,9 @@ export function LoginPrompt(props: LoginPromptProps) {
                             </DialogContent>
                         </Dialog>
                     </div>
-                )}
+                </div>
             </div>
 
-            {/* Footer */}
             <div className="absolute bottom-4 left-0 right-0 text-center text-xs text-[var(--app-hint)] space-y-1">
                 <div>{t('login.footer')} <span className="text-red-500">♥</span> {t('login.footer.for')}</div>
                 <div>{t('login.footer.copyright')} {new Date().getFullYear()} AgentChat</div>

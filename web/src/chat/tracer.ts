@@ -1,5 +1,5 @@
 import type { NormalizedMessage } from '@/chat/types'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 
 export type TracedMessage = NormalizedMessage & {
     sidechainId?: string

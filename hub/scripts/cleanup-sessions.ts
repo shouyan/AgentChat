@@ -117,10 +117,10 @@ function getDbPath(): string {
     if (process.env.DB_PATH) {
         return process.env.DB_PATH.replace(/^~/, homedir())
     }
-    const dataDir = process.env.HAPI_HOME
-        ? process.env.HAPI_HOME.replace(/^~/, homedir())
-        : join(homedir(), '.hapi')
-    return join(dataDir, 'hapi.db')
+    const dataDir = process.env.AGENTCHAT_HOME
+        ? process.env.AGENTCHAT_HOME.replace(/^~/, homedir())
+        : join(homedir(), '.agentchat')
+    return join(dataDir, 'agentchat.db')
 }
 
 // Session info for display

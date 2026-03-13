@@ -101,6 +101,40 @@ export type StoredUser = {
     createdAt: number
 }
 
+export type StoredFeishuSessionState = {
+    openId: string
+    namespace: string
+    activeSessionId: string | null
+    activeRoomId: string | null
+    activeTargetType: 'session' | 'room' | null
+    activeMachineId: string | null
+    lastInboundMessageId: string | null
+    lastInboundAt: number | null
+    lastOutboundAt: number | null
+    createdAt: number
+    updatedAt: number
+}
+
+export type StoredFeishuMessageLink = {
+    feishuMessageId: string
+    openId: string
+    namespace: string
+    sessionId: string | null
+    roomId: string | null
+    agentchatMessageId: string | null
+    direction: 'inbound' | 'outbound'
+    createdAt: number
+}
+
+
+export type StoredFeishuEventReceipt = {
+    eventId: string
+    openId: string
+    namespace: string
+    kind: 'menu'
+    createdAt: number
+}
+
 export type StoredPushSubscription = {
     id: number
     namespace: string

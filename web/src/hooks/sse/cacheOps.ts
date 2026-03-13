@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { isObject, toSessionSummary } from '@hapi/protocol'
+import { isObject, toSessionSummary } from '@agentchat/protocol'
 import type {
     Machine,
     MachinesResponse,
@@ -92,7 +92,7 @@ function isMachineMetadata(value: unknown): value is Machine['metadata'] {
     }
     return typeof value.host === 'string'
         && typeof value.platform === 'string'
-        && typeof value.happyCliVersion === 'string'
+        && typeof value.agentchatCliVersion === 'string'
 }
 
 export function isMachineRecord(value: unknown): value is Machine {

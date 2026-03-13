@@ -15,7 +15,7 @@ export interface OpencodeHookServer {
 }
 
 function readHookToken(req: IncomingMessage): string | null {
-    const header = req.headers['x-hapi-hook-token'];
+    const header = req.headers['x-agentchat-hook-token'];
     if (Array.isArray(header)) {
         return header[0] ?? null;
     }

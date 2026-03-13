@@ -1,4 +1,4 @@
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@agentchat/protocol'
 import type { SyncEvent } from '../sync/syncEngine'
 
 type EventEnvelope = {

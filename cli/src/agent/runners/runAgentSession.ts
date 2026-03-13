@@ -7,7 +7,7 @@ import { convertAgentMessage } from '@/agent/messageConverter';
 import { PermissionAdapter } from '@/agent/permissionAdapter';
 import type { AgentBackend, PromptContent } from '@/agent/types';
 import { configuration } from '@/configuration';
-import { getHappyCliCommand } from '@/utils/spawnHappyCLI';
+import { getAgentchatCliCommand } from '@/utils/spawnAgentchatCLI';
 import { registerKillSessionHandler } from '@/claude/registerKillSessionHandler';
 import { bootstrapSession } from '@/agent/sessionFactory';
 import { formatMessageWithAttachments } from '@/utils/attachmentFormatter';
@@ -57,7 +57,7 @@ export async function runAgentSession(opts: {
 
     const permissionAdapter = new PermissionAdapter(session, backend);
 
-    const bridgeCommand = getHappyCliCommand([
+    const bridgeCommand = getAgentchatCliCommand([
         'mcp',
         '--session-id', session.sessionId,
         '--access-token', session.accessToken,
@@ -65,7 +65,7 @@ export async function runAgentSession(opts: {
     ]);
     const mcpServers = [
         {
-            name: 'happy',
+            name: 'agentchat',
             command: bridgeCommand.command,
             args: bridgeCommand.args,
             env: []

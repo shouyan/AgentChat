@@ -4,12 +4,13 @@ import { AttachmentMetadataSchema, DecryptedMessageSchema, ModelModeSchema, Perm
 const SessionSummaryMetadataSchema = z.object({
     name: z.string().optional(),
     path: z.string(),
+    model: z.string().optional(),
     machineId: z.string().optional(),
     summary: z.object({ text: z.string() }).optional(),
     flavor: z.string().nullish(),
-        worktree: WorktreeMetadataSchema.optional(),
-        roomSpawned: z.boolean().optional(),
-        roomId: z.string().optional()
+    worktree: WorktreeMetadataSchema.optional(),
+    roomSpawned: z.boolean().optional(),
+    roomId: z.string().optional()
 })
 
 export const SessionSummarySchema = z.object({
@@ -81,7 +82,7 @@ export const PermissionModeBodySchema = z.object({
 })
 export type PermissionModeBody = z.infer<typeof PermissionModeBodySchema>
 
-export const ModelModeBodySchema = z.object({
-    model: ModelModeSchema
+export const SessionModelBodySchema = z.object({
+    model: z.string().trim().min(1)
 })
-export type ModelModeBody = z.infer<typeof ModelModeBodySchema>
+export type SessionModelBody = z.infer<typeof SessionModelBodySchema>

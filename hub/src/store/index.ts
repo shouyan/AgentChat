@@ -4,6 +4,7 @@ import { dirname } from 'node:path'
 
 import { MachineStore } from './machineStore'
 import { MessageStore } from './messageStore'
+import { FeishuStore } from './feishuStore'
 import { PushStore } from './pushStore'
 import { RoomStore } from './roomStore'
 import { SessionStore } from './sessionStore'
@@ -21,19 +22,23 @@ export type {
     StoredRoomTask,
     StoredSession,
     StoredBuiltinTemplateOverride,
+    StoredFeishuEventReceipt,
+    StoredFeishuMessageLink,
+    StoredFeishuSessionState,
     TemplateKind,
     StoredUser,
     VersionedUpdateResult
 } from './types'
 export { MachineStore } from './machineStore'
 export { MessageStore } from './messageStore'
+export { FeishuStore } from './feishuStore'
 export { PushStore } from './pushStore'
 export { RoomStore } from './roomStore'
 export { SessionStore } from './sessionStore'
 export { TemplateStore } from './templateStore'
 export { UserStore } from './userStore'
 
-const SCHEMA_VERSION: number = 6
+const SCHEMA_VERSION: number = 9
 const REQUIRED_TABLES = [
     'sessions',
     'machines',
@@ -43,6 +48,9 @@ const REQUIRED_TABLES = [
     'room_tasks',
     'room_messages',
     'users',
+    'feishu_session_states',
+    'feishu_message_links',
+    'feishu_event_receipts',
     'push_subscriptions',
     'saved_templates',
     'builtin_template_overrides'
@@ -57,6 +65,7 @@ export class Store {
     readonly messages: MessageStore
     readonly rooms: RoomStore
     readonly users: UserStore
+    readonly feishu: FeishuStore
     readonly push: PushStore
     readonly templates: TemplateStore
 
@@ -100,6 +109,7 @@ export class Store {
         this.messages = new MessageStore(this.db)
         this.rooms = new RoomStore(this.db)
         this.users = new UserStore(this.db)
+        this.feishu = new FeishuStore(this.db)
         this.push = new PushStore(this.db)
         this.templates = new TemplateStore(this.db)
     }
@@ -149,8 +159,35 @@ export class Store {
             this.setUserVersion(5)
         }
 
-        if (this.getUserVersion() === 5 && SCHEMA_VERSION === 6) {
+        if (this.getUserVersion() === 5 && SCHEMA_VERSION >= 6) {
             this.migrateFromV5ToV6()
+            if (SCHEMA_VERSION === 6) {
+                this.setUserVersion(SCHEMA_VERSION)
+                return
+            }
+            this.setUserVersion(6)
+        }
+
+        if (this.getUserVersion() === 6 && SCHEMA_VERSION >= 7) {
+            this.migrateFromV6ToV7()
+            if (SCHEMA_VERSION === 7) {
+                this.setUserVersion(SCHEMA_VERSION)
+                return
+            }
+            this.setUserVersion(7)
+        }
+
+        if (this.getUserVersion() === 7 && SCHEMA_VERSION >= 8) {
+            this.migrateFromV7ToV8()
+            if (SCHEMA_VERSION === 8) {
+                this.setUserVersion(SCHEMA_VERSION)
+                return
+            }
+            this.setUserVersion(8)
+        }
+
+        if (this.getUserVersion() === 8 && SCHEMA_VERSION === 9) {
+            this.migrateFromV8ToV9()
             this.setUserVersion(SCHEMA_VERSION)
             return
         }
@@ -282,6 +319,43 @@ export class Store {
             );
             CREATE INDEX IF NOT EXISTS idx_users_platform ON users(platform);
             CREATE INDEX IF NOT EXISTS idx_users_platform_namespace ON users(platform, namespace);
+
+            CREATE TABLE IF NOT EXISTS feishu_session_states (
+                open_id TEXT PRIMARY KEY,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                active_session_id TEXT,
+                active_room_id TEXT,
+                active_target_type TEXT,
+                active_machine_id TEXT,
+                last_inbound_message_id TEXT,
+                last_inbound_at INTEGER,
+                last_outbound_at INTEGER,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_session_states_namespace ON feishu_session_states(namespace);
+
+            CREATE TABLE IF NOT EXISTS feishu_message_links (
+                feishu_message_id TEXT PRIMARY KEY,
+                open_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                session_id TEXT,
+                room_id TEXT,
+                agentchat_message_id TEXT,
+                direction TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_message_links_open_id ON feishu_message_links(open_id);
+            CREATE INDEX IF NOT EXISTS idx_feishu_message_links_session_id ON feishu_message_links(session_id);
+
+            CREATE TABLE IF NOT EXISTS feishu_event_receipts (
+                event_id TEXT PRIMARY KEY,
+                open_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                kind TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_event_receipts_open_id ON feishu_event_receipts(open_id);
 
             CREATE TABLE IF NOT EXISTS push_subscriptions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -511,6 +585,38 @@ export class Store {
         `)
     }
 
+    private migrateFromV6ToV7(): void {
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS feishu_session_states (
+                open_id TEXT PRIMARY KEY,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                active_session_id TEXT,
+                active_room_id TEXT,
+                active_target_type TEXT,
+                active_machine_id TEXT,
+                last_inbound_message_id TEXT,
+                last_inbound_at INTEGER,
+                last_outbound_at INTEGER,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_session_states_namespace ON feishu_session_states(namespace);
+
+            CREATE TABLE IF NOT EXISTS feishu_message_links (
+                feishu_message_id TEXT PRIMARY KEY,
+                open_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                session_id TEXT,
+                room_id TEXT,
+                agentchat_message_id TEXT,
+                direction TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_message_links_open_id ON feishu_message_links(open_id);
+            CREATE INDEX IF NOT EXISTS idx_feishu_message_links_session_id ON feishu_message_links(session_id);
+        `)
+    }
+
     private getSessionColumnNames(): Set<string> {
         const rows = this.db.prepare('PRAGMA table_info(sessions)').all() as Array<{ name: string }>
         return new Set(rows.map((row) => row.name))
@@ -553,6 +659,31 @@ export class Store {
         }
     }
 
+
+
+    private migrateFromV7ToV8(): void {
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS feishu_event_receipts (
+                event_id TEXT PRIMARY KEY,
+                open_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                kind TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_feishu_event_receipts_open_id ON feishu_event_receipts(open_id);
+        `)
+    }
+
+    private migrateFromV8ToV9(): void {
+        const rows = this.db.prepare('PRAGMA table_info(feishu_session_states)').all() as Array<{ name: string }>
+        const columnNames = new Set(rows.map((row) => row.name))
+        if (!columnNames.has('active_room_id')) {
+            this.db.exec('ALTER TABLE feishu_session_states ADD COLUMN active_room_id TEXT')
+        }
+        if (!columnNames.has('active_target_type')) {
+            this.db.exec('ALTER TABLE feishu_session_states ADD COLUMN active_target_type TEXT')
+        }
+    }
     private buildSchemaMismatchError(currentVersion: number): Error {
         const location = (this.dbPath === ':memory:' || this.dbPath.startsWith('file::memory:'))
             ? 'in-memory database'

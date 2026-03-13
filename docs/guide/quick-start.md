@@ -1,62 +1,94 @@
 # Quick Start
 
-<Steps>
+This guide covers the smallest useful local setup for AgentChat 0.0.1.
 
-## Install HAPI
+## 1. Install dependencies
 
-::: code-group
-
-```bash [npm]
-npm install -g @twsxtd/hapi --registry=https://registry.npmjs.org
-```
-
-```bash [Homebrew]
-brew install tiann/tap/hapi
-```
-
-```bash [npx (one-off)]
-npx @twsxtd/hapi
-```
-
-:::
-
-> Recommendation: use the official npm registry for global install. Some mirrors may not sync platform packages in time.
-
-Other install options: [Installation](./installation.md)
-
-## Start the hub
+From source:
 
 ```bash
-hapi hub --relay
+bun install
 ```
 
-On first run, HAPI prints an access token and saves it to `~/.hapi/settings.json`.
-
-`hapi server` remains supported as an alias.
-
-The terminal will display a URL and QR code for remote access.
-
-> End-to-end encrypted with WireGuard + TLS.
-
-## Start a coding session
+## 2. Start the hub
 
 ```bash
-hapi
+bun run dev:hub
 ```
 
-This starts Claude Code wrapped with HAPI. The session appears in the web UI.
+Default local URL:
 
-## Open the UI
+- `http://127.0.0.1:3217`
 
-Open the URL shown in the terminal, or scan the QR code with your phone.
+## 3. Start the web app
 
-Enter your access token to log in.
+```bash
+bun run dev:web -- --host 0.0.0.0 --port 4173
+```
 
-</Steps>
+Open:
 
-## Next steps
+- `http://127.0.0.1:4173/`
 
-- [Seamless Handoff](./how-it-works.md#seamless-handoff) - Switch between terminal and phone seamlessly
-- [Hub setup](./installation.md#hub-setup) - Access HAPI from anywhere
-- [Notifications](./installation.md#telegram-setup) - Set up Telegram notifications
-- [Install the App](./pwa.md) - Add HAPI to your home screen
+## 4. Start a runner
+
+```bash
+CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd cli dev -- runner start-sync
+```
+
+If you want remote spawning from the web UI, the runner must be online.
+
+## 5. Configure providers
+
+Edit:
+
+- `~/.agentchat/runner.env`
+
+or open **Machines & providers** in the web UI and edit the same file there.
+
+Minimal Claude example:
+
+```env
+ANTHROPIC_BASE_URL=https://your-claude-gateway.example.com
+ANTHROPIC_AUTH_TOKEN=your-token
+```
+
+Minimal Gemini example:
+
+```env
+GOOGLE_GEMINI_BASE_URL=https://generativelanguage.googleapis.com
+GEMINI_API_KEY=your-key
+```
+
+## 6. Sign in to the web UI
+
+Use the same `CLI_API_TOKEN` value you configured for the hub and runner.
+
+## 7. Verify the basics
+
+- **Machines & providers** shows one online machine
+- create a session
+- send a message
+- open files
+- create a room
+
+## Common first-run issues
+
+### No machines online
+
+- runner not started
+- runner connected to the wrong hub URL
+- token mismatch between hub and runner
+
+### Provider misconfigured
+
+- `runner.env` missing required keys
+- changes saved, but only new sessions pick them up
+- old sessions still using old environment
+
+## Next
+
+- [Installation](./installation.md)
+- [Provider Setup](./provider-setup.md)
+- [Support Matrix](./support-matrix.md)
+- [Feishu](./feishu.md)

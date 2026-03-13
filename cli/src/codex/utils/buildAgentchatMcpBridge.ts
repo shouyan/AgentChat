@@ -1,12 +1,12 @@
 /**
  * Unified MCP bridge setup for Codex local and remote modes.
  *
- * This module provides a single source of truth for starting the hapi MCP
+ * This module provides a single source of truth for starting the agentchat MCP
  * bridge server and generating the MCP server configuration that Codex needs.
  */
 
 import { configuration } from '@/configuration';
-import { getHappyCliCommand } from '@/utils/spawnHappyCLI';
+import { getAgentchatCliCommand } from '@/utils/spawnAgentchatCLI';
 import type { ApiSessionClient } from '@/api/apiSession';
 
 /**
@@ -23,9 +23,9 @@ export interface McpServerEntry {
 export type McpServersConfig = Record<string, McpServerEntry>;
 
 /**
- * Result of starting the hapi MCP bridge.
+ * Result of starting the agentchat MCP bridge.
  */
-export interface HapiMcpBridge {
+export interface AgentChatMcpBridge {
     /** The running server instance */
     server: {
         url: string;
@@ -36,14 +36,14 @@ export interface HapiMcpBridge {
 }
 
 /**
- * Start the hapi MCP bridge server and return the configuration
+ * Start the agentchat MCP bridge server and return the configuration
  * needed to connect Codex to it.
  *
  * This is the single source of truth for MCP bridge setup,
  * used by both local and remote launchers.
  */
-export async function buildHapiMcpBridge(client: ApiSessionClient): Promise<HapiMcpBridge> {
-    const bridgeCommand = getHappyCliCommand([
+export async function buildAgentchatMcpBridge(client: ApiSessionClient): Promise<AgentChatMcpBridge> {
+    const bridgeCommand = getAgentchatCliCommand([
         'mcp',
         '--session-id', client.sessionId,
         '--access-token', client.accessToken,
@@ -56,7 +56,7 @@ export async function buildHapiMcpBridge(client: ApiSessionClient): Promise<Hapi
             stop: () => {}
         },
         mcpServers: {
-            hapi: {
+            agentchat: {
                 command: bridgeCommand.command,
                 args: bridgeCommand.args
             }

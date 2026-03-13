@@ -2,9 +2,11 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
+import { testTmpPath } from '@agentchat/protocol/testPaths';
 
 const require = createRequire(import.meta.url);
 const binModulePath = path.resolve(process.cwd(), 'bin/agentchat.cjs');
+const testBinaryPath = testTmpPath('agentchat');
 const {
     formatCommand,
     isSupportedPlatform,
@@ -16,21 +18,21 @@ const {
 
 describe('agentchat binary launcher error reporting', () => {
     it('formats command with shell-safe JSON quoting', () => {
-        const command = formatCommand('/tmp/agentchat', ['serve', '--name', 'my agent']);
-        expect(command).toBe('"/tmp/agentchat" "serve" "--name" "my agent"');
+        const command = formatCommand(testBinaryPath, ['serve', '--name', 'my agent']);
+        expect(command).toBe(`${JSON.stringify(testBinaryPath)} "serve" "--name" "my agent"`);
     });
 
     it('normalizes child process execution errors', () => {
         const normalized = normalizeExecError({
             status: 132,
             signal: 'SIGILL',
-            message: 'Command failed: /tmp/agentchat',
+            message: `Command failed: ${testBinaryPath}`,
         });
 
         expect(normalized).toEqual({
             status: 132,
             signal: 'SIGILL',
-            message: 'Command failed: /tmp/agentchat',
+            message: `Command failed: ${testBinaryPath}`,
         });
     });
 
@@ -44,14 +46,14 @@ describe('agentchat binary launcher error reporting', () => {
                 signal: 'SIGILL',
                 message: 'Illegal instruction (core dumped)',
             },
-            '/tmp/agentchat',
+            testBinaryPath,
             ['serve', '--port', '3000'],
             log,
         );
 
         expect(result).toEqual({ status: 132, signal: 'SIGILL' });
         expect(lines).toEqual([
-            'Failed to execute: "/tmp/agentchat" "serve" "--port" "3000"',
+            `Failed to execute: ${JSON.stringify(testBinaryPath)} "serve" "--port" "3000"`,
             'Binary terminated by signal SIGILL.',
             'Binary exited with status 132.',
             'Illegal instruction (core dumped)',
@@ -61,12 +63,12 @@ describe('agentchat binary launcher error reporting', () => {
     it('handles unknown failures with generic output', () => {
         const lines: string[] = [];
 
-        const result = reportExecutionFailure({}, '/tmp/agentchat', [], (line: string) => {
+        const result = reportExecutionFailure({}, testBinaryPath, [], (line: string) => {
             lines.push(line);
         });
 
         expect(result).toEqual({ status: null, signal: null });
-        expect(lines).toEqual(['Failed to execute: "/tmp/agentchat"']);
+        expect(lines).toEqual([`Failed to execute: ${JSON.stringify(testBinaryPath)}`]);
     });
 
     it('distinguishes supported and unsupported platforms', () => {
@@ -91,10 +93,10 @@ describe('agentchat binary launcher error reporting', () => {
             lines.push(line);
         });
 
-        expect(lines).toContain('Missing internal platform package: @twsxtd/hapi-linux-x64');
+        expect(lines).toContain('Missing internal platform package: @twsxtd/agentchat-linux-x64');
         expect(lines).toContain('Try reinstalling with the official npm registry:');
         expect(lines).toContain('  npm install -g @twsxtd/agentchat --registry=https://registry.npmjs.org');
         expect(lines).toContain('Or download the binary manually from:');
-        expect(lines).toContain('  https://github.com/tiann/hapi/releases');
+        expect(lines).toContain('  https://github.com/tiann/agentchat/releases');
     });
 });

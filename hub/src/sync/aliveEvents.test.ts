@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import type { SyncEvent } from '@hapi/protocol/types'
+import type { SyncEvent } from '@agentchat/protocol/types'
 import { Store } from '../store'
 import type { EventPublisher } from './eventPublisher'
 import { MachineCache } from './machineCache'
 import { SessionCache } from './sessionCache'
+import { testProjectPath } from '@agentchat/protocol/testPaths'
 
 function createPublisher(events: SyncEvent[]): EventPublisher {
     return {
@@ -21,7 +22,7 @@ describe('alive incremental events', () => {
 
         const session = cache.getOrCreateSession(
             'session-alive-test',
-            { path: '/tmp/project', host: 'localhost' },
+            { path: testProjectPath('project'), host: 'localhost' },
             { requests: {}, completedRequests: {} },
             'default'
         )
@@ -45,7 +46,7 @@ describe('alive incremental events', () => {
 
         const machine = cache.getOrCreateMachine(
             'machine-alive-test',
-            { host: 'localhost', platform: 'linux', happyCliVersion: '0.1.0' },
+            { host: 'localhost', platform: 'linux', agentchatCliVersion: '0.1.0' },
             null,
             'default'
         )

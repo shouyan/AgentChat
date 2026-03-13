@@ -6,7 +6,7 @@ import { useAppContext } from '@/lib/app-context'
 import { getElevenLabsSupportedLanguages, getLanguageDisplayName, type Language } from '@/lib/languages'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { useAppearance, getAppearanceOptions, type AppearancePreference } from '@/hooks/useTheme'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@agentchat/protocol'
 
 const locales: { value: Locale; nativeLabel: string }[] = [
     { value: 'en', nativeLabel: 'English' },
@@ -90,7 +90,7 @@ export default function SettingsPage() {
 
     // Voice language state - read from localStorage
     const [voiceLanguage, setVoiceLanguage] = useState<string | null>(() => {
-        return localStorage.getItem('agentchat-voice-lang') ?? localStorage.getItem('hapi-voice-lang')
+        return localStorage.getItem('agentchat-voice-lang') ?? localStorage.getItem('agentchat-voice-lang')
     })
 
     const fontScaleOptions = getFontScaleOptions()
@@ -119,10 +119,10 @@ export default function SettingsPage() {
         setVoiceLanguage(language.code)
         if (language.code === null) {
             localStorage.removeItem('agentchat-voice-lang')
-            localStorage.removeItem('hapi-voice-lang')
+            localStorage.removeItem('agentchat-voice-lang')
         } else {
             localStorage.setItem('agentchat-voice-lang', language.code)
-            localStorage.setItem('hapi-voice-lang', language.code)
+            localStorage.setItem('agentchat-voice-lang', language.code)
         }
         setIsVoiceOpen(false)
     }
@@ -457,14 +457,7 @@ export default function SettingsPage() {
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">
                             <span className="text-[var(--app-fg)]">{t('settings.about.website')}</span>
-                            <a
-                                href="https://github.com/tiann/hapi"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[var(--app-link)] hover:underline"
-                            >
-                                github.com/tiann/hapi
-                            </a>
+                            <span className="text-[var(--app-hint)]"></span>
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">
                             <span className="text-[var(--app-fg)]">{t('settings.about.appVersion')}</span>

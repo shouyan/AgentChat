@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
-const HUB_URL_KEY = 'hapi_hub_url'
+const HUB_URL_KEY = 'agentchat_hub_url'
 
 export type ServerUrlResult =
     | { ok: true; value: string }

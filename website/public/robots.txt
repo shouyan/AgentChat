@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hapi.manus.space/sitemap.xml
+Sitemap: https://agentchat.manus.space/sitemap.xml

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { TeamState } from '@hapi/protocol/types'
+import type { TeamState } from '@agentchat/protocol/types'
 
 function memberStatusDot(status?: string): string {
     if (status === 'active') return 'bg-emerald-500'

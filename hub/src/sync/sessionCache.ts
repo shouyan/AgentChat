@@ -1,5 +1,5 @@
-import { AgentStateSchema, MetadataSchema, TeamStateSchema } from '@hapi/protocol/schemas'
-import type { ModelMode, PermissionMode, Session } from '@hapi/protocol/types'
+import { AgentStateSchema, MetadataSchema, TeamStateSchema } from '@agentchat/protocol/schemas'
+import type { ModelMode, PermissionMode, Session } from '@agentchat/protocol/types'
 import type { Store } from '../store'
 import { clampAliveTime } from './aliveTime'
 import { EventPublisher } from './eventPublisher'
@@ -150,6 +150,7 @@ export class SessionCache {
         mode?: 'local' | 'remote'
         permissionMode?: PermissionMode
         modelMode?: ModelMode
+        model?: string
     }): void {
         const t = clampAliveTime(payload.time)
         if (!t) return
@@ -172,6 +173,12 @@ export class SessionCache {
         if (payload.modelMode !== undefined) {
             session.modelMode = payload.modelMode
         }
+        if (payload.model !== undefined && session.metadata) {
+            session.metadata = {
+                ...session.metadata,
+                model: payload.model
+            }
+        }
 
         const now = Date.now()
         const lastBroadcastAt = this.lastBroadcastAtBySessionId.get(session.id) ?? 0
@@ -191,7 +198,8 @@ export class SessionCache {
                     activeAt: session.activeAt,
                     thinking: session.thinking,
                     permissionMode: session.permissionMode,
-                    modelMode: session.modelMode
+                    modelMode: session.modelMode,
+                    metadata: session.metadata
                 }
             })
         }
@@ -226,7 +234,7 @@ export class SessionCache {
         }
     }
 
-    applySessionConfig(sessionId: string, config: { permissionMode?: PermissionMode; modelMode?: ModelMode }): void {
+    applySessionConfig(sessionId: string, config: { permissionMode?: PermissionMode; modelMode?: ModelMode; model?: string }): void {
         const session = this.sessions.get(sessionId) ?? this.refreshSession(sessionId)
         if (!session) {
             return
@@ -237,6 +245,12 @@ export class SessionCache {
         }
         if (config.modelMode !== undefined) {
             session.modelMode = config.modelMode
+        }
+        if (config.model !== undefined && session.metadata) {
+            session.metadata = {
+                ...session.metadata,
+                model: config.model
+            }
         }
 
         this.publisher.emit({ type: 'session-updated', sessionId, data: session })

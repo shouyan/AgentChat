@@ -1,6 +1,6 @@
 import React from 'react';
 import { logger } from '@/ui/logger';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildAgentchatMcpBridge } from '@/codex/utils/buildAgentchatMcpBridge';
 import { convertAgentMessage } from '@/agent/messageConverter';
 import type { AgentMessage, McpServerStdio, PromptContent } from '@/agent/types';
 import { RemoteLauncherBase, type RemoteLauncherDisplayContext, type RemoteLauncherExitReason } from '@/modules/common/remote/RemoteLauncherBase';
@@ -17,7 +17,7 @@ class GeminiRemoteLauncher extends RemoteLauncherBase {
     private readonly hookSettingsPath?: string;
     private backend: ReturnType<typeof createGeminiBackend> | null = null;
     private permissionHandler: GeminiPermissionHandler | null = null;
-    private happyServer: { stop: () => void } | null = null;
+    private agentchatServer: { stop: () => void } | null = null;
     private abortController = new AbortController();
     private displayModel: string | null = null;
     private displayPermissionMode: PermissionMode | null = null;
@@ -44,8 +44,8 @@ class GeminiRemoteLauncher extends RemoteLauncherBase {
         const session = this.session;
         const messageBuffer = this.messageBuffer;
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
-        this.happyServer = happyServer;
+        const { server: agentchatServer, mcpServers } = await buildAgentchatMcpBridge(session.client);
+        this.agentchatServer = agentchatServer;
 
         const runtimeConfig = resolveGeminiRuntimeConfig({ model: this.model });
         this.displayModel = runtimeConfig.model;
@@ -143,9 +143,9 @@ class GeminiRemoteLauncher extends RemoteLauncherBase {
             this.backend = null;
         }
 
-        if (this.happyServer) {
-            this.happyServer.stop();
-            this.happyServer = null;
+        if (this.agentchatServer) {
+            this.agentchatServer.stop();
+            this.agentchatServer = null;
         }
     }
 

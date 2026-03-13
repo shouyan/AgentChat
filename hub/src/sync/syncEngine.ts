@@ -1,13 +1,13 @@
 /**
- * Sync Engine for HAPI Telegram Bot (Direct Connect)
+ * Sync Engine for AgentChat (Direct Connect)
  *
  * In the direct-connect architecture:
- * - hapi-hub is the hub (Socket.IO + REST)
- * - hapi CLI connects directly to the hub (no relay)
+ * - agentchat-hub is the hub (Socket.IO + REST)
+ * - agentchat CLI connects directly to the hub (no relay)
  * - No E2E encryption; data is stored as JSON in SQLite
  */
 
-import type { DecryptedMessage, ModelMode, PermissionMode, Room, RoomMessage, RoomMetadata, Session, SyncEvent } from '@hapi/protocol/types'
+import type { DecryptedMessage, ModelMode, PermissionMode, Room, RoomMessage, RoomMetadata, Session, SyncEvent } from '@agentchat/protocol/types'
 import type { Server } from 'socket.io'
 import type { Store } from '../store'
 import type { RpcRegistry } from '../socket/rpcRegistry'
@@ -25,6 +25,7 @@ import {
     type RpcListMachineSessionsResponse,
     type RpcPathMutationResponse,
     type RpcProviderHealthResponse,
+    type RpcRunnerEnvResponse,
     type RpcPathExistsResponse,
     type RpcReadFileResponse,
     type RpcWriteFileResponse,
@@ -33,8 +34,8 @@ import {
 import { SessionCache } from './sessionCache'
 import { SessionWorkspaceService } from './sessionWorkspaceService'
 
-export type { Session, SyncEvent } from '@hapi/protocol/types'
-export type { Room, RoomMessage } from '@hapi/protocol/types'
+export type { Session, SyncEvent } from '@agentchat/protocol/types'
+export type { Room, RoomMessage } from '@agentchat/protocol/types'
 export type { Machine } from './machineCache'
 export type { SyncEventListener } from './eventPublisher'
 export type {
@@ -323,10 +324,11 @@ export class SyncEngine {
                 path: string
                 previewUrl?: string
             }>
-            sentFrom?: 'telegram-bot' | 'webapp'
+            sentFrom?: 'webapp' | 'feishu-bot'
+            meta?: Record<string, unknown>
         }
-    ): Promise<void> {
-        await this.messageService.sendMessage(sessionId, payload)
+    ): Promise<DecryptedMessage> {
+        return await this.messageService.sendMessage(sessionId, payload)
     }
 
     createRoom(namespace: string, input: CreateRoomInput): Room {
@@ -677,13 +679,14 @@ export class SyncEngine {
         config: {
             permissionMode?: PermissionMode
             modelMode?: ModelMode
+            model?: string
         }
     ): Promise<void> {
         const result = await this.rpcGateway.requestSessionConfig(sessionId, config)
         if (!result || typeof result !== 'object') {
             throw new Error('Invalid response from session config RPC')
         }
-        const obj = result as { applied?: { permissionMode?: Session['permissionMode']; modelMode?: Session['modelMode'] } }
+        const obj = result as { applied?: { permissionMode?: Session['permissionMode']; modelMode?: Session['modelMode']; model?: string } }
         const applied = obj.applied
         if (!applied || typeof applied !== 'object') {
             throw new Error('Missing applied session config')
@@ -834,6 +837,14 @@ export class SyncEngine {
 
     async checkProviderHealth(machineId: string, namespace: string): Promise<RpcProviderHealthResponse> {
         return await this.machineAdminService.checkProviderHealth(machineId, namespace)
+    }
+
+    async getRunnerEnv(machineId: string, namespace: string): Promise<RpcRunnerEnvResponse> {
+        return await this.machineAdminService.getRunnerEnv(machineId, namespace)
+    }
+
+    async setRunnerEnv(machineId: string, namespace: string, content: string): Promise<RpcRunnerEnvResponse> {
+        return await this.machineAdminService.setRunnerEnv(machineId, namespace, content)
     }
 
     async getGitStatus(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {

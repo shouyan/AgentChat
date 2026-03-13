@@ -45,7 +45,7 @@
 
 :root {
   /* Cozy Maker Workshop Theme - Light Mode */
-  /* Primary: Soft but vibrant Coral/Orange for that "Happy" vibe */
+  /* Primary: Soft but vibrant Coral/Orange for the AgentChat vibe */
   --primary: oklch(0.65 0.2 30); 
   --primary-foreground: oklch(0.98 0 0);
   

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
@@ -8,7 +8,7 @@ import { useSessions } from '@/hooks/queries/useSessions'
 import { queryKeys } from '@/lib/query-keys'
 import { MachineStatusCard } from '@/features/machines/components/MachineStatusCard'
 import { LoadingState } from '@/components/LoadingState'
-import type { MachineCleanupResponse, ProviderHealthResponse } from '@/types/api'
+import type { MachineCleanupResponse, ProviderHealthResponse, RunnerEnvResponse } from '@/types/api'
 
 function BackIcon(props: { className?: string }) {
     return (
@@ -40,6 +40,7 @@ export default function MachinesPage() {
     const [actionMessageByMachine, setActionMessageByMachine] = useState<Record<string, string | null>>({})
     const [providerHealthByMachine, setProviderHealthByMachine] = useState<Record<string, ProviderHealthResponse | null>>({})
     const [pendingSessionCleanupId, setPendingSessionCleanupId] = useState<string | null>(null)
+    const [runnerEnvByMachine, setRunnerEnvByMachine] = useState<Record<string, { path?: string; content: string }>>({})
 
     const refreshMachineQueries = useCallback(async () => {
         await queryClient.invalidateQueries({ queryKey: queryKeys.machines })
@@ -62,6 +63,43 @@ export default function MachinesPage() {
     const setMachineMessage = useCallback((machineId: string, message: string | null) => {
         setActionMessageByMachine((current) => ({ ...current, [machineId]: message }))
     }, [])
+
+    const applyRunnerEnv = useCallback((machineId: string, result: RunnerEnvResponse) => {
+        setRunnerEnvByMachine((current) => ({
+            ...current,
+            [machineId]: {
+                path: result.path,
+                content: result.content ?? '',
+            },
+        }))
+    }, [])
+
+    const loadRunnerEnv = useCallback(async (machineId: string) => {
+        if (!api) return
+        setMachinePending(machineId, 'runner-env-load')
+        setMachineMessage(machineId, null)
+        try {
+            const result = await api.getRunnerEnv(machineId)
+            if (!result.success) {
+                setMachineMessage(machineId, result.error || 'Failed to load runner env')
+                return
+            }
+            applyRunnerEnv(machineId, result)
+        } catch (actionError) {
+            setMachineMessage(machineId, actionError instanceof Error ? actionError.message : 'Failed to load runner env')
+        } finally {
+            setMachinePending(machineId, null)
+        }
+    }, [api, applyRunnerEnv, setMachineMessage, setMachinePending])
+
+    useEffect(() => {
+        if (!api) return
+        for (const machine of machines) {
+            if (!machine.active) continue
+            if (runnerEnvByMachine[machine.id]) continue
+            void loadRunnerEnv(machine.id)
+        }
+    }, [api, machines, runnerEnvByMachine, loadRunnerEnv])
 
     const handleRestartRunner = useCallback(async (machineId: string) => {
         if (!api) {
@@ -152,6 +190,42 @@ export default function MachinesPage() {
         }
     }, [api, queueRefreshes, setMachineMessage])
 
+    const handleRunnerEnvChange = useCallback((machineId: string, content: string) => {
+        setRunnerEnvByMachine((current) => ({
+            ...current,
+            [machineId]: {
+                path: current[machineId]?.path,
+                content,
+            },
+        }))
+    }, [])
+
+    const handleSaveRunnerEnv = useCallback(async (machineId: string) => {
+        if (!api) return
+        const current = runnerEnvByMachine[machineId]
+        if (!current) {
+            await loadRunnerEnv(machineId)
+            return
+        }
+
+        setMachinePending(machineId, 'runner-env-save')
+        setMachineMessage(machineId, null)
+        try {
+            const result = await api.saveRunnerEnv(machineId, current.content)
+            if (!result.success) {
+                setMachineMessage(machineId, result.error || 'Failed to save runner env')
+                return
+            }
+            applyRunnerEnv(machineId, result)
+            setMachineMessage(machineId, 'Runner environment saved. New agent sessions will use these values.')
+            await refreshMachineQueries()
+        } catch (actionError) {
+            setMachineMessage(machineId, actionError instanceof Error ? actionError.message : 'Failed to save runner env')
+        } finally {
+            setMachinePending(machineId, null)
+        }
+    }, [api, runnerEnvByMachine, loadRunnerEnv, applyRunnerEnv, refreshMachineQueries, setMachineMessage, setMachinePending])
+
     const sessionsByMachine = useMemo(() => {
         const map = new Map<string, typeof sessions>()
         for (const session of sessions) {
@@ -203,11 +277,22 @@ export default function MachinesPage() {
                             Showing only machine, session, and provider data for <span className="font-mono text-[var(--app-fg)]">{namespace}</span>.
                         </div>
                     </div>
+                    <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] p-4">
+                        <div className="text-sm font-medium">Release checklist</div>
+                        <div className="mt-2 text-xs text-[var(--app-hint)]">
+                            Before wider rollout: keep one runner online per machine, save provider variables in runner.env, create a fresh session after env changes, and verify Feishu or web flows against this namespace.
+                        </div>
+                    </div>
                     {isLoading ? <LoadingState label="Loading machines…" className="text-sm" /> : null}
                     {error ? <div className="text-sm text-red-600">{error}</div> : null}
                     {!isLoading && !error && machines.length === 0 ? (
                         <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] p-4 text-sm text-[var(--app-hint)]">
-                            No online machines.
+                            <div className="font-medium text-[var(--app-fg)]">No online machines</div>
+                            <ol className="mt-2 list-decimal space-y-1 pl-4">
+                                <li>Start the hub.</li>
+                                <li>Start a runner with the same token and hub URL.</li>
+                                <li>Refresh this page after the runner connects.</li>
+                            </ol>
                         </div>
                     ) : null}
                     {machines.map((machine) => (
@@ -218,6 +303,11 @@ export default function MachinesPage() {
                             pendingAction={pendingActionByMachine[machine.id] ?? null}
                             actionMessage={actionMessageByMachine[machine.id] ?? null}
                             providerHealth={providerHealthByMachine[machine.id] ?? null}
+                            runnerEnvPath={runnerEnvByMachine[machine.id]?.path}
+                            runnerEnvContent={runnerEnvByMachine[machine.id]?.content ?? ''}
+                            onRunnerEnvChange={(content) => handleRunnerEnvChange(machine.id, content)}
+                            onReloadRunnerEnv={() => void loadRunnerEnv(machine.id)}
+                            onSaveRunnerEnv={() => void handleSaveRunnerEnv(machine.id)}
                             onRestartRunner={() => void handleRestartRunner(machine.id)}
                             onCleanupDeadSessions={() => void handleCleanupDeadSessions(machine.id)}
                             onRunProviderHealthCheck={() => void handleRunProviderHealthCheck(machine.id)}

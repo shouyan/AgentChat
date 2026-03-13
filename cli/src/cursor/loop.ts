@@ -5,7 +5,7 @@ import { CursorSession } from './session';
 import { cursorLocalLauncher } from './cursorLocalLauncher';
 import { cursorRemoteLauncher } from './cursorRemoteLauncher';
 import { ApiClient, ApiSessionClient } from '@/lib';
-import type { CursorPermissionMode } from '@hapi/protocol/types';
+import type { CursorPermissionMode } from '@agentchat/protocol/types';
 
 export type PermissionMode = CursorPermissionMode;
 

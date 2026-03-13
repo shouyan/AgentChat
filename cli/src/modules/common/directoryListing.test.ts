@@ -19,7 +19,7 @@ describe('listDirectoryEntries', () => {
             await rm(rootDir, { recursive: true, force: true })
         }
 
-        rootDir = await createTempDir('hapi-directory-listing')
+        rootDir = await createTempDir('agentchat-directory-listing')
         await mkdir(join(rootDir, 'src'), { recursive: true })
         await writeFile(join(rootDir, 'README.md'), 'hello')
     })

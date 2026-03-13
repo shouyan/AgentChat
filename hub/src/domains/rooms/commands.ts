@@ -1,6 +1,6 @@
 import type { z } from 'zod'
 import type { SyncEngine } from '../../sync/syncEngine'
-import type { CreateRoomBodySchema } from '@hapi/protocol/contracts/rooms'
+import type { CreateRoomBodySchema } from '@agentchat/protocol/contracts/rooms'
 import { normalizeCreateRoomRoles } from './helpers'
 
 export async function createRoomWithAssignments(

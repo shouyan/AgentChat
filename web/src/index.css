@@ -2,15 +2,15 @@
 @config "../tailwind.config.ts";
 
 :root {
-    --app-bg: var(--tg-theme-bg-color, #ffffff);
-    --app-fg: var(--tg-theme-text-color, #111827);
-    --app-hint: var(--tg-theme-hint-color, #6b7280);
-    --app-link: var(--tg-theme-link-color, #111827);
-    --app-button: var(--tg-theme-button-color, #111827);
-    --app-button-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-banner-bg: var(--tg-theme-button-color, #111827);
-    --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #f3f4f6);
+    --app-bg: #ffffff;
+    --app-fg: #111827;
+    --app-hint: #6b7280;
+    --app-link: #111827;
+    --app-button: #111827;
+    --app-button-text: #ffffff;
+    --app-banner-bg: #111827;
+    --app-banner-text: #ffffff;
+    --app-secondary-bg: #f3f4f6;
 
     /* Theme-aware colors (light mode defaults) */
     --app-border: rgba(0, 0, 0, 0.1);
@@ -19,7 +19,7 @@
     --app-code-bg: #f6f8fa;
     --app-inline-code-bg: rgba(0, 0, 0, 0.08);
 
-    /* Diff colors (light) - from hapi-app */
+    /* Diff colors (light) - from agentchat-app */
     --app-diff-added-bg: #e6ffed;
     --app-diff-added-text: #24292e;
     --app-diff-removed-bg: #ffeef0;
@@ -47,16 +47,15 @@
 }
 
 [data-theme="dark"] {
-    /* Primary colors - override fallbacks for non-Telegram browsers */
-    --app-bg: var(--tg-theme-bg-color, #1c1c1e);
-    --app-fg: var(--tg-theme-text-color, #ffffff);
-    --app-hint: var(--tg-theme-hint-color, #8e8e93);
-    --app-link: var(--tg-theme-link-color, #ffffff);
-    --app-button: var(--tg-theme-button-color, #ffffff);
-    --app-button-text: var(--tg-theme-button-text-color, #111827);
-    --app-banner-bg: var(--tg-theme-button-color, #3A3A3C);
-    --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #2C2C2E);
+    --app-bg: #1c1c1e;
+    --app-fg: #ffffff;
+    --app-hint: #8e8e93;
+    --app-link: #ffffff;
+    --app-button: #ffffff;
+    --app-button-text: #111827;
+    --app-banner-bg: #3a3a3c;
+    --app-banner-text: #ffffff;
+    --app-secondary-bg: #2c2c2e;
 
     --app-border: rgba(255, 255, 255, 0.1);
     --app-divider: rgba(255, 255, 255, 0.08);
@@ -64,7 +63,7 @@
     --app-code-bg: #282c34;
     --app-inline-code-bg: rgba(255, 255, 255, 0.1);
 
-    /* Diff colors (dark) - from hapi-app */
+    /* Diff colors (dark) - from agentchat-app */
     --app-diff-added-bg: #0d2e1f;
     --app-diff-added-text: #c9d1d9;
     --app-diff-removed-bg: #3f1b23;

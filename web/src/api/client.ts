@@ -7,4 +7,4 @@ import './domains/systemApi'
 import './domains/templateApi'
 
 export { ApiClient, ApiError, type ApiClientOptions } from './core'
-export type { TemplatesResponse } from '@hapi/protocol/contracts/templates'
+export type { TemplatesResponse } from '@agentchat/protocol/contracts/templates'

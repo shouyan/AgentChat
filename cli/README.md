@@ -1,117 +1,78 @@
-# hapi CLI
+# AgentChat CLI
 
-Run Claude Code, Codex, Cursor Agent, Gemini, or OpenCode sessions from your terminal and control them remotely through the hapi hub.
+Run Claude Code, Codex, Cursor Agent, Gemini, or OpenCode from your terminal and control sessions remotely through the AgentChat hub.
 
-## What it does
+## Typical Flow
 
-- Starts Claude Code sessions and registers them with hapi-hub.
-- Starts Codex mode for OpenAI-based sessions.
-- Starts Cursor Agent mode for Cursor CLI sessions.
-- Starts Gemini mode via ACP (Anthropic Code Plugins).
-- Starts OpenCode mode via ACP and its plugin hook system.
-- Provides an MCP stdio bridge for external tools.
-- Manages a background runner for long-running sessions.
-- Includes diagnostics and auth helpers.
-
-## Typical flow
-
-1. Start the hub and set env vars (see ../hub/README.md).
-2. Set the same CLI_API_TOKEN on this machine or run `hapi auth login`.
-3. Run `hapi` to start a session.
-4. Use the web app or Telegram Mini App to monitor and control.
+1. Start the hub
+2. Configure the same `CLI_API_TOKEN` on hub and CLI
+3. Run `agentchat` to start a session
+4. Use the web app or installed PWA to monitor and control it
 
 ## Commands
 
 ### Session commands
 
-- `hapi` - Start a Claude Code session (passes through Claude CLI flags). See `src/index.ts`.
-- `hapi codex` - Start Codex mode. See `src/codex/runCodex.ts`.
-- `hapi codex resume <sessionId>` - Resume existing Codex session.
-- `hapi cursor` - Start Cursor Agent mode. See `src/cursor/runCursor.ts`.
-  Supports `hapi cursor resume <chatId>`, `hapi cursor --continue`, `--mode plan|ask`, `--yolo`, `--model`.
-  Local and remote modes supported; remote uses `agent -p` with stream-json.
-- `hapi gemini` - Start Gemini mode via ACP. See `src/agent/runners/runAgentSession.ts`.
-  Note: Gemini runs in remote mode only; it waits for messages from the hub UI/Telegram.
-- `hapi opencode` - Start OpenCode mode via ACP. See `src/opencode/runOpencode.ts`.
-  Note: OpenCode supports local and remote modes; local mode streams via OpenCode plugins.
+- `agentchat` - start Claude Code
+- `agentchat codex` - start Codex mode
+- `agentchat codex resume <sessionId>` - resume Codex
+- `agentchat cursor` - start Cursor Agent mode
+- `agentchat gemini` - start Gemini via ACP
+- `agentchat opencode` - start OpenCode via ACP
 
 ### Authentication
 
-- `hapi auth status` - Show authentication configuration and token source.
-- `hapi auth login` - Interactively enter and save CLI_API_TOKEN.
-- `hapi auth logout` - Clear saved credentials.
-
-See `src/commands/auth.ts`.
-
-### Runner management
-
-- `hapi runner start` - Start runner as detached process.
-- `hapi runner stop` - Stop runner gracefully.
-- `hapi runner status` - Show runner diagnostics.
-- `hapi runner list` - List active sessions managed by runner.
-- `hapi runner stop-session <sessionId>` - Terminate specific session.
-- `hapi runner logs` - Print path to latest runner log file.
-
-See `src/runner/run.ts`.
-
-### Diagnostics
-
-- `hapi doctor` - Show full diagnostics (version, runner status, logs, processes).
-- `hapi doctor clean` - Kill runaway HAPI processes.
-
-See `src/ui/doctor.ts`.
-
-### Other
-
-- `hapi mcp` - Start MCP stdio bridge. See `src/codex/happyMcpStdioBridge.ts`.
-- `hapi hub` - Start the bundled hub (single binary workflow).
-- `hapi server` - Alias for `hapi hub`.
-
-## Configuration
-
-See `src/configuration.ts` for all options.
-
-### Required
-
-- `CLI_API_TOKEN` - Shared secret; must match the hub. Can be set via env or `~/.hapi/settings.json` (env wins).
-- `HAPI_API_URL` - Hub base URL (default: http://localhost:3006).
-
-### Optional
-
-- `HAPI_HOME` - Config/data directory (default: ~/.hapi).
-- `HAPI_EXPERIMENTAL` - Enable experimental features (true/1/yes).
-- `HAPI_CLAUDE_PATH` - Path to a specific `claude` executable.
-- `HAPI_HTTP_MCP_URL` - Default MCP target for `hapi mcp`.
+- `agentchat auth status`
+- `agentchat auth login`
+- `agentchat auth logout`
 
 ### Runner
 
-- `HAPI_RUNNER_HEARTBEAT_INTERVAL` - Heartbeat interval in ms (default: 60000).
-- `HAPI_RUNNER_HTTP_TIMEOUT` - HTTP timeout for runner control in ms (default: 10000).
+- `agentchat runner start`
+- `agentchat runner stop`
+- `agentchat runner status`
+- `agentchat runner list`
+- `agentchat runner stop-session <sessionId>`
+- `agentchat runner logs`
 
-### Worktree (set by runner)
+### Other
 
-- `HAPI_WORKTREE_BASE_PATH` - Base repository path.
-- `HAPI_WORKTREE_BRANCH` - Current branch name.
-- `HAPI_WORKTREE_NAME` - Worktree name.
-- `HAPI_WORKTREE_PATH` - Full worktree path.
-- `HAPI_WORKTREE_CREATED_AT` - Creation timestamp (ms).
+- `agentchat mcp` - start the MCP stdio bridge
+- `agentchat hub` - start the bundled hub
+- `agentchat server` - alias for `agentchat hub`
+- `agentchat doctor` - diagnostics and cleanup
+
+## Configuration
+
+### Required
+
+- `CLI_API_TOKEN` - shared secret used by CLI and hub
+- `AGENTCHAT_API_URL` - hub base URL. Default: `http://localhost:3217`
+
+### Optional
+
+- `AGENTCHAT_HOME` - data directory. Default: `~/.agentchat`
+- `AGENTCHAT_EXPERIMENTAL` - enable experimental features
+- `AGENTCHAT_CLAUDE_PATH` - custom Claude executable path
+- `AGENTCHAT_HTTP_MCP_URL` - default MCP bridge target
+
+### Worktree env set by the runner
+
+- `AGENTCHAT_WORKTREE_BASE_PATH`
+- `AGENTCHAT_WORKTREE_BRANCH`
+- `AGENTCHAT_WORKTREE_NAME`
+- `AGENTCHAT_WORKTREE_PATH`
+- `AGENTCHAT_WORKTREE_CREATED_AT`
 
 ## Storage
 
-Data is stored in `~/.hapi/` (or `$HAPI_HOME`):
+Files are stored under `~/.agentchat` unless `AGENTCHAT_HOME` is set:
 
-- `settings.json` - User settings (machineId, token, onboarding flag). See `src/persistence.ts`.
-- `runner.state.json` - Runner state (pid, port, version, heartbeat).
-- `logs/` - Log files.
+- `settings.json`
+- `runner.state.json`
+- `logs/`
 
-## Requirements
-
-- Claude CLI installed and logged in (`claude` on PATH).
-- Cursor Agent CLI installed (`agent` on PATH) for `hapi cursor`. Install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux), `irm 'https://cursor.com/install?win32=true' | iex` (Windows).
-- OpenCode CLI installed (`opencode` on PATH).
-- Bun for building from source.
-
-## Build from source
+## Build
 
 From the repo root:
 
@@ -121,26 +82,20 @@ bun run build:cli
 bun run build:cli:exe
 ```
 
-For an all-in-one binary that also embeds the web app:
+For a single binary that also embeds the web app:
 
 ```bash
 bun run build:single-exe
 ```
 
-## Source structure
+## Structure
 
-- `src/api/` - Bot communication (Socket.IO + REST).
-- `src/claude/` - Claude Code integration.
-- `src/codex/` - Codex mode integration.
-- `src/cursor/` - Cursor Agent integration.
-- `src/agent/` - Multi-agent support (Gemini via ACP).
-- `src/opencode/` - OpenCode ACP + hook integration.
-- `src/runner/` - Background service.
-- `src/commands/` - CLI command handlers.
-- `src/ui/` - User interface and diagnostics.
-- `src/modules/` - Tool implementations (ripgrep, difftastic, git).
-
-## Related docs
-
-- `../hub/README.md`
-- `../web/README.md`
+- `src/api/` - hub communication
+- `src/claude/` - Claude Code integration
+- `src/codex/` - Codex mode integration
+- `src/cursor/` - Cursor Agent integration
+- `src/agent/` - ACP-based backends such as Gemini
+- `src/opencode/` - OpenCode integration
+- `src/runner/` - background runner
+- `src/commands/` - CLI commands
+- `src/ui/` - diagnostics and terminal UI helpers
