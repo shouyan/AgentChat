@@ -27,6 +27,7 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
     const [connectionState, setConnectionState] = useState<AttachConnectionState>(() => client.getConnectionState())
     const [actionState, setActionState] = useState<ActionState>(null)
     const [composer, setComposer] = useState('')
+    const [lastActionError, setLastActionError] = useState<string | null>(null)
     const { stdout } = useStdout()
     const terminalWidth = stdout.columns || 80
     const terminalHeight = stdout.rows || 24
@@ -83,12 +84,15 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
             if (nextActionState) {
                 setActionState(nextActionState)
             }
+            setLastActionError(null)
 
             try {
                 await Promise.resolve(onSubmitInput(composer))
                 if (parsed.type !== 'detach') {
                     setComposer('')
                 }
+            } catch (error) {
+                setLastActionError(formatActionError(error))
             } finally {
                 if (parsed.type !== 'detach' && nextActionState) {
                     setActionState(null)
@@ -98,16 +102,19 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
         }
 
         if (key.backspace || key.delete) {
+            setLastActionError(null)
             setComposer((current) => current.slice(0, -1))
             return
         }
 
         if (key.ctrl && input === 'u') {
+            setLastActionError(null)
             setComposer('')
             return
         }
 
         if (!key.ctrl && !key.meta && input.length > 0) {
+            setLastActionError(null)
             setComposer((current) => current + input)
         }
     }, { isActive: true })
@@ -149,7 +156,7 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
             <Box
                 width={terminalWidth}
                 borderStyle="round"
-                borderColor={actionState ? 'yellow' : 'green'}
+                borderColor={actionState ? 'yellow' : lastActionError ? 'red' : 'green'}
                 paddingX={2}
                 justifyContent="center"
                 alignItems="center"
@@ -161,9 +168,14 @@ export const AttachSessionDisplay: React.FC<AttachSessionDisplayProps> = ({
                     <Text color="yellow" bold>Sending message to session...</Text>
                 ) : actionState === 'exiting' ? (
                     <Text color="yellow" bold>Detaching from session...</Text>
+                ) : lastActionError ? (
+                    <Text color="red" bold>Last action failed. Enter retry • Ctrl-U clear • /detach exit</Text>
                 ) : (
                     <Text color="green" bold>💬 Interactive attach • Enter send • /refresh • /detach • Ctrl-C exit</Text>
                 )}
+                {lastActionError ? (
+                    <Text color="red">{formatFooterLine(lastActionError, terminalWidth)}</Text>
+                ) : null}
                 <Text color="white">{formatComposer(composer, terminalWidth)}</Text>
                 {process.env.DEBUG && logPath ? (
                     <Text color="gray" dimColor>Debug logs: {logPath}</Text>
@@ -242,4 +254,19 @@ function formatComposer(composer: string, terminalWidth: number): string {
         return line
     }
     return `${line.slice(-maxLength)}`
+}
+
+function formatActionError(error: unknown): string {
+    if (error instanceof Error && error.message) {
+        return error.message
+    }
+    return String(error)
+}
+
+function formatFooterLine(content: string, terminalWidth: number): string {
+    const maxLength = Math.max(10, terminalWidth - 8)
+    if (content.length <= maxLength) {
+        return content
+    }
+    return `${content.slice(0, maxLength - 1)}…`
 }

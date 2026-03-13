@@ -80,24 +80,36 @@ export async function runAttach(opts: { sessionId: string }): Promise<void> {
                     return
                 }
 
-                if (parsed.type === 'detach') {
-                    await finish()
-                    return
-                }
+                try {
+                    if (parsed.type === 'detach') {
+                        await finish()
+                        return
+                    }
 
-                if (parsed.type === 'refresh') {
-                    await client.refreshAll()
-                    messageBuffer.addMessage('Session snapshot refreshed.', 'status')
-                    return
-                }
+                    if (parsed.type === 'refresh') {
+                        await client.refreshAll()
+                        messageBuffer.addMessage('Session snapshot refreshed.', 'status')
+                        return
+                    }
 
-                if (parsed.type === 'help') {
-                    messageBuffer.addMessage('Commands: /refresh refresh session snapshot, /detach exit attach, /help show this help.', 'status')
-                    return
-                }
+                    if (parsed.type === 'help') {
+                        messageBuffer.addMessage('Commands: /refresh refresh session snapshot, /detach exit attach, /help show this help.', 'status')
+                        return
+                    }
 
-                await client.sendUserMessage(parsed.text)
-                messageBuffer.addMessage('Message sent from terminal attach.', 'status')
+                    await client.sendUserMessage(parsed.text)
+                    messageBuffer.addMessage('Message sent from terminal attach.', 'status')
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error)
+                    if (parsed.type === 'message') {
+                        messageBuffer.addMessage(`Send failed: ${message}. Press Enter to retry current input.`, 'status')
+                    } else if (parsed.type === 'refresh') {
+                        messageBuffer.addMessage(`Refresh failed: ${message}`, 'status')
+                    } else {
+                        messageBuffer.addMessage(`Attach command failed: ${message}`, 'status')
+                    }
+                    throw error
+                }
             },
         }),
         {
