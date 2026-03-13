@@ -14,6 +14,7 @@ Run Claude Code, Codex, Cursor Agent, Gemini, or OpenCode from your terminal and
 ### Session commands
 
 - `agentchat` - start Claude Code
+- `agentchat attach <sessionId>` - attach a read-only terminal view to an existing session
 - `agentchat codex` - start Codex mode
 - `agentchat codex resume <sessionId>` - resume Codex
 - `agentchat cursor` - start Cursor Agent mode

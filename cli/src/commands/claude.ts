@@ -70,6 +70,7 @@ ${chalk.bold('agentchat')} - Claude Code On the Go
 ${chalk.bold('Usage:')}
   agentchat [options]         Start Claude with web/PWA control (direct-connect)
   agentchat auth              Manage authentication
+  agentchat attach <sessionId> Attach terminal view to an existing session
   agentchat codex             Start Codex mode
   agentchat cursor            Start Cursor Agent mode
   agentchat gemini            Start Gemini ACP mode
@@ -87,6 +88,7 @@ ${chalk.bold('Usage:')}
 ${chalk.bold('Examples:')}
   agentchat                    Start session (will prompt for token if not set)
   agentchat auth login         Configure CLI_API_TOKEN interactively
+  agentchat attach <sessionId> Open a read-only terminal view for a web-started session
   agentchat --yolo             Start with bypassing permissions
                                agentchat sugar for --dangerously-skip-permissions
   agentchat auth status        Show direct-connect status

@@ -68,6 +68,7 @@ CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd c
 
 - web: `http://127.0.0.1:4173/`
 - login token: the same `CLI_API_TOKEN` you used for the hub/runner
+- existing web-started sessions can be mirrored in a terminal with `bun run --cwd cli dev -- attach <sessionId>`
 
 ## Provider setup
 
