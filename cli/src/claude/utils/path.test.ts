@@ -1,24 +1,37 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getProjectPath } from './path';
 import { join } from 'node:path';
+import { mkdir, rm, symlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 
-vi.mock('node:os', () => ({
-    homedir: vi.fn(() => '/home/user')
-}));
+vi.mock('node:os', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('node:os')>();
+    return {
+        ...actual,
+        homedir: vi.fn(() => '/home/user')
+    };
+});
 
 // Store original env
 const originalEnv = process.env;
 
 describe('getProjectPath', () => {
+    let testDir: string;
+
     beforeEach(() => {
         // Reset process.env to a clean state
         process.env = { ...originalEnv };
         delete process.env.CLAUDE_CONFIG_DIR;
+        testDir = join(tmpdir(), `claude-path-${Date.now()}-${Math.random().toString(16).slice(2)}`);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
         // Restore original env
         process.env = originalEnv;
+        if (existsSync(testDir)) {
+            await rm(testDir, { recursive: true, force: true });
+        }
     });
     it('should replace slashes with hyphens in the project path', () => {
         const workingDir = '/Users/steve/projects/my-app';
@@ -55,6 +68,18 @@ describe('getProjectPath', () => {
         const workingDir = '';
         const result = getProjectPath(workingDir);
         expect(result).toContain(join('/home/user', '.claude', 'projects'));
+    });
+
+    it('should canonicalize symlinked working directories before building the project id', async () => {
+        const realDir = join(testDir, 'workspace-real');
+        const aliasDir = join(testDir, 'workspace-alias');
+        await mkdir(realDir, { recursive: true });
+        await symlink(realDir, aliasDir, process.platform === 'win32' ? 'junction' : 'dir');
+
+        const realResult = getProjectPath(realDir);
+        const aliasResult = getProjectPath(aliasDir);
+
+        expect(aliasResult).toBe(realResult);
     });
 
     describe('CLAUDE_CONFIG_DIR support', () => {
