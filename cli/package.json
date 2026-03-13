@@ -5,11 +5,11 @@
   "author": "Kirill Dubovitskiy & weishu",
   "license": "AGPL-3.0-only",
   "type": "module",
-  "homepage": "https://github.com/tiann/agentchat",
-  "bugs": "https://github.com/tiann/agentchat/issues",
+  "homepage": "https://github.com/shouyan/AgentChat",
+  "bugs": "https://github.com/shouyan/AgentChat/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiann/agentchat.git",
+    "url": "git+https://github.com/shouyan/AgentChat.git",
     "directory": "cli"
   },
   "bin": {

@@ -2,13 +2,11 @@
 
 适合：只想使用 AgentChat，不想先安装 Bun 的用户。
 
-> 下文中的 Release 地址仍使用占位符。等仓库创建后，请将 `https://github.com/<你的组织>/<你的仓库名>/releases` 替换为最终地址。
-
 ## 1. 下载对应平台的二进制
 
 打开：
 
-- `https://github.com/<你的组织>/<你的仓库名>/releases`
+- `https://github.com/shouyan/AgentChat/releases`
 
 下载与你的平台匹配的压缩包或二进制文件。
 

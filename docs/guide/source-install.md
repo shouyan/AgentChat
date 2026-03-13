@@ -2,13 +2,11 @@
 
 适合：开发者、贡献者、需要调试和修改 AgentChat 的用户。
 
-> 仓库地址暂未最终确定。请先把下面的占位符替换成你实际创建的 GitHub 仓库地址。
-
 ## 1. 克隆仓库
 
 ```bash
-git clone https://github.com/<你的组织>/<你的仓库名>.git
-cd <你的仓库目录>
+git clone https://github.com/shouyan/AgentChat.git
+cd AgentChat
 ```
 
 ## 2. 安装依赖

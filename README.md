@@ -2,7 +2,9 @@
 
 AgentChat 是一个**本地优先**的 AI 编程代理控制台：你在自己的机器上运行 Claude Code、Codex、Cursor Agent、Gemini 或 OpenCode，再通过网页、手机 PWA、飞书私聊远程查看、发消息、审批权限和管理会话。
 
-> 说明：文档里的 `https://github.com/<你的组织>/<你的仓库名>` 仍是占位符。等你创建好 GitHub 仓库后，我再统一替换成最终地址。
+GitHub 仓库：
+
+- `https://github.com/shouyan/AgentChat`
 
 当前版本：**0.0.1**
 
@@ -163,4 +165,3 @@ bun run smoke:web
 
 - License：**AGPL-3.0-only**
 - 欢迎自托管、二次开发与提交 PR
-
