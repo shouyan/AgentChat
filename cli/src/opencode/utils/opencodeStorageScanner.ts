@@ -1,10 +1,11 @@
 import { logger } from '@/ui/logger';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import type { Dirent } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { isObject } from '@agentchat/protocol';
 import type { OpencodeHookEvent } from '../types';
+import { normalizeComparablePath } from '@/utils/normalizeComparablePath';
 
 export type OpencodeStorageScannerHandle = {
     cleanup: () => Promise<void>;
@@ -72,7 +73,7 @@ class OpencodeStorageScanner {
 
     constructor(opts: OpencodeStorageScannerOptions) {
         this.storageDir = opts.storageDir ?? resolveOpencodeStorageDir();
-        this.targetCwd = opts.cwd ? normalizePath(opts.cwd) : null;
+        this.targetCwd = opts.cwd ? normalizeComparablePath(opts.cwd) : null;
         this.onEvent = opts.onEvent;
         this.onSessionFound = opts.onSessionFound;
         this.onSessionMatchFailed = opts.onSessionMatchFailed;
@@ -190,7 +191,7 @@ class OpencodeStorageScanner {
                 continue;
             }
 
-            if (normalizePath(info.directory) !== this.targetCwd) {
+            if (normalizeComparablePath(info.directory) !== this.targetCwd) {
                 continue;
             }
 
@@ -480,11 +481,6 @@ async function readMtime(filePath: string): Promise<number | null> {
 function resolveOpencodeStorageDir(): string {
     const base = process.env.XDG_DATA_HOME || join(homedir(), '.local', 'share');
     return join(base, 'opencode', 'storage');
-}
-
-function normalizePath(value: string): string {
-    const resolved = resolve(value);
-    return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
 }
 
 function filenameToId(filePath: string): string | null {

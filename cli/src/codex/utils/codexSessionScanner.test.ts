@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { mkdir, writeFile, appendFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, appendFile, rm, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { existsSync } from 'node:fs';
@@ -147,5 +147,53 @@ describe('codexSessionScanner', () => {
 
         await wait(200);
         expect(events).toHaveLength(0);
+    });
+
+    it('matches sessions when cwd and session_meta use different symlink aliases of the same directory', async () => {
+        const referenceTimestampMs = Date.parse('2025-12-22T00:00:00.000Z');
+        const windowMs = 2 * 60 * 1000;
+        const sessionId = 'session-symlink-match';
+        const canonicalWorkspace = join(testDir, 'workspace-real');
+        const aliasWorkspace = join(testDir, 'workspace-alias');
+        sessionFile = join(sessionsDir, `codex-${sessionId}.jsonl`);
+
+        await mkdir(canonicalWorkspace, { recursive: true });
+        await symlink(canonicalWorkspace, aliasWorkspace, process.platform === 'win32' ? 'junction' : 'dir');
+
+        await writeFile(
+            sessionFile,
+            [
+                JSON.stringify({
+                    type: 'session_meta',
+                    payload: {
+                        id: sessionId,
+                        cwd: canonicalWorkspace,
+                        timestamp: '2025-12-22T00:00:30.000Z'
+                    }
+                }),
+                JSON.stringify({ type: 'event_msg', payload: { type: 'agent_message', message: 'boot' } })
+            ].join('\n') + '\n'
+        );
+
+        scanner = await createCodexSessionScanner({
+            sessionId: null,
+            cwd: aliasWorkspace,
+            startupTimestampMs: referenceTimestampMs,
+            sessionStartWindowMs: windowMs,
+            onEvent: (event) => events.push(event)
+        });
+
+        await wait(150);
+        expect(events).toHaveLength(0);
+
+        const newLine = JSON.stringify({
+            type: 'response_item',
+            payload: { type: 'function_call', name: 'Tool', call_id: 'call-symlink', arguments: '{}' }
+        });
+        await appendFile(sessionFile, newLine + '\n');
+
+        await wait(200);
+        expect(events).toHaveLength(1);
+        expect(events[0].type).toBe('response_item');
     });
 });

@@ -1,9 +1,10 @@
 import { BaseSessionScanner, SessionFileScanEntry, SessionFileScanResult, SessionFileScanStats } from "@/modules/common/session/BaseSessionScanner";
 import { logger } from "@/ui/logger";
-import { join, relative, resolve, sep } from "node:path";
+import { join, relative, sep } from "node:path";
 import { homedir } from "node:os";
 import { readFile, readdir, stat } from "node:fs/promises";
 import type { CodexSessionEvent } from "./codexEventConverter";
+import { normalizeComparablePath } from "@/utils/normalizeComparablePath";
 
 interface CodexSessionScannerOptions {
     sessionId: string | null;
@@ -33,7 +34,7 @@ type Candidate = {
 const DEFAULT_SESSION_START_WINDOW_MS = 2 * 60 * 1000;
 
 export async function createCodexSessionScanner(opts: CodexSessionScannerOptions): Promise<CodexSessionScanner> {
-    const targetCwd = opts.cwd && opts.cwd.trim().length > 0 ? normalizePath(opts.cwd) : null;
+    const targetCwd = opts.cwd && opts.cwd.trim().length > 0 ? normalizeComparablePath(opts.cwd) : null;
 
     if (!targetCwd && !opts.sessionId) {
         const message = 'No cwd provided for Codex session matching; refusing to fallback.';
@@ -297,7 +298,7 @@ class CodexSessionScannerImpl extends BaseSessionScanner<CodexSessionEvent> {
                         this.sessionIdByFile.set(filePath, sessionId);
                     }
                     const sessionCwd = payload ? asString(payload.cwd) : null;
-                    const normalizedCwd = sessionCwd ? normalizePath(sessionCwd) : null;
+                    const normalizedCwd = sessionCwd ? normalizeComparablePath(sessionCwd) : null;
                     if (normalizedCwd) {
                         this.sessionCwdByFile.set(filePath, normalizedCwd);
                     }
@@ -455,11 +456,6 @@ function parseTimestamp(value: unknown): number | null {
         return Number.isNaN(parsed) ? null : parsed;
     }
     return null;
-}
-
-function normalizePath(value: string): string {
-    const resolved = resolve(value);
-    return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
 }
 
 function getSessionDatePrefixes(referenceTimestampMs: number, windowMs: number): Set<string> {
