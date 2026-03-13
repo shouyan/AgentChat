@@ -1,7 +1,14 @@
 {
     "name": "agentchat-workspace",
     "private": true,
-    "workspaces": ["cli", "shared", "hub", "web", "website", "docs"],
+    "workspaces": [
+        "cli",
+        "shared",
+        "hub",
+        "web",
+        "website",
+        "docs"
+    ],
     "scripts": {
         "clean": "node -e \"const fs=require('fs');for(const p of ['web/dist','hub/dist','cli/dist','cli/dist-exe','release'])fs.rmSync(p,{recursive:true,force:true});\"",
         "build:site": "bun run --cwd website build && bun run --cwd docs docs:build && cp -r docs/.vitepress/dist website/dist/public/docs",
@@ -21,6 +28,8 @@
         "typecheck:hub": "cd hub && bun run typecheck",
         "typecheck:web": "cd web && bun run typecheck",
         "test": "bun run test:cli && bun run test:hub && bun run test:web",
+        "smoke:web": "bun run scripts/smoke-web-login-create-session.ts",
+        "smoke:web:headed": "bun run scripts/smoke-web-login-create-session.ts --headed",
         "test:cli": "cd cli && bun run test",
         "test:hub": "cd hub && bun run test",
         "test:web": "cd web && bun run test",
@@ -29,6 +38,7 @@
     },
     "devDependencies": {
         "concurrently": "^9.2.1",
+        "playwright-core": "^1.58.2",
         "react-devtools-core": "^7.0.1",
         "vite-plugin-pwa": "^1.2.0"
     }

@@ -113,7 +113,18 @@ Recommended checks:
 ```bash
 bun run typecheck
 bun run test
+bun run smoke:web
 ```
+
+`bun run smoke:web` starts a temporary hub, web dev server, and runner, logs in through the browser, creates a session, saves a screenshot under `output/playwright/`, then cleans everything up.
+
+Useful overrides:
+
+- `SMOKE_AGENT=cursor`
+- `SMOKE_DIRECTORY=/absolute/path/to/project`
+- `SMOKE_BROWSER_CHANNEL=chrome`
+- `SMOKE_BROWSER_EXECUTABLE_PATH=/path/to/browser`
+- `SMOKE_HEADED=1`
 
 Then manually verify:
 

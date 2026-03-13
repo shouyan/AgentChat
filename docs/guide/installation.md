@@ -66,7 +66,10 @@ CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd c
 ```bash
 bun run typecheck
 bun run test
+bun run smoke:web
 ```
+
+`bun run smoke:web` launches a temporary hub + web dev server + runner, signs in through the browser, creates a session, writes logs and a screenshot under `output/playwright/`, then tears the stack back down. If your local machine needs a specific browser or provider, set overrides such as `SMOKE_AGENT`, `SMOKE_DIRECTORY`, `SMOKE_BROWSER_CHANNEL`, `SMOKE_BROWSER_EXECUTABLE_PATH`, or `SMOKE_HEADED=1`.
 
 Then verify in the UI:
 
