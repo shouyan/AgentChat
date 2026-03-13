@@ -15,10 +15,45 @@ jobs:
             - name: Create integration test env
               run: |
                   {
-                      echo "HAPI_HOME=~/.hapi-dev-test"
-                      echo "HAPI_API_URL=http://localhost:3006"
+                      echo "AGENTCHAT_HOME=~/.agentchat-dev-test"
+                      echo "AGENTCHAT_API_URL=http://localhost:3217"
                       echo "CLI_API_TOKEN=${CLI_API_TOKEN:-dev-test-token}"
-                      echo "HAPI_DAEMON_HTTP_TIMEOUT=60000"
-                      echo "HAPI_DAEMON_HEARTBEAT_INTERVAL=30000"
+                      echo "AGENTCHAT_RUNNER_HTTP_TIMEOUT=60000"
+                      echo "AGENTCHAT_RUNNER_HEARTBEAT_INTERVAL=30000"
                   } > cli/.env.integration-test
             - run: bun run test
+
+    smoke-web:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+            - run: bun install
+            - name: Detect browser binary
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  for candidate in \
+                      "$(command -v google-chrome 2>/dev/null || true)" \
+                      "$(command -v google-chrome-stable 2>/dev/null || true)" \
+                      "$(command -v chromium 2>/dev/null || true)" \
+                      "$(command -v chromium-browser 2>/dev/null || true)"; do
+                      if [[ -n "$candidate" ]]; then
+                          echo "SMOKE_BROWSER_EXECUTABLE_PATH=$candidate" >> "$GITHUB_ENV"
+                          "$candidate" --version || true
+                          exit 0
+                      fi
+                  done
+                  echo "No supported browser binary found on runner" >&2
+                  exit 1
+            - name: Run web smoke test
+              env:
+                  SMOKE_TOKEN: ci-smoke-token
+              run: bun run smoke:web
+            - name: Upload web smoke artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: smoke-web-artifacts
+                  path: output/playwright/smoke-web-login-create-session/
+                  if-no-files-found: ignore
