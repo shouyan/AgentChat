@@ -1,16 +1,16 @@
 name: Feature Request
-description: Propose a new feature for HAPI
+description: Propose a new feature for AgentChat
 labels:
   - enhancement
 body:
   - type: markdown
     attributes:
       value: |
-        Is HAPI missing a feature that you'd like to see? Feel free to propose it here.
+        Is AgentChat missing a feature that you'd like to see? Feel free to propose it here.
 
         Before you submit a feature:
         1. Search existing issues for similar features. If you find one, 👍 it rather than opening a new one.
-        2. The HAPI team will try to balance the varying needs of the community when prioritizing or rejecting new features. Not all features will be accepted.
+        2. The AgentChat team will try to balance the varying needs of the community when prioritizing or rejecting new features. Not all features will be accepted.
 
   - type: textarea
     id: feature

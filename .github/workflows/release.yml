@@ -23,14 +23,14 @@ jobs:
 
                   for dir in bun-*/; do
                       target="${dir%/}"
-                      # bun-darwin-arm64 -> hapi-darwin-arm64
-                      name="hapi-${target#bun-}"
+                      # bun-darwin-arm64 -> agentchat-darwin-arm64
+                      name="agentchat-${target#bun-}"
                       name="${name/windows/win32}"
 
                       if [[ "$target" == *"windows"* ]]; then
-                          zip -j "../release-artifacts/${name}.zip" "$target"/hapi.exe
+                          zip -j "../release-artifacts/${name}.zip" "$target"/agentchat.exe
                       else
-                          tar -czvf "../release-artifacts/${name}.tar.gz" -C "$target" hapi
+                          tar -czvf "../release-artifacts/${name}.tar.gz" -C "$target" agentchat
                       fi
                   done
 

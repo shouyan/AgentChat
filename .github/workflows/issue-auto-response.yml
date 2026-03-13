@@ -20,13 +20,13 @@ jobs:
       issues: write
 
     steps:
-      - name: Check for existing HAPI Bot response
+      - name: Check for existing AgentChat Bot response
         id: check_bot
         uses: actions/github-script@v7
         with:
           script: |
-            const marker = "*HAPI Bot*";
-            const allowedLogins = (process.env.HAPI_BOT_LOGINS || "github-actions[bot]")
+            const marker = "*AgentChat Bot*";
+            const allowedLogins = (process.env.AGENTCHAT_BOT_LOGINS || "github-actions[bot]")
               .split(",")
               .map((value) => value.trim())
               .filter(Boolean);
@@ -53,10 +53,10 @@ jobs:
             );
             core.setOutput("has_bot", hasBot ? "true" : "false");
             if (hasBot) {
-              core.info("Existing HAPI Bot response found; skipping.");
+              core.info("Existing AgentChat Bot response found; skipping.");
             }
         env:
-          HAPI_BOT_LOGINS: ${{ vars.HAPI_BOT_LOGINS }}
+          AGENTCHAT_BOT_LOGINS: ${{ vars.AGENTCHAT_BOT_LOGINS }}
 
       - name: Checkout repository
         if: steps.check_bot.outputs.has_bot != 'true'

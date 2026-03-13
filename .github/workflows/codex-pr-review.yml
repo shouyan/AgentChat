@@ -22,13 +22,13 @@ jobs:
       review_result: ${{ steps.run_codex.outputs.final-message }}
 
     steps:
-      - name: Check HAPI Bot review state
+      - name: Check AgentChat Bot review state
         id: check_bot
         uses: actions/github-script@v7
         with:
           script: |
-            const marker = "*HAPI Bot*";
-            const allowedLogins = (process.env.HAPI_BOT_LOGINS || "github-actions[bot]")
+            const marker = "*AgentChat Bot*";
+            const allowedLogins = (process.env.AGENTCHAT_BOT_LOGINS || "github-actions[bot]")
               .split(",")
               .map((value) => value.trim())
               .filter(Boolean);
@@ -76,14 +76,14 @@ jobs:
             core.setOutput("is_follow_up_review", isFollowUpReview ? "true" : "false");
 
             if (hasReviewForCurrentHead) {
-              core.info(`Existing HAPI Bot review found for ${currentHeadSha}; skipping.`);
+              core.info(`Existing AgentChat Bot review found for ${currentHeadSha}; skipping.`);
             } else if (isFollowUpReview) {
               core.info(
-                `Latest HAPI Bot review was for ${latestBotReview.commit_id}; running follow-up review for ${currentHeadSha}.`
+                `Latest AgentChat Bot review was for ${latestBotReview.commit_id}; running follow-up review for ${currentHeadSha}.`
               );
             }
         env:
-          HAPI_BOT_LOGINS: ${{ vars.HAPI_BOT_LOGINS }}
+          AGENTCHAT_BOT_LOGINS: ${{ vars.AGENTCHAT_BOT_LOGINS }}
 
       - name: Checkout repository
         if: steps.check_bot.outputs.has_review_for_current_head != 'true'

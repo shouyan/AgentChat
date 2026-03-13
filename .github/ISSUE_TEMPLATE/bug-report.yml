@@ -6,9 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for submitting a bug report! It helps make HAPI better for everyone.
+        Thank you for submitting a bug report! It helps make AgentChat better for everyone.
 
-        If you need help or support using HAPI, and are not reporting a bug, please post on [HAPI/discussions](https://github.com/tiann/hapi/discussions), where you can ask questions or engage with others on ideas for how to improve HAPI.
+        If you need help or support using AgentChat, and are not reporting a bug, please post on [AgentChat discussions](https://github.com/tiann/agentchat/discussions), where you can ask questions or engage with others on ideas for how to improve AgentChat.
 
         You are already an engineer who uses coding agents; you should know how to describe issues clearly. Issues that lack a clear description will be closed.
 
@@ -17,8 +17,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: What version of HAPI is running?
-      description: Copy the output of `hapi --version`
+      label: What version of AgentChat is running?
+      description: Copy the output of `agentchat --version`
     validations:
       required: true
   - type: input

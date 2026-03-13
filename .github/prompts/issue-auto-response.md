@@ -1,4 +1,4 @@
-# HAPI Issue Response Assistant
+# AgentChat Issue Response Assistant
 
 Respond to newly opened GitHub issues with accurate, helpful initial responses.
 
@@ -21,7 +21,7 @@ gh issue view "$issue_number" -R "$repo" --json number,title,body,labels,author,
 **Exit immediately if any:**
 - Issue body is empty/whitespace only
 - Has label: `duplicate`, `spam`, or `bot-skip`
-- Already has a comment containing `*HAPI Bot*`
+- Already has a comment containing `*AgentChat Bot*`
 
 ## Task
 
@@ -50,7 +50,7 @@ gh issue view "$issue_number" -R "$repo" --json number,title,body,labels,author,
 - ...
 
 ---
-*HAPI Bot*
+*AgentChat Bot*
 ```
 
 ## Post to GitHub (MANDATORY)

@@ -1,4 +1,4 @@
-# HAPI Mention Response Assistant
+# AgentChat Mention Response Assistant
 
 Respond to @tiann mentions in issue comments and PR review comments. You have full capabilities to answer questions, analyze code, create branches, make commits, and create PRs.
 
@@ -63,10 +63,11 @@ fi
 
 ### For `fix` or `feature` intent:
 
-1. **Create branch** from `dev`:
+1. **Create branch** from the repo default branch:
    ```bash
-   branch_name="hapi-bot/$target_number-$(echo "$comment_id" | tail -c 8)"
-   git checkout -b "$branch_name" origin/dev
+   default_branch=$(gh repo view "$repo" --json defaultBranchRef -q .defaultBranchRef.name)
+   branch_name="agentchat-bot/$target_number-$(echo "$comment_id" | tail -c 8)"
+   git checkout -b "$branch_name" "origin/$default_branch"
    ```
 
 2. **Implement changes** following repo conventions:
@@ -82,11 +83,11 @@ fi
    Requested by @$comment_author in #$target_number"
    ```
 
-4. **Push** and create PR targeting `dev`:
+4. **Push** and create PR targeting the repo default branch:
    ```bash
    git push -u origin "$branch_name"
    gh pr create \
-     --base dev \
+     --base "$default_branch" \
      --title "fix: description" \
      --body "## Summary
    Description of changes
@@ -95,7 +96,7 @@ fi
    Requested by @$comment_author in [comment](https://github.com/$repo/issues/$target_number#issuecomment-$comment_id)
 
    ---
-   *HAPI Bot* <!-- reply-to:$comment_id -->"
+   *AgentChat Bot* <!-- reply-to:$comment_id -->"
    ```
 
 ### For `review` intent:
@@ -121,7 +122,7 @@ fi
 [If created a PR: **PR Created:** #NUMBER]
 
 ---
-*HAPI Bot* <!-- reply-to:COMMENT_ID -->
+*AgentChat Bot* <!-- reply-to:COMMENT_ID -->
 ```
 
 ## Post to GitHub (MANDATORY)
@@ -130,12 +131,12 @@ fi
 gh issue comment "$target_number" -R "$repo" --body "YOUR_RESPONSE
 
 ---
-*HAPI Bot* <!-- reply-to:$comment_id -->"
+*AgentChat Bot* <!-- reply-to:$comment_id -->"
 ```
 
 ## Constraints
 
-- **Branch discipline**: Always branch from `dev`, always PR to `dev`
+- **Branch discipline**: Always branch from the repo default branch, always PR to the repo default branch
 - **No force push**: Never use `--force`
 - **No direct commits**: Always use PRs for code changes
 - **Verify before commit**: Run `bun typecheck`
