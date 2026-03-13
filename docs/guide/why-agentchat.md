@@ -1,241 +1,63 @@
-# Why AgentChat?
+# 为什么是 AgentChat？
 
-[Happy](https://github.com/slopus/happy) is an excellent project. So why build AgentChat?
+[Happy](https://github.com/slopus/happy) 是一个很优秀的项目。但 AgentChat 想解决的是另一类问题：
 
-**The short answer**: Happy uses a centralized server that stores your encrypted data. AgentChat is decentralized — each user runs their own hub, and the relay server only forwards encrypted traffic without storing anything. These different goals lead to fundamentally different architectures.
+> **我希望 AI 编程代理运行在我自己的机器上，数据尽量留在本地，同时仍能通过手机或网页远程控制。**
 
-## TL;DR
+这让 AgentChat 从一开始就更偏向：**本地优先、自托管、单机即可跑通**。
 
-| Aspect | Happy | AgentChat |
-|--------|-------|------|
-| **Architecture** | Centralized (cloud server stores encrypted data) | Decentralized (each user runs own hub) |
-| **Users** | Multi-user on shared server | Any number (each runs own hub) |
-| **Data** | Encrypted on server (server cannot read) | Stays on your machine |
-| **Encryption** | Application-layer E2EE (client encrypts before sending) | WireGuard + TLS via relay; or none needed if self-hosted |
-| **Deployment** | Multiple services (PostgreSQL, Redis, app server) | Single binary |
-| **Complexity** | High (E2EE, key management, scaling) | Low (one command) |
+## 一句话区别
 
-**Choose AgentChat if**: You want data sovereignty, self-hosting, and minimal setup.
+| 维度 | Happy | AgentChat |
+| --- | --- | --- |
+| 架构倾向 | 中心化云服务 | 去中心化 / 自托管 |
+| 数据位置 | 云端（加密后存储） | 你的机器本地 |
+| 部署复杂度 | 多服务 | 单机 / 单二进制 |
+| 目标用户 | 更偏云端协作 | 更偏本地掌控和数据主权 |
 
-**Choose Happy if**: You need a managed cloud service with multi-user collaboration.
+## AgentChat 的核心取舍
 
-## Architecture Comparison
+### 1. 数据优先留在本地
 
-### Happy: Centralized Cloud
+AgentChat 的默认思路是：
 
-Happy's centralized design requires:
+- 会话数据由你的 Hub 保存
+- 数据库存放在你的机器上
+- 远程访问也是你自己决定是否开放
 
-- **Application-layer E2EE** — Clients encrypt before sending; the server stores encrypted blobs it cannot read
-- **Distributed database + cache** — PostgreSQL + Redis for multi-user scaling
-- **Complex deployment** — Docker, multiple services, config files
+### 2. 更简单的部署路径
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                             PUBLIC INTERNET                             │
-│                                                                         │
-│   ┌─────────────┐                    ┌─────────────────────────────────┐│
-│   │             │                    │        Cloud Server             ││
-│   │  Mobile App │◄───── E2EE ───────►│                                 ││
-│   │             │                    │  ┌─────────────────────────────┐││
-│   └─────────────┘                    │  │   Encrypted Database        │││
-│                                      │  │   (server cannot read)      │││
-│                                      │  └─────────────────────────────┘││
-│                                      └────────────────┬────────────────┘│
-│                                                       │ E2EE            │
-└───────────────────────────────────────────────────────┼─────────────────┘
-                                                        ▼
-                                             ┌───────────────────┐
-                                             │       CLI         │
-                                             │ (holds the keys)  │
-                                             └───────────────────┘
-```
+理想状态下，AgentChat 应该做到：
 
-The server stores encrypted data — it never sees plaintext, but it does hold your data.
+- 一个二进制就能跑
+- 一个 Hub 就能提供 Web 控制面
+- 不需要 PostgreSQL、Redis 这类额外基础设施
 
-### AgentChat: Decentralized
+### 3. 更贴近“个人 / 小团队自托管”
 
-Each user runs their own hub. AgentChat offers two modes of remote access:
+AgentChat 目前更适合：
 
-- **Self-hosted** (own server / Cloudflare Tunnel / Tailscale) — You control the full network path, no E2EE needed
-- **Public relay** (`agentchat hub --relay`) — E2E encrypted via tunwg (WireGuard + TLS); the relay only forwards opaque packets
-- **Single embedded database** — SQLite, no external services
-- **One-command deployment** — Single binary, zero config
+- 个人开发者
+- 小团队内网 / 私网使用
+- 希望保留对 AI 编程工作流完整控制权的人
 
-#### Mode 1: Self-Hosted (own server or tunnel)
+## 什么时候更适合选 AgentChat？
 
-You control the entire path. No encryption beyond standard HTTPS is needed.
+如果你更看重这些点：
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                       YOUR NETWORK / TUNNEL                            │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │                   Single Process / Binary                      │   │
-│   │                                                                │   │
-│   │  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │   │
-│   │  │   CLI    │◄──►│   Hub    │◄──►│ Web App  │                  │   │
-│   │  └──────────┘    └────┬─────┘    └──────────┘                  │   │
-│   │                       │                                        │   │
-│   │                       ▼                                        │   │
-│   │              ┌────────────────┐                                │   │
-│   │              │ Local Database │                                │   │
-│   │              │  (plaintext)   │                                │   │
-│   │              └────────────────┘                                │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                            │                                           │
-│                            ▼ HTTPS                                     │
-│               ┌────────────────────────┐                               │
-│               │ Cloudflare / Tailscale │                               │
-│               │ / Public IP / etc.     │                               │
-│               └────────────────────────┘                               │
-└────────────────────────────────────────────────────────────────────────┘
-```
+- 数据尽量保留在自己机器上
+- 不想搭很多服务
+- 想从手机继续看和控本机 Agent
+- 想要网页、PWA、飞书私聊这些控制入口
 
-#### Mode 2: Public Relay (E2E encrypted)
+那 AgentChat 更合适。
 
-The relay server only forwards encrypted packets — it cannot read your data.
+## 什么时候可能不适合？
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                       YOUR MACHINE                                     │
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │                   Single Process / Binary                      │   │
-│   │                                                                │   │
-│   │  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │   │
-│   │  │   CLI    │◄──►│   Hub    │◄──►│ Web App  │                  │   │
-│   │  └──────────┘    └────┬─────┘    └──────────┘                  │   │
-│   │                       │                                        │   │
-│   │                       ▼                                        │   │
-│   │              ┌────────────────┐                                │   │
-│   │              │ Local Database │                                │   │
-│   │              │  (plaintext)   │                                │   │
-│   │              └────────────────┘                                │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                            │                                           │
-│                            ▼ tunwg (WireGuard + TLS)                   │
-└────────────────────────────┼───────────────────────────────────────────┘
-                             │ E2E encrypted
-                    ┌────────▼────────┐
-                    │  Relay Server   │
-                    │  (forwards only,│
-                    │  cannot read)   │
-                    └────────┬────────┘
-                             │ E2E encrypted
-                    ┌────────▼────────┐
-                    │  Your Phone /   │
-                    │  Browser        │
-                    └─────────────────┘
-```
+如果你要的是：
 
-## Key Differences
+- 面向大规模多人共享的云服务
+- 强中心化托管
+- 完整的 SaaS 多租户运维体系
 
-### Data Location
-
-| Aspect | Happy | AgentChat |
-|--------|-------|------|
-| **Where data lives** | Cloud server (encrypted blobs) | Your own machine |
-| **Who stores it** | Central server holds encrypted data | Only your hub, locally |
-| **Data at rest** | Encrypted (server cannot read) | Plaintext (protected by OS) |
-| **Server's role** | Stores encrypted data + syncs devices | Relay only forwards (or no server at all if self-hosted) |
-
-### Deployment Model
-
-**Happy** requires orchestrating multiple components:
-
-```
-┌───────────────────────────────────────────────────────────────────┐
-│   Distributed Services (4+ components)                            │
-│                                                                   │
-│   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│   │ Database │  │  Cache   │  │ Storage  │  │  Server  │          │
-│   │(Postgres)│  │ (Redis)  │  │ (Files)  │  │(Node.js) │          │
-│   └──────────┘  └──────────┘  └──────────┘  └──────────┘          │
-│                                                                   │
-│   Requires: Container orchestration, multiple config files        │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-**AgentChat** bundles everything:
-
-```
-┌───────────────────────────────────────────────────────────────────┐
-│   Single Binary (everything bundled)                              │
-│                                                                   │
-│   ┌─────────────────────────────────────────────────────────────┐ │
-│   │  CLI + Hub + Web App + Database (SQLite, embedded)          │ │
-│   └─────────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│   Requires: One command to run                                    │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-### Security Approach
-
-| Aspect | Happy | AgentChat (self-hosted) | AgentChat (relay) |
-|--------|-------|-------------------|--------------|
-| **Problem** | Data on untrusted server | Remote access to local hub | Remote access via third-party relay |
-| **Solution** | Application-layer E2EE | HTTPS (you control the path) | WireGuard + TLS (tunwg) |
-| **Key management** | Client holds keys; server never sees plaintext | Not needed | Handled by tunwg automatically |
-| **Data at rest** | Encrypted on server | Plaintext on your machine | Plaintext on your machine |
-
-## Why Different Architectures?
-
-### Happy: Centralized
-
-```
-Goal: Multi-user cloud platform
-         │
-         ├──► Server stores user data
-         │         └──► Must encrypt everything (application-layer E2EE)
-         │
-         ├──► Many concurrent users on one server
-         │         └──► Must scale horizontally (PostgreSQL, Redis)
-         │
-         └──► Multiple devices per user
-                   └──► Must sync encrypted state across devices
-```
-
-**Result**: Sophisticated infrastructure with zero-knowledge server
-
-### AgentChat: Decentralized
-
-```
-Goal: Self-hosted tool — each user runs their own hub
-         │
-         ├──► Data never leaves your machine
-         │         └──► No application-layer E2EE needed
-         │
-         ├──► Each user has their own hub
-         │         └──► No horizontal scaling needed; unlimited users in aggregate
-         │
-         ├──► Self-hosted access (own server/tunnel)
-         │         └──► You control the full path — HTTPS sufficient
-         │
-         └──► Public relay access
-                   └──► WireGuard + TLS (tunwg) — relay forwards only
-```
-
-**Result**: Simple, portable, one-command deployment
-
-## Summary
-
-| Dimension | Happy | AgentChat |
-|-----------|-------|------|
-| **Architecture** | Centralized cloud server | Decentralized (each user runs own hub) |
-| **Server's role** | Stores encrypted data | Relay only forwards (or none if self-hosted) |
-| **Data location** | Server (encrypted, zero-knowledge) | Local (plaintext, your machine) |
-| **Deployment** | Multiple services (PostgreSQL, Redis, Node.js) | Single binary (embedded SQLite) |
-| **Encryption** | Application-layer E2EE (client-side) | WireGuard + TLS (relay) or HTTPS (self-hosted) |
-| **Scaling** | Horizontal (multi-user on shared server) | Per-user (each runs own hub) |
-| **Target user** | Managed cloud service users | Self-hosters who want data sovereignty |
-
-## Conclusion
-
-The architectural differences stem from a centralized vs decentralized design:
-
-- **Happy**: Centralized cloud server that stores your encrypted data. The server never sees plaintext (zero-knowledge), but it does hold your data. This requires application-layer E2EE, key management, and distributed infrastructure (PostgreSQL, Redis, scaling).
-
-- **AgentChat**: Decentralized — each user runs their own hub. Your data stays on your machine. For remote access, you can self-host (own server or tunnel — no E2EE needed since you control the path) or use the public relay (WireGuard + TLS via tunwg — the relay only forwards encrypted packets it cannot read). This achieves one-command deployment with zero external dependencies.
-
-The core tradeoff: Happy solves the "untrusted server" problem with sophisticated encryption. AgentChat avoids the problem entirely by keeping your data on your own machine.
+那 AgentChat 不是当前版本的重点方向。

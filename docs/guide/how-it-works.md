@@ -1,140 +1,132 @@
-# How it Works
+# 工作原理
 
-AgentChat has three core pieces working together:
+AgentChat 由三部分组成：
 
-- **CLI** runs the coding agent on your machine
-- **Hub** stores state and exposes APIs
-- **Web/PWA** gives you remote control from another device
+- **CLI**：在你的机器上运行 AI 编程代理
+- **Hub**：保存状态、提供 API、协调消息同步
+- **Web / PWA**：提供远程控制界面
 
-## Architecture Overview
+## 架构总览
 
 ```text
 ┌──────────────┐   Socket.IO   ┌──────────────┐   REST + SSE   ┌──────────────┐
 │ AgentChat CLI│◄────────────►│ AgentChat Hub│◄──────────────►│  Web / PWA   │
-│ + AI Agent   │              │ + SQLite     │                │  on phone     │
+│ + AI Agent   │              │ + SQLite     │                │  手机 / 浏览器 │
 └──────────────┘              └──────────────┘                └──────────────┘
         │                             │
-        │ local process               │ http://localhost:3217
+        │ 本地进程                    │ http://localhost:3217
         ▼                             ▼
-   project files               optional HTTPS / tunnel
+   项目文件 / 命令行              可选 HTTPS / 隧道
 ```
 
-## Components
+## 各组件负责什么
 
 ### AgentChat CLI
 
-The CLI wraps Claude Code, Codex, Cursor Agent, Gemini, and OpenCode. It:
+CLI 负责：
 
-- Starts and manages sessions
-- Registers them with the hub
-- Streams messages and permission requests
-- Exposes AgentChat MCP tools to supported agents
+- 启动 Claude Code、Codex、Cursor、Gemini、OpenCode
+- 将会话注册到 Hub
+- 上报消息、状态、权限请求
+- 暴露 AgentChat 的 MCP / RPC 能力
 
 ### AgentChat Hub
 
-The hub is the central coordination service. It provides:
+Hub 是中心协调层，负责：
 
-- REST endpoints for session actions
-- Socket.IO for CLI connectivity and RPC
-- SSE for live browser updates
-- SQLite persistence for sessions, messages, and machines
-- Web Push notifications for permission and ready events
+- HTTP API
+- CLI Socket.IO 连接
+- SSE 推送浏览器更新
+- SQLite 持久化会话、消息、机器信息
+- 转发权限审批结果
+- 提供 Web 页面和配套后端能力
 
-### Web App / PWA
+### Web / PWA
 
-The web app is the remote control surface. It lets you:
+Web / PWA 是远程控制面板，负责：
 
-- Browse current and past sessions
-- Read and send messages
-- Approve or deny permissions
-- Inspect files, diffs, and terminal output
-- Spawn sessions on runner-connected machines
+- 查看当前和历史会话
+- 发送消息
+- 审批权限
+- 查看文件、终端、机器信息
+- 从在线 runner 机器远程创建会话
 
-## Data Flow
+## 典型数据流
 
-### Starting a Session
-
-```text
-1. User runs `agentchat`
-2. CLI starts the selected agent
-3. CLI connects to the hub over Socket.IO
-4. Hub stores the session and metadata
-5. Web clients receive the update over SSE
-6. The session appears on phone or desktop web
-```
-
-### Permission Requests
+### 新建会话
 
 ```text
-1. Agent requests a permission
-2. CLI sends the request to the hub
-3. Hub stores it and publishes SSE / push events
-4. User opens the web app or PWA
-5. User approves or denies
-6. Hub relays the decision back to the CLI
+1. 用户在终端运行 agentchat，或在网页里通过 runner 新建会话
+2. CLI 启动对应 AI Agent
+3. CLI 通过 Socket.IO 连接 Hub
+4. Hub 保存会话元数据
+5. 浏览器通过 SSE 收到会话更新
+6. 手机 / 浏览器里出现新会话
 ```
 
-### Message Flow
+### 权限审批
 
 ```text
-Phone / Browser        Hub                CLI
-     │                  │                  │
-     │ send message     │                  │
-     ├─────────────────►│                  │
-     │                  ├─────────────────►│
-     │                  │   Socket.IO      │
-     │                  │                  ├─ agent runs
-     │                  │◄─────────────────┤
-     │     SSE update   │                  │
-     ◄──────────────────┤                  │
+1. Agent 请求一个权限
+2. CLI 把请求发给 Hub
+3. Hub 持久化并推送 SSE / 通知
+4. 用户在网页或 PWA 中打开该会话
+5. 用户批准或拒绝
+6. Hub 再把结果转发回 CLI
 ```
 
-## Communication Protocols
+### 消息往返
 
-### CLI ↔ Hub
+```text
+浏览器 / 手机           Hub                 CLI / Agent
+     │                   │                       │
+     │ 发送消息          │                       │
+     ├──────────────────►│                       │
+     │                   ├──────────────────────►│
+     │                   │      Socket.IO        │
+     │                   │                       ├─ Agent 执行
+     │                   │◄──────────────────────┤
+     │      SSE 更新     │                       │
+     ◄───────────────────┤                       │
+```
 
-Socket.IO handles:
+## 本地模式与远程模式
 
-- Session registration
-- Keepalive and status updates
-- Permission requests
-- RPC calls for runner and machine operations
+### 本地模式
 
-### Hub ↔ Web
+适合你在终端里专注工作时：
 
-REST handles actions such as:
+- 原生 Agent CLI 体验
+- 响应最快
+- 键盘驱动效率最高
 
-- Send message
-- Approve permission
-- Spawn session
+### 远程模式
 
-SSE handles live updates such as:
+适合你离开终端但想继续控制会话时：
 
-- New messages
-- Session state changes
-- Machine updates
+- 手机 / 浏览器可继续查看与发消息
+- 远程审批权限
+- 会话持续运行在你的机器上
 
-## Local and Remote Modes
+### attach 模式
 
-### Local Mode
+`agentchat attach <sessionId>` 允许你：
 
-Best for focused work at your terminal:
+- 在终端附着到一个已经存在的会话
+- 查看实时消息
+- 从终端继续发送消息
+- 但不会直接结束底层会话
 
-- Native agent interface
-- Fastest feedback loop
-- Full keyboard-driven flow
+## 为什么需要 Runner
 
-### Remote Mode
+Runner 的作用是让“网页端远程创建会话”成为可能。
 
-Best when you step away from the terminal:
+没有 Runner 时：
 
-- Web/PWA access from any device
-- Remote approvals and messages
-- Session keeps running on your machine
+- 你仍可以手动在终端启动本地会话
+- 但网页端无法远程拉起新会话
 
-### Switching
+有 Runner 时：
 
-- **Local → Remote** happens when remote input arrives
-- **Remote → Local** happens when you take control back from the terminal
-
-The same session keeps running either way. AgentChat changes the control surface, not the session identity.
+- Web 会看到在线机器
+- 你可以从网页里指定目录和 Agent 类型，直接新建会话

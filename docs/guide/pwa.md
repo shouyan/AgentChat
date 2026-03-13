@@ -1,56 +1,61 @@
-# Progressive Web App (PWA)
+# PWA 安装
 
-AgentChat's web interface can be installed as a PWA on your phone or desktop for an app-like remote control experience.
+AgentChat 的 Web 界面可以安装成 PWA（渐进式 Web 应用），让它在手机或桌面上更像原生 App。
 
-## Why install it?
+## 为什么建议安装 PWA？
 
-A PWA gives you:
+安装后你会得到：
 
-- A home screen icon
-- Full-screen app behavior
-- Faster repeat launches
-- Web push notifications
-- Offline caching for recently loaded UI
+- 主屏幕图标
+- 更接近原生应用的全屏体验
+- 更快的重复启动速度
+- Web Push 通知
+- 最近加载界面的离线缓存
 
-## Installing AgentChat
+## 安装方式
 
 ### Android
 
-1. Open AgentChat in Chrome or Edge
-2. Tap the install banner, or use the browser menu
-3. Confirm installation
+1. 用 Chrome 或 Edge 打开 AgentChat
+2. 点浏览器提示的安装横幅，或从菜单中选择“安装”
+3. 确认安装
 
 ### iPhone / iPad
 
-1. Open AgentChat in Safari
-2. Tap **Share**
-3. Choose **Add to Home Screen**
+1. 用 Safari 打开 AgentChat
+2. 点 **分享**
+3. 选择 **添加到主屏幕**
 
-### Desktop
+### 桌面浏览器
 
-1. Open AgentChat in Chrome or Edge
-2. Click the install icon in the address bar
-3. Or use the browser menu to install
+1. 用 Chrome 或 Edge 打开 AgentChat
+2. 点击地址栏安装图标
+3. 或从浏览器菜单中选择安装
 
-## Notifications
+## 通知
 
-AgentChat uses web push notifications to tell you when:
+AgentChat 会在这些场景尝试发送 Web Push：
 
-- An agent needs approval
-- A session is ready for more input
+- Agent 请求权限
+- 会话准备好继续输入
 
-Enable notifications when prompted. If you skipped the prompt, re-enable them from browser or system settings.
+如果你第一次点掉了通知授权，可以之后在浏览器设置或系统设置里重新开启。
 
-## Offline Behavior
+## 离线行为
 
-When offline, AgentChat can still show cached UI and previously loaded session data. Actions that require the hub resume once connectivity returns.
+离线时，PWA 仍可能展示：
 
-## Tips
+- 已缓存的界面
+- 最近查看过的部分会话信息
 
-- Use HTTPS for any non-local deployment
-- On Android, disable battery optimization if you want more reliable background notifications
-- If the install prompt does not appear, refresh once and check whether the app is already installed
+但真正需要 Hub 的动作（例如发消息、审批权限）仍要等恢复联网后才能成功。
 
-## Browser Fallback
+## 使用建议
 
-If you do not want to install the PWA, the standard browser experience still works. Installation is optional; the same hub and access token are used either way.
+- 对公网访问时请使用 HTTPS
+- Android 上如果希望通知更稳定，可考虑关闭浏览器电池优化
+- 如果没有看到安装提示，先刷新一次并确认之前没有装过
+
+## 不安装也能用吗？
+
+可以。PWA 是增强体验，不是强制要求。你直接在浏览器里访问也能完成大多数操作。

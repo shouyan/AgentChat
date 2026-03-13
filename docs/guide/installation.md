@@ -1,91 +1,57 @@
-# Installation
+# 安装总览
 
-## Supported platforms
+这份文档用于帮你判断应该使用哪种安装方式，以及每种方式分别适合谁。
 
-AgentChat 0.0.1 targets:
+## 你应该选哪一种？
 
-- macOS `arm64`, `x64`
-- Linux `arm64`, `x64`
-- Windows `x64`
+| 方式 | 适合谁 | 是否需要 Bun | 是否适合开发修改 | 推荐程度 |
+| --- | --- | --- | --- | --- |
+| GitHub Release 安装 | 普通用户、只想直接运行的人 | 否 | 否 | 推荐 |
+| 源码安装 | 开发者、贡献者、需要调试的人 | 是 | 是 | 推荐给开发场景 |
 
-Known limitation:
+## 组件说明
 
-- web terminal is not supported on Windows
-
-## Requirements
-
-- Bun 1.3+
-- Node.js 20+
-- at least one supported local agent CLI installed
-
-## Components
-
-| Component | Purpose | Required |
+| 组件 | 作用 | 是否必须 |
 | --- | --- | --- |
-| Hub | HTTP API, persistence, SSE, web backend | yes |
-| Web | browser UI / PWA | yes |
-| Runner | remote spawn, machine metadata, provider env | yes for web-driven session creation |
-| Agent CLI | Claude / Codex / Gemini / Cursor / OpenCode | yes |
+| Hub | HTTP API、SQLite、SSE、Socket.IO、Web 后端 | 必须 |
+| Web / PWA | 浏览器远程控制界面 | 必须 |
+| Runner | 让网页能远程创建会话、汇报机器状态 | 想从网页新建会话时必须 |
+| Agent CLI | Claude / Codex / Cursor / Gemini / OpenCode 本地命令行 | 至少一个 |
 
-## Local source install
+## 前置条件
 
-```bash
-git clone <your-repo-url>
-cd agentchat-source
-bun install
-```
+### Release 安装
 
-## Start order
+- 下载对应平台的 AgentChat 二进制
+- 至少安装一个你要使用的 Agent CLI
 
-### Hub
+### 源码安装
 
-```bash
-bun run dev:hub
-```
+- Node.js 20+
+- Bun 1.3+
+- 至少安装一个你要使用的 Agent CLI
 
-### Web
+## 默认端口与目录
 
-```bash
-bun run dev:web -- --host 0.0.0.0 --port 4173
-```
+### 默认端口
 
-### Runner
+- Hub：`3217`
+- 源码模式下 Web 开发服务器常用：`4173`
 
-```bash
-CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd cli dev -- runner start-sync
-```
+### 默认数据目录
 
-## Configuration notes
+- `~/.agentchat`
 
-- use the same `CLI_API_TOKEN` for hub, runner, and web login
-- runner provider variables live in `~/.agentchat/runner.env`
-- web edits to runner env only affect future agent sessions
+常见文件：
 
-## Recommended smoke checks
+- `settings.json`
+- `agentchat.db`
+- `runner.state.json`
+- `runner.env`
+- `logs/`
 
-```bash
-bun run typecheck
-bun run test
-bun run smoke:web
-```
+## 下一步
 
-`bun run smoke:web` launches a temporary hub + web dev server + runner, signs in through the browser, creates a session, writes logs and a screenshot under `output/playwright/`, then tears the stack back down. If your local machine needs a specific browser or provider, set overrides such as `SMOKE_AGENT`, `SMOKE_DIRECTORY`, `SMOKE_BROWSER_CHANNEL`, `SMOKE_BROWSER_EXECUTABLE_PATH`, or `SMOKE_HEADED=1`.
-
-Then verify in the UI:
-
-- login works
-- one machine online
-- provider health check works
-- create session works
-- files page loads
-- room creation works
-
-## Production-ish notes
-
-Before wider rollout, document these locally for your team:
-
-- where hub runs
-- what token distribution flow you use
-- which namespaces are used
-- how `runner.env` is managed per machine
-- which providers/models are officially supported
+- 想直接运行：看 [Release 安装](./release-install.md)
+- 想从仓库启动：看 [源码安装](./source-install.md)
+- 想快速走通一遍：看 [快速开始](./quick-start.md)

@@ -1,94 +1,119 @@
-# Quick Start
+# 快速开始
 
-This guide covers the smallest useful local setup for AgentChat 0.0.1.
+这份文档提供一套**最小可用**的本地启动流程，目标是让你在几分钟内把 AgentChat 跑起来。
 
-## 1. Install dependencies
+## 前置条件
 
-From source:
+- Node.js 20+
+- Bun 1.3+
+- 至少安装一个本地 Agent CLI
+
+如果你不想安装 Bun，请改看 [Release 安装](./release-install.md)。
+
+## 第 1 步：准备一个强 token
+
+Hub、Runner 和 Web 登录需要使用同一个 `CLI_API_TOKEN`。
+
+示例：
 
 ```bash
-bun install
+export CLI_API_TOKEN="your-strong-token"
 ```
 
-## 2. Start the hub
+## 第 2 步：启动 Hub
 
 ```bash
 bun run dev:hub
 ```
 
-Default local URL:
+默认地址：
 
 - `http://127.0.0.1:3217`
 
-## 3. Start the web app
+## 第 3 步：启动 Web
 
 ```bash
 bun run dev:web -- --host 0.0.0.0 --port 4173
 ```
 
-Open:
+打开：
 
 - `http://127.0.0.1:4173/`
 
-## 4. Start a runner
+## 第 4 步：启动 Runner
 
 ```bash
-CLI_API_TOKEN=test-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd cli dev -- runner start-sync
+CLI_API_TOKEN=$CLI_API_TOKEN AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --cwd cli dev -- runner start-sync
 ```
 
-If you want remote spawning from the web UI, the runner must be online.
+如果你想从网页端远程创建会话，这一步必须做。
 
-## 5. Configure providers
+## 第 5 步：配置 Provider
 
-Edit:
+编辑：
 
 - `~/.agentchat/runner.env`
 
-or open **Machines & providers** in the web UI and edit the same file there.
+最小 Claude 示例：
 
-Minimal Claude example:
-
-```env
+```ini
 ANTHROPIC_BASE_URL=https://your-claude-gateway.example.com
 ANTHROPIC_AUTH_TOKEN=your-token
 ```
 
-Minimal Gemini example:
+最小 Gemini 示例：
 
-```env
+```ini
 GOOGLE_GEMINI_BASE_URL=https://generativelanguage.googleapis.com
 GEMINI_API_KEY=your-key
 ```
 
-## 6. Sign in to the web UI
+更完整配置见：[Provider 配置](./provider-setup.md)
 
-Use the same `CLI_API_TOKEN` value you configured for the hub and runner.
+## 第 6 步：登录 Web
 
-## 7. Verify the basics
+使用和上面相同的 `CLI_API_TOKEN` 登录。
 
-- **Machines & providers** shows one online machine
-- create a session
-- send a message
-- open files
-- create a room
+## 第 7 步：验证最小链路
 
-## Common first-run issues
+进入 Web 后，建议按这个顺序验证：
 
-### No machines online
+1. **Machines & providers** 页面看到 1 台在线机器
+2. 创建新会话
+3. 发送一条消息
+4. 打开 **Files** 页面
+5. 打开 **Terminal** 页面
+6. 终端执行 `agentchat attach <sessionId>` 并附着到这个会话
 
-- runner not started
-- runner connected to the wrong hub URL
-- token mismatch between hub and runner
+## 常见首屏问题
 
-### Provider misconfigured
+### 没有在线机器
 
-- `runner.env` missing required keys
-- changes saved, but only new sessions pick them up
-- old sessions still using old environment
+常见原因：
 
-## Next
+- runner 没启动
+- runner 连到了错误的 hub 地址
+- hub 和 runner 的 token 不一致
 
-- [Installation](./installation.md)
-- [Provider Setup](./provider-setup.md)
-- [Support Matrix](./support-matrix.md)
-- [Feishu](./feishu.md)
+### Provider 配好了但新会话还是不能用
+
+检查：
+
+- 是否把变量写进了 `runner.env`
+- 是否是**新建**会话而不是继续使用旧会话
+- 变量名是否完全匹配
+
+### 网页打不开或登录失败
+
+检查：
+
+- hub 是否真的在 `3217` 上运行
+- web dev server 是否真的在 `4173` 上运行
+- `CLI_API_TOKEN` 是否一致
+
+## 下一步
+
+- 看 [安装总览](./installation.md)
+- 看 [Release 安装](./release-install.md)
+- 看 [源码安装](./source-install.md)
+- 看 [飞书接入](./feishu.md)

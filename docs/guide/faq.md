@@ -1,198 +1,148 @@
 # FAQ
 
-## General
+## 基础问题
 
-### What is AgentChat?
+### AgentChat 是什么？
 
-AgentChat is a local-first, self-hosted platform for running and controlling AI coding agents remotely. It lets you start sessions on your computer and monitor, message, and approve them from your phone.
+AgentChat 是一个本地优先、自托管的 AI 编程代理控制台。你可以在自己的电脑上运行会话，再通过网页、手机或飞书私聊远程查看、发消息和审批权限。
 
-### What does AgentChat stand for?
+### AgentChat 这个名字是什么意思？
 
-AgentChat (哈皮) is a Chinese transliteration of "Happy", reflecting the project's goal of making AI coding assistance feel lighter and less terminal-bound.
+AgentChat（曾经也有人叫它“哈皮”）强调的是“把 AI Agent 对话和控制面统一起来”，让你不用一直被困在终端里。
 
-### Is AgentChat free?
+### 它免费吗？
 
-Yes. AgentChat is open source and released under the AGPL-3.0-only license.
+是的。AgentChat 是开源软件，许可证为 **AGPL-3.0-only**。
 
-### What AI agents does AgentChat support?
+### 支持哪些 Agent？
 
-- **Claude Code** (recommended)
-- **OpenAI Codex**
-- **Cursor Agent**
-- **Google Gemini**
-- **OpenCode**
+当前支持：
 
-## Setup & Installation
+- Claude Code
+- Codex
+- Cursor Agent
+- Gemini
+- OpenCode
 
-### Do I need a separate hub?
+## 安装与部署
 
-No. AgentChat includes an embedded hub. Run `agentchat hub` on the machine that hosts your sessions.
+### 我一定要单独部署一个 Hub 吗？
 
-`agentchat server` remains supported as an alias.
+AgentChat 的 Hub 是核心组件，但它已经内置在 AgentChat 里。你只需要运行：
 
-### How do I access AgentChat from my phone?
+```bash
+agentchat hub
+```
 
-For local network access:
+或源码模式下：
+
+```bash
+bun run dev:hub
+```
+
+### 手机怎么访问？
+
+局域网访问时，通常是：
 
 ```text
-http://<your-computer-ip>:3217
+http://<你的电脑 IP>:3217
 ```
 
-For internet access:
+如果要通过公网访问：
 
-- Put the hub behind HTTPS with a reverse proxy, or
-- Use a tunnel such as Cloudflare Tunnel, Tailscale, or ngrok.
+- 请务必放到 HTTPS 后面
+- 或使用 Cloudflare Tunnel、Tailscale、ngrok 等隧道方案
 
-### What's the access token for?
+### `CLI_API_TOKEN` 是做什么的？
 
-The `CLI_API_TOKEN` is the shared secret used by:
+它是 Hub、Runner 和 Web 登录共用的访问令牌，用来控制谁可以接入你的 AgentChat。
 
-- CLI connections to the hub
-- Web app and PWA logins
+### 支持多账号吗？
 
-It is auto-generated on first hub start and stored in `~/.agentchat/settings.json`.
+支持轻量隔离方式：**namespace**。详见 [Namespace（高级）](./namespace.md)。
 
-### Do you support multiple accounts?
+## 使用问题
 
-Yes. Use namespaces for lightweight multi-account isolation on one hub. See [Namespace (Advanced)](./namespace.md).
+### 如何远程审批权限？
 
-### Can I use AgentChat in a browser only?
+当 Agent 请求权限时：
 
-Yes. The browser and installed PWA are the primary remote control surfaces.
+1. 打开 Web / PWA
+2. 进入对应会话
+3. 在会话里批准或拒绝该请求
 
-## Usage
+### 能从手机给 Agent 发消息吗？
 
-### How do I approve permissions remotely?
+可以。打开会话后直接在聊天框输入即可。
 
-1. When your AI agent requests permission, you'll get an in-app or push notification.
-2. Open AgentChat on your phone.
-3. Navigate to the active session.
-4. Approve or deny the pending permission.
+### 能远程打开终端吗？
 
-### How do I receive notifications?
+可以。进入会话的 **Terminal** 页面。
 
-AgentChat supports web push notifications. Enable them when prompted in the web app or installed PWA.
+### 能在终端附着已有会话吗？
 
-### Can I start sessions remotely?
-
-Yes, with runner mode:
-
-1. Run `agentchat runner start` on your computer.
-2. Your machine appears in the **Machines** list in the web app.
-3. Spawn new sessions from anywhere.
-
-### How do I see what files were changed?
-
-Open the **Files** tab in a session to:
-
-- Browse project files
-- View git status
-- Inspect diffs
-
-### Can I send messages to the AI from my phone?
-
-Yes. Open a session and use the chat interface to message the agent directly.
-
-### Can I access a terminal remotely?
-
-Yes. Open the **Terminal** tab inside a session.
-
-### How do I use voice control?
-
-Set `ELEVENLABS_API_KEY`, open a session in the web app, and click the microphone button. See [Voice Assistant](./voice-assistant.md).
-
-## Security
-
-### Is my data safe?
-
-Yes. AgentChat is local-first:
-
-- All session data stays on your machine
-- Nothing is uploaded to a hosted AgentChat service
-- The database lives in `~/.agentchat/`
-
-### How secure is token authentication?
-
-The auto-generated token is 256-bit and cryptographically secure. For any non-local access, put the hub behind HTTPS.
-
-### Can others access my AgentChat instance?
-
-Only if they know your access token. For stronger security:
-
-- Use a strong unique token
-- Always use HTTPS externally
-- Prefer private networking such as Tailscale when possible
-
-## Troubleshooting
-
-### "Connection refused" error
-
-- Ensure the hub is running: `agentchat hub`
-- Check firewall rules for port `3217`
-- Verify `AGENTCHAT_API_URL`
-
-### "Invalid token" error
-
-- Re-run `agentchat auth login`
-- Check the token matches on CLI and hub
-- Verify `~/.agentchat/settings.json`
-
-### Runner won't start
+可以：
 
 ```bash
-agentchat runner status
-rm ~/.agentchat/runner.state.json.lock
-agentchat runner logs
+agentchat attach <sessionId>
 ```
 
-### Claude Code not found
+attach 后你可以：
 
-Install Claude Code or set a custom path:
+- 查看实时消息
+- 从终端继续发送消息
+- detach 不会结束底层会话
 
-```bash
-npm install -g @anthropic-ai/claude-code
-export AGENTCHAT_CLAUDE_PATH=/path/to/claude
+### 能远程创建会话吗？
+
+可以，但要求 runner 在线：
+
+1. 启动 `agentchat runner start-sync`
+2. 在 Web 里看到在线机器
+3. 从网页里选择目录和 Agent 类型创建会话
+
+## 安全问题
+
+### 数据会上传到 AgentChat 官方服务器吗？
+
+不会。AgentChat 是本地优先的：
+
+- 会话数据存在你的机器上
+- 数据库默认在 `~/.agentchat/`
+- 是否对公网开放，由你自己决定
+
+### Token 登录安全吗？
+
+本地环境下足够实用；如果要对外提供访问，**必须使用 HTTPS**，并使用强随机 token。
+
+### 别人能访问我的实例吗？
+
+只有知道你的访问 token 的人才能登录。所以建议：
+
+- 使用强 token
+- 公网环境必须走 HTTPS
+- 优先用 Tailscale 之类的私网方案
+
+## 飞书问题
+
+### 飞书支持群聊吗？
+
+0.0.1 暂不支持。当前只支持**私聊文本消息**。
+
+### 飞书里为什么提示用户未绑定 namespace？
+
+说明你还没有给该飞书 `open_id` 配置映射。最简单做法是设置：
+
+```ini
+FEISHU_USER_BINDINGS=ou_xxx:default
 ```
 
-### Cursor Agent not found
+详见 [飞书接入](./feishu.md)。
 
-Install Cursor Agent CLI:
+## 还有问题怎么办？
 
-```bash
-curl https://cursor.com/install -fsS | bash
-```
+先看：
 
-On Windows:
-
-```powershell
-irm 'https://cursor.com/install?win32=true' | iex
-```
-
-### How do I run diagnostics?
-
-```bash
-agentchat doctor
-```
-
-## Comparison
-
-### AgentChat vs Happy
-
-| Aspect | Happy | AgentChat |
-|--------|-------|-----------|
-| Design | Cloud-first | Local-first |
-| Users | Multi-user | Single user |
-| Deployment | Multiple services | Single binary |
-| Data | Encrypted on server | Never leaves your machine |
-
-See [Why AgentChat](./why-agentchat.md) for the deeper comparison.
-
-### AgentChat vs running Claude Code directly
-
-| Feature | Claude Code | AgentChat + Claude Code |
-|---------|-------------|-------------------------|
-| Remote access | No | Yes |
-| Mobile control | No | Yes |
-| Permission approval | Terminal only | Phone/web |
-| Session persistence | No | Yes |
-| Multi-machine | Manual | Built-in |
+- [故障排查](./troubleshooting.md)
+- [Provider 配置](./provider-setup.md)
+- [飞书接入](./feishu.md)

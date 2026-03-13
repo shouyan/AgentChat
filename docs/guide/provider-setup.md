@@ -1,20 +1,20 @@
-# Provider Setup
+# Provider 配置
 
-AgentChat 0.0.1 uses a machine-scoped runner environment file.
+AgentChat 0.0.1 使用**机器级** `runner.env` 作为 provider 配置的事实来源。
 
-## Source of truth
+## 配置文件位置
 
-Each runner reads:
+每台运行 runner 的机器都会读取：
 
 - `~/.agentchat/runner.env`
 
-before starting a new agent session.
+只有在**启动新会话**时，AgentChat 才会把这个文件里的环境变量注入到新的 Agent 进程中。
 
-If a managed variable is present in this file, AgentChat uses it. If it is absent, AgentChat falls back to the default behavior for that provider.
+> 这意味着：你修改 `runner.env` 后，**旧会话不会自动生效**，需要新建一个会话再验证。
 
-## Managed keys
+## 当前内置管理的键
 
-```env
+```ini
 ANTHROPIC_BASE_URL=
 ANTHROPIC_AUTH_TOKEN=
 ANTHROPIC_DEFAULT_OPUS_MODEL=
@@ -24,38 +24,83 @@ GOOGLE_GEMINI_BASE_URL=
 GEMINI_API_KEY=
 ```
 
-## Editing options
+## 不同 Agent 的配置方式
 
-### Local filesystem
+### Claude Code
 
-Edit `~/.agentchat/runner.env` directly with any editor.
+通常需要：
 
-### Web UI
+```ini
+ANTHROPIC_BASE_URL=https://your-claude-gateway.example.com
+ANTHROPIC_AUTH_TOKEN=your-token
+```
 
-Open **Settings → Machines & providers**, then edit the **Runner environment** box for a machine and save it.
+可选：指定默认模型别名
 
-## Important behavior
+```ini
+ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-4
+ANTHROPIC_DEFAULT_SONNET_MODEL=claude-sonnet-4
+ANTHROPIC_DEFAULT_HAIKU_MODEL=claude-haiku-4
+```
 
-Changes only affect **newly started agent sessions**.
+### Gemini
 
-Existing sessions keep their current environment until you create a new session or respawn the agent through a fresh session.
+```ini
+GOOGLE_GEMINI_BASE_URL=https://generativelanguage.googleapis.com
+GEMINI_API_KEY=your-key
+```
 
-## Troubleshooting
+### Codex / Cursor / OpenCode
 
-### Terminal Claude works, AgentChat Claude does not
+这几个更多依赖各自 CLI 的本地安装与登录状态。AgentChat 会检测它们是否可用，但不一定通过 `runner.env` 管理其全部认证信息。
 
-Usually means:
+建议你先在本机终端确认对应 CLI 已能独立工作，再接入 AgentChat。
 
-- your shell has the right provider variables
-- but `runner.env` does not
+## 两种编辑方式
 
-Fix: update `runner.env`, then create a new session.
+### 方式一：本地直接编辑
 
-### Machines page shows provider not configured
+用任意编辑器打开：
 
-Check:
+- `~/.agentchat/runner.env`
 
-- key names exactly match the managed list
-- no old token/base URL left in the file
-- save completed successfully
-- you started a brand-new session after the change
+### 方式二：在 Web 中编辑
+
+进入：
+
+- **Settings → Machines & providers**
+
+在机器对应的 **Runner environment** 文本框里修改并保存。
+
+## 推荐验证方式
+
+修改完成后：
+
+1. 保存 `runner.env`
+2. 新建一个全新的会话
+3. 在新会话里发送一条最简单的消息
+4. 再看 Provider 是否真正生效
+
+## 常见问题
+
+### 本机终端里 Claude 能用，但 AgentChat 里 Claude 不能用
+
+通常是因为：
+
+- 你的 shell profile 里有 provider 环境变量
+- 但 `runner.env` 里没有
+
+AgentChat Runner 启动新会话时，读的是 `runner.env`，不是你的 shell 当前临时状态。
+
+### 页面显示 Provider 未配置
+
+检查：
+
+- 键名是否完全一致
+- 是否误留了旧 token / 旧 base URL
+- 是否保存成功
+- 是否用新会话验证
+
+### 修改后旧会话没变化
+
+这是预期行为。`runner.env` 只影响**新建会话**。
