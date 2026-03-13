@@ -143,7 +143,7 @@ export function formatUnsupportedMessageText(messageType: string): string {
 }
 
 export function formatUnboundUserText(): string {
-    return '当前飞书账号未绑定 AgentChat namespace；请联系管理员配置 FEISHU_USER_BINDINGS 或写入 users 表(platform=feishu)。'
+    return '当前飞书账号没有可用的 AgentChat namespace；请检查 FEISHU_DEFAULT_NAMESPACE、FEISHU_USER_BINDINGS，或写入 users 表(platform=feishu)。'
 }
 
 export function formatFeishuHelpText(): string {

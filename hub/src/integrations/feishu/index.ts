@@ -24,6 +24,7 @@ export class FeishuIntegration {
         this.repository = new FeishuRepository(deps.store, {
             allowOpenIds: configuration.feishuAllowOpenIds,
             envBindings: configuration.feishuUserBindings,
+            defaultNamespace: configuration.feishuDefaultNamespace,
         })
         this.apiClient = configuration.feishuEnabled && configuration.feishuAppId && configuration.feishuAppSecret
             ? new FeishuApiClient({

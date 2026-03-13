@@ -48,11 +48,13 @@ CLI_API_TOKEN=$CLI_API_TOKEN AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run --c
 
 如果你想从网页端远程创建会话，这一步必须做。
 
-## 第 5 步：配置 Provider
+## 第 5 步：配置 Provider（可选）
 
 编辑：
 
 - `~/.agentchat/runner.env`
+
+只有在你需要给 Runner 显式传入 Claude / Gemini 的 API 或网关地址时，才需要这一步。
 
 最小 Claude 示例：
 
@@ -69,6 +71,8 @@ GEMINI_API_KEY=your-key
 ```
 
 更完整配置见：[Provider 配置](./provider-setup.md)
+
+如果你当前不需要这些配置，可以直接跳到下一步。
 
 ## 第 6 步：登录 Web
 

@@ -2,6 +2,17 @@
 
 AgentChat 0.0.2 当前支持**飞书私聊机器人**。
 
+这一版的推荐思路是：**先走最小接入**。
+
+也就是：
+
+- 建一个飞书应用
+- 给它加机器人
+- 给机器人开通合理的消息权限
+- 在 Hub 里填 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET`
+
+先让机器人能聊起来；菜单、卡片、多用户隔离这些都属于可选增强项。
+
 ## 当前支持范围
 
 ### 已支持
@@ -28,7 +39,6 @@ AgentChat 0.0.2 当前支持**飞书私聊机器人**。
 1. 一台已经跑起来的 AgentChat Hub
 2. 至少一台在线 Runner 机器
 3. 飞书开放平台应用（含机器人）
-4. 能拿到飞书用户的 `open_id`，用于绑定 namespace
 
 ## 第一步：在飞书开放平台创建应用
 
@@ -36,32 +46,48 @@ AgentChat 0.0.2 当前支持**飞书私聊机器人**。
 
 1. 创建企业自建应用
 2. 打开**机器人能力**
-3. 开启**事件订阅**或长连接能力（当前更推荐长连接）
-4. 为机器人添加菜单项，例如：
+3. 确保机器人有基本的消息接收/发送能力
+4. 开启**事件订阅**或长连接能力（当前默认推荐长连接）
+5. 如有需要，再为机器人添加菜单项，例如：
    - 帮助
    - 最近目标
    - 当前进展
+
+说明：
+
+- **卡片不是必需项**
+- **菜单不是必需项**
+- 先把最基础的私聊文本链路打通最重要
 
 > AgentChat 当前更偏向私聊机器人模式，不依赖复杂卡片或群聊场景。
 
 ## 第二步：配置 AgentChat 环境变量
 
-以下变量由 Hub 在启动时读取：
+最小可用配置：
 
 ```ini
 CLI_API_TOKEN=your-strong-token
 
-FEISHU_ENABLED=true
 FEISHU_APP_ID=cli_xxx
 FEISHU_APP_SECRET=xxx
+```
+
+只要 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 存在，Hub 就会自动启用飞书集成。
+
+下面这些是**可选增强项**：
+
+```ini
 
 # 默认启用长连接；如果你显式关闭可写 false
 FEISHU_LONG_CONNECTION=true
 
+# 默认进入 default namespace；单用户场景通常不需要改
+FEISHU_DEFAULT_NAMESPACE=default
+
 # 可选：只允许部分 open_id 使用
 FEISHU_ALLOW_OPEN_IDS=ou_xxx,ou_yyy
 
-# 推荐：直接把 open_id 映射到 namespace
+# 可选：把指定 open_id 映射到不同 namespace
 FEISHU_USER_BINDINGS=ou_xxx:default,ou_yyy:alice
 
 # 可选：飞书私聊收到第一条普通文本时自动建会话
@@ -77,33 +103,31 @@ FEISHU_REPLY_TIMEOUT_MS=90000
 FEISHU_BASE_URL=https://agentchat.example.com
 ```
 
-## 第三步：绑定用户到 namespace
+## 第三步：理解默认 namespace 行为
 
-最简单方式是配置：
+默认情况下，如果你没有额外配置用户映射，飞书用户会进入：
 
-```ini
-FEISHU_USER_BINDINGS=ou_xxx:default
-```
+- `default` namespace
 
-含义：
+这已经足够覆盖大多数**单用户自用**场景。
 
-- 当飞书 `open_id=ou_xxx` 的用户私聊机器人时
-- 它会进入 AgentChat 的 `default` namespace
+如果你需要更细的隔离，再使用：
 
-如果不做绑定，机器人会提示：当前飞书账号未绑定 namespace。
+- `FEISHU_USER_BINDINGS`
+- 或 users 表里的飞书用户映射
 
 ## 第四步：启动 Hub 和 Runner
 
 ### 启动 Hub
 
 ```bash
-CLI_API_TOKEN=your-strong-token FEISHU_ENABLED=true FEISHU_APP_ID=cli_xxx FEISHU_APP_SECRET=xxx FEISHU_USER_BINDINGS=ou_xxx:default agentchat hub
+CLI_API_TOKEN=your-strong-token FEISHU_APP_ID=cli_xxx FEISHU_APP_SECRET=xxx agentchat hub
 ```
 
 源码方式：
 
 ```bash
-CLI_API_TOKEN=your-strong-token FEISHU_ENABLED=true FEISHU_APP_ID=cli_xxx FEISHU_APP_SECRET=xxx FEISHU_USER_BINDINGS=ou_xxx:default bun run dev:hub
+CLI_API_TOKEN=your-strong-token FEISHU_APP_ID=cli_xxx FEISHU_APP_SECRET=xxx bun run dev:hub
 ```
 
 ### 启动 Runner
@@ -158,6 +182,8 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 
 ## 菜单建议
 
+菜单是可选项。
+
 推荐给飞书机器人配置三个菜单入口：
 
 - 帮助
@@ -170,12 +196,13 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 
 ### 机器人回复“当前飞书账号未绑定 AgentChat namespace”
 
-说明你的 `open_id` 还没有映射到 namespace。
+这种情况通常只会出现在你自己做了额外用户隔离逻辑、或改了默认用户映射行为时。
 
 优先检查：
 
 - `FEISHU_USER_BINDINGS`
-- 或你自己的用户映射逻辑
+- `FEISHU_DEFAULT_NAMESPACE`
+- 或你自己的用户映射逻辑 / users 表
 
 ### 飞书里发消息后说没有在线机器
 

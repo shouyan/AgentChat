@@ -17,6 +17,8 @@
  * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@agentchat.run)
  * - AGENTCHAT_HOME: Data directory (default: ~/.agentchat)
  * - DB_PATH: SQLite database path (default: {AGENTCHAT_HOME}/agentchat.db)
+ * - FEISHU_APP_ID / FEISHU_APP_SECRET: Enable Feishu bot integration when both are present
+ * - FEISHU_DEFAULT_NAMESPACE: Default namespace for Feishu users without explicit bindings (default: default)
  */
 
 import { existsSync, mkdirSync } from 'node:fs'
@@ -116,6 +118,9 @@ class Configuration {
     /** Feishu app secret */
     public readonly feishuAppSecret: string | null
 
+    /** Default namespace for Feishu users without explicit bindings */
+    public readonly feishuDefaultNamespace: string
+
     /** Optional external base URL for deep links */
     public readonly feishuBaseUrl: string | null
 
@@ -150,10 +155,14 @@ class Configuration {
         this.listenPort = serverSettings.listenPort
         this.publicUrl = serverSettings.publicUrl
         this.corsOrigins = serverSettings.corsOrigins
-        this.feishuEnabled = process.env.FEISHU_ENABLED === 'true'
-        this.feishuLongConnection = process.env.FEISHU_LONG_CONNECTION !== 'false'
         this.feishuAppId = process.env.FEISHU_APP_ID?.trim() || null
         this.feishuAppSecret = process.env.FEISHU_APP_SECRET?.trim() || null
+        const feishuConfigured = Boolean(this.feishuAppId && this.feishuAppSecret)
+        this.feishuEnabled = process.env.FEISHU_ENABLED === 'false'
+            ? false
+            : feishuConfigured || process.env.FEISHU_ENABLED === 'true'
+        this.feishuLongConnection = process.env.FEISHU_LONG_CONNECTION !== 'false'
+        this.feishuDefaultNamespace = process.env.FEISHU_DEFAULT_NAMESPACE?.trim() || 'default'
         this.feishuBaseUrl = process.env.FEISHU_BASE_URL?.trim() || null
         this.feishuAllowOpenIds = parseCommaSeparatedList(process.env.FEISHU_ALLOW_OPEN_IDS)
         this.feishuUserBindings = parseFeishuUserBindings(process.env.FEISHU_USER_BINDINGS)
@@ -180,8 +189,8 @@ class Configuration {
             mkdirSync(this.dataDir, { recursive: true })
         }
 
-        if (this.feishuEnabled && (!this.feishuAppId || !this.feishuAppSecret)) {
-            throw new Error('FEISHU_ENABLED=true requires FEISHU_APP_ID and FEISHU_APP_SECRET')
+        if (process.env.FEISHU_ENABLED === 'true' && (!this.feishuAppId || !this.feishuAppSecret)) {
+            throw new Error('Feishu requires FEISHU_APP_ID and FEISHU_APP_SECRET')
         }
     }
 

@@ -1,6 +1,17 @@
 # AgentChat
 
-AgentChat 是一个**本地优先**的 AI 编程代理控制台：你在自己的机器上运行 Claude Code、Codex、Cursor Agent、Gemini 或 OpenCode，再通过网页、手机 PWA、飞书私聊远程查看、发消息、审批权限和管理会话。
+AgentChat 是一个**本地优先的 AI Agent 远程控制台**。
+
+你可以在自己的机器上运行 **Claude Code、Codex、Gemini、Cursor Agent、OpenCode**，然后通过：
+
+- **远程网页 / PWA**
+- **飞书 App 里的机器人会话**
+
+去查看会话、发消息、审批权限、切换目标、继续推进任务。
+
+它不只是“把终端搬到网页上”。
+
+AgentChat 还支持 **多 Agent 群组 / Rooms**：你可以把 **Claude Code、Codex、Gemini、Cursor Agent、OpenCode** 这样的不同 Agent 放进同一个协作群组，让它们围绕同一个任务分工、对话、协调和推进工作。
 
 GitHub 仓库：
 
@@ -8,18 +19,53 @@ GitHub 仓库：
 
 当前版本：**0.0.2**
 
+## 这个项目能做什么
+
+### 1. 远程控制本地 Agent
+
+你在本机或服务器上运行 Agent，AgentChat 负责把控制面开放到：
+
+- Web
+- 手机 PWA
+- 飞书私聊机器人
+
+适合这些场景：
+
+- 人不在电脑前，但要继续盯 Claude Code / Codex 的执行进度
+- 在手机上给会话补一句指令
+- 在网页上审批权限、查看文件、打开终端
+- 在飞书里直接问“现在做到哪了”
+
+### 2. 多 Agent 群组协作
+
+你可以创建一个多 Agent 群组，把不同能力的 Agent 拉进来，例如：
+
+- Claude Code 负责主实现
+- Codex 负责另一路方案或测试修复
+- Gemini 负责总结、检索、结构化输出
+- Cursor Agent / OpenCode 负责特定工具链或独立任务
+
+然后让它们在一个群组里围绕同一目标持续协作。
+
+这类场景适合：
+
+- 一个 Agent 写代码，另一个 Agent 补测试
+- 一个 Agent 做规划，另一个 Agent 落地实现
+- 多条实现路线并行探索，再由协调者汇总
+
 ## 核心能力
 
-- 在本机运行 AI 编程代理，数据保留在自己的机器上
-- 通过 Web / PWA 远程查看会话、发消息、审批权限
-- Runner 模式支持从网页远程创建新会话
-- 支持多 Agent：Claude Code、Codex、Cursor Agent、Gemini、OpenCode
-- 支持飞书私聊机器人查看进度、切换会话、直接发消息
-- 支持 `agentchat attach <sessionId>` 在终端附着已有会话并继续发送消息
+- 通过 **网页 / PWA / 飞书 App** 远程控制本地 Agent
+- 支持 **Claude Code、Codex、Gemini、Cursor Agent、OpenCode**
+- 支持 **多 Agent 群组协作**
+- 支持从网页端**远程创建新会话**
+- 支持查看会话消息、文件、终端、机器状态
+- 支持 `agentchat attach <sessionId>` 回到终端继续附着已有会话
+- 数据和运行环境保留在你自己的机器上
 
 ## 安装方式
 
-AgentChat 首发先提供两种安装方式：
+AgentChat 当前提供两种安装方式：
 
 ### 1. GitHub Release 安装
 
@@ -78,42 +124,58 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 bun run 
 
 更完整说明见：[`docs/guide/quick-start.md`](docs/guide/quick-start.md)
 
-## Provider 配置
+## Provider 配置（可选）
 
-AgentChat 读取**机器级** provider 配置文件：
+Provider 配置是**可选项**，不是必填项。
+
+只有在你确实需要给 Runner 注入 **Claude / Gemini 的 API 信息或网关地址** 时，才需要编辑：
 
 - `~/.agentchat/runner.env`
 
-当前内置管理的键：
+例如：
 
 ```ini
 ANTHROPIC_BASE_URL=
 ANTHROPIC_AUTH_TOKEN=
-ANTHROPIC_DEFAULT_OPUS_MODEL=
-ANTHROPIC_DEFAULT_SONNET_MODEL=
-ANTHROPIC_DEFAULT_HAIKU_MODEL=
 GOOGLE_GEMINI_BASE_URL=
 GEMINI_API_KEY=
 ```
+
+如果你当前：
+
+- 不打算用 Claude / Gemini
+- 或本机上的 Claude Code / Gemini 方案本来就已经能独立工作
+
+那这些值都可以先留空，不需要为了启动 AgentChat 硬填。
 
 你也可以在 Web 的 **Machines & providers** 页面直接编辑同一个 `runner.env` 文件。
 
 文档：[`docs/guide/provider-setup.md`](docs/guide/provider-setup.md)
 
-## 飞书支持
+## 飞书接入
 
-0.0.2 当前支持：
+AgentChat 支持在**飞书 App**里通过机器人远程控制会话。
 
-- 飞书**私聊机器人**文本消息
-- `/help`、`/sessions`、`/use`、`/progress`、`/new`、`/model`、`/pwd`、`/status`、`/web`
-- 将普通文本转发到当前 active 会话或群组
+最小接入思路：
 
-当前不支持：
+1. 在飞书开放平台创建应用
+2. 给应用添加机器人
+3. 给机器人开通合理的消息权限
+4. 在 Hub 环境变量里填入：
+   - `FEISHU_APP_ID`
+   - `FEISHU_APP_SECRET`
+5. 启动 Hub 和 Runner
 
-- 飞书群聊绑定
-- 文件 / 图片消息
-- OAuth 账号绑定流程
-- 复杂交互卡片
+默认情况下，飞书用户会进入 `default` namespace；如果你需要更细的多用户隔离，再额外配置：
+
+- `FEISHU_USER_BINDINGS`
+- 或 users 表里的飞书用户映射
+
+说明：
+
+- 菜单是可选的
+- 卡片不是必需项
+- 当前最稳定的是**私聊机器人文本交互**
 
 文档：[`docs/guide/feishu.md`](docs/guide/feishu.md)
 
@@ -165,3 +227,9 @@ bun run smoke:web
 
 - License：**AGPL-3.0-only**
 - 欢迎自托管、二次开发与提交 PR
+
+## 致谢
+
+本项目的整体思路与部分实现参考了 HAPI 项目：
+
+- `https://github.com/tiann/hapi`

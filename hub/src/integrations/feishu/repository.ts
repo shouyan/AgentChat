@@ -7,6 +7,7 @@ export class FeishuRepository implements FeishuRepositoryLike {
         private readonly options: {
             allowOpenIds: string[]
             envBindings: Record<string, string>
+            defaultNamespace: string
         }
     ) {
     }
@@ -24,7 +25,7 @@ export class FeishuRepository implements FeishuRepositoryLike {
             return fromEnv
         }
         const fromStore = this.store.users.getUser('feishu', openId)
-        return fromStore?.namespace ?? null
+        return fromStore?.namespace ?? this.options.defaultNamespace
     }
 
     hasInboundMessage(messageId: string): boolean {

@@ -114,9 +114,14 @@ agentchat runner logs
 
 ### 飞书提示用户未绑定 namespace
 
+默认情况下，飞书用户会进入 `default` namespace。
+
+如果你仍然看到了这个提示，通常说明你启用了自定义隔离逻辑。
+
 检查：
 
 ```ini
+FEISHU_DEFAULT_NAMESPACE=default
 FEISHU_USER_BINDINGS=ou_xxx:default
 ```
 

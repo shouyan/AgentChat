@@ -131,9 +131,14 @@ attach 后你可以：
 
 ### 飞书里为什么提示用户未绑定 namespace？
 
-说明你还没有给该飞书 `open_id` 配置映射。最简单做法是设置：
+默认情况下，飞书用户会进入 `default` namespace。
+
+如果你看到了这个提示，通常说明你启用了更严格的隔离配置，但没有配好映射。
+
+最常见做法是设置：
 
 ```ini
+FEISHU_DEFAULT_NAMESPACE=default
 FEISHU_USER_BINDINGS=ou_xxx:default
 ```
 
