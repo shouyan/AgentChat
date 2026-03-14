@@ -1,9 +1,12 @@
 import type { Store } from '../../store'
+import type { NotificationChannel } from '../../notifications/notificationTypes'
 import type { SyncEngine } from '../../sync/syncEngine'
 import { configuration } from '../../configuration'
 import { FeishuApiClient } from './apiClient'
+import { FeishuCardActionHandler } from './cardActionHandler'
 import { FeishuInboundHandler } from './inbound'
 import { FeishuLongConnection } from './longConnection'
+import { FeishuNotificationChannel } from './notificationChannel'
 import { FeishuRepository } from './repository'
 import { FeishuSessionBridge } from './sessionBridge'
 import type { FeishuStatus } from './types'
@@ -13,6 +16,8 @@ export class FeishuIntegration {
     private readonly apiClient: FeishuApiClient | null
     private readonly bridge: FeishuSessionBridge | null
     private readonly inbound: FeishuInboundHandler | null
+    private readonly notificationChannel: NotificationChannel | null
+    private readonly cardActionHandler: FeishuCardActionHandler | null
     private readonly longConnection: FeishuLongConnection
 
     constructor(
@@ -30,6 +35,24 @@ export class FeishuIntegration {
             ? new FeishuApiClient({
                 appId: configuration.feishuAppId,
                 appSecret: configuration.feishuAppSecret,
+            })
+            : null
+        this.notificationChannel = this.apiClient
+            ? new FeishuNotificationChannel(
+                this.apiClient,
+                this.repository,
+                configuration.feishuBaseUrl ?? configuration.publicUrl,
+                configuration.cliApiToken
+            )
+            : null
+        this.cardActionHandler = this.apiClient
+            ? new FeishuCardActionHandler({
+                engine: deps.engine,
+                repository: this.repository,
+                publicUrl: configuration.feishuBaseUrl ?? configuration.publicUrl,
+                accessToken: configuration.cliApiToken,
+                verificationToken: configuration.feishuCardVerificationToken,
+                encryptKey: configuration.feishuCardEncryptKey,
             })
             : null
         this.bridge = this.apiClient
@@ -98,5 +121,13 @@ export class FeishuIntegration {
 
     getStatus(): FeishuStatus {
         return this.longConnection.getStatus()
+    }
+
+    getNotificationChannel(): NotificationChannel | null {
+        return this.notificationChannel
+    }
+
+    getCardActionHandler(): FeishuCardActionHandler | null {
+        return this.cardActionHandler
     }
 }

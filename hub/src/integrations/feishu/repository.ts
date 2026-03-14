@@ -71,6 +71,26 @@ export class FeishuRepository implements FeishuRepositoryLike {
         return this.store.feishu.getSessionState(openId)
     }
 
+    listOpenIdsByNamespace(namespace: string): string[] {
+        const openIds = new Set<string>()
+
+        for (const [openId, boundNamespace] of Object.entries(this.options.envBindings)) {
+            if (boundNamespace === namespace) {
+                openIds.add(openId)
+            }
+        }
+
+        for (const user of this.store.users.getUsersByPlatformAndNamespace('feishu', namespace)) {
+            openIds.add(user.platformUserId)
+        }
+
+        for (const state of this.store.feishu.getSessionStatesByNamespace(namespace)) {
+            openIds.add(state.openId)
+        }
+
+        return Array.from(openIds)
+    }
+
     setSessionState(input: {
         openId: string
         namespace: string

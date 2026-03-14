@@ -1,4 +1,5 @@
 import type { DecryptedMessage, SessionSummary } from '@agentchat/protocol/types'
+import type { InteractiveCard } from '@larksuiteoapi/node-sdk'
 import type { Machine, Session, SyncEngine } from '../../sync/syncEngine'
 
 export type FeishuStatus = {
@@ -24,6 +25,7 @@ export type FeishuMenuEvent = {
 
 export type FeishuApiMessageClient = {
     sendText: (openId: string, text: string) => Promise<string | undefined>
+    sendInteractiveCard?: (openId: string, card: InteractiveCard) => Promise<string | undefined>
 }
 
 export type FeishuRepositoryLike = {
@@ -47,6 +49,7 @@ export type FeishuRepositoryLike = {
         activeTargetType: 'session' | 'room' | null
         activeMachineId: string | null
     } | null
+    listOpenIdsByNamespace: (namespace: string) => string[]
     setSessionState: (input: {
         openId: string
         namespace: string

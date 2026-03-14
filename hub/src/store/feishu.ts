@@ -80,6 +80,13 @@ export function getFeishuSessionState(db: Database, openId: string): StoredFeish
     return row ? toStoredFeishuSessionState(row) : null
 }
 
+export function getFeishuSessionStatesByNamespace(db: Database, namespace: string): StoredFeishuSessionState[] {
+    const rows = db.prepare(
+        'SELECT * FROM feishu_session_states WHERE namespace = ? ORDER BY updated_at DESC'
+    ).all(namespace) as DbFeishuSessionStateRow[]
+    return rows.map(toStoredFeishuSessionState)
+}
+
 export function upsertFeishuSessionState(
     db: Database,
     input: {

@@ -19,6 +19,7 @@
  * - DB_PATH: SQLite database path (default: {AGENTCHAT_HOME}/agentchat.db)
  * - FEISHU_APP_ID / FEISHU_APP_SECRET: Enable Feishu bot integration when both are present
  * - FEISHU_DEFAULT_NAMESPACE: Default namespace for Feishu users without explicit bindings (default: default)
+ * - FEISHU_CARD_VERIFICATION_TOKEN / FEISHU_CARD_ENCRYPT_KEY: Optional Feishu card callback verification
  */
 
 import { existsSync, mkdirSync } from 'node:fs'
@@ -139,6 +140,12 @@ class Configuration {
     /** Wait time for collecting assistant reply */
     public readonly feishuReplyTimeoutMs: number
 
+    /** Optional Feishu card callback verification token */
+    public readonly feishuCardVerificationToken: string | null
+
+    /** Optional Feishu card callback encrypt key */
+    public readonly feishuCardEncryptKey: string | null
+
     /** Private constructor - use createConfiguration() instead */
     private constructor(
         dataDir: string,
@@ -173,6 +180,8 @@ class Configuration {
             const parsed = raw ? Number(raw) : NaN
             return Number.isFinite(parsed) && parsed > 0 ? parsed : 90_000
         })()
+        this.feishuCardVerificationToken = process.env.FEISHU_CARD_VERIFICATION_TOKEN?.trim() || null
+        this.feishuCardEncryptKey = process.env.FEISHU_CARD_ENCRYPT_KEY?.trim() || null
 
         // CLI API token - will be set by _setCliApiToken() before create() returns
         this.cliApiToken = ''

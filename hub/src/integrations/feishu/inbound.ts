@@ -88,6 +88,29 @@ function mapMenuEventKeyToCommand(eventKey: string): string {
     if (normalized === 'groups' || normalized === 'room_list' || normalized === 'agentchat_groups') {
         return '/sessions'
     }
+    if (
+        normalized === 'permissions'
+        || normalized === 'permission_list'
+        || normalized === 'agentchat_permissions'
+    ) {
+        return '/permissions'
+    }
+    if (
+        normalized === 'approve_current_permission'
+        || normalized === 'permission_approve'
+        || normalized === 'approve_permission'
+        || normalized === 'agentchat_permission_approve'
+    ) {
+        return '/approve current'
+    }
+    if (
+        normalized === 'deny_current_permission'
+        || normalized === 'permission_deny'
+        || normalized === 'deny_permission'
+        || normalized === 'agentchat_permission_deny'
+    ) {
+        return '/deny current'
+    }
     return '/help'
 }
 

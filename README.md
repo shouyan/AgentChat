@@ -17,7 +17,7 @@ GitHub 仓库：
 
 - `https://github.com/shouyan/AgentChat`
 
-当前版本：**0.0.3**
+当前版本：**0.0.4**
 
 ## 这个项目能做什么
 
@@ -174,14 +174,31 @@ AgentChat 支持在**飞书 App**里通过机器人远程控制会话。
 说明：
 
 - 菜单是可选的
-- 卡片不是必需项
+- 卡片是可选增强；如果启用，可直接在飞书里审批权限请求
 - 当前最稳定的是**私聊机器人文本交互**
+
+如果你希望飞书里用起来更顺手，建议再给机器人配三个可选菜单项：
+
+- `agentchat_sessions`：最近目标
+- `agentchat_permission_approve`：同意当前请求
+- `agentchat_permission_deny`：拒绝当前请求
+
+其中后两个菜单按钮会作用于**当前 active 目标下最新一条 pending request**。
+
+如果你要启用**卡片按钮审批**，再额外把飞书卡片回调地址指到：
+
+- `https://你的Hub地址/feishu/card`
+
+可选安全配置：
+
+- `FEISHU_CARD_VERIFICATION_TOKEN`
+- `FEISHU_CARD_ENCRYPT_KEY`
 
 文档：[`docs/guide/feishu.md`](docs/guide/feishu.md)
 
 ## 支持平台
 
-0.0.3 目标平台：
+0.0.4 目标平台：
 
 - macOS `arm64` / `x64`
 - Linux `arm64` / `x64`

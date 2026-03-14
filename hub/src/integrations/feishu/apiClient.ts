@@ -1,3 +1,5 @@
+import type { InteractiveCard } from '@larksuiteoapi/node-sdk'
+
 type TokenCache = {
     value: string
     expiresAt: number
@@ -22,6 +24,28 @@ export class FeishuApiClient {
             throw new Error('Feishu text content is required')
         }
 
+        return await this.sendMessage(openId, 'text', {
+            text: trimmedText,
+        })
+    }
+
+    async sendInteractiveCard(openId: string, card: InteractiveCard): Promise<string | undefined> {
+        if (!card || typeof card !== 'object') {
+            throw new Error('Feishu interactive card content is required')
+        }
+
+        return await this.sendMessage(openId, 'interactive', card)
+    }
+
+    private async sendMessage(
+        openId: string,
+        msgType: 'text' | 'interactive',
+        content: unknown
+    ): Promise<string | undefined> {
+        if (!openId.trim()) {
+            throw new Error('Feishu openId is required')
+        }
+
         const token = await this.getTenantAccessToken()
         const response = await this.fetchWithTimeout('https://open.feishu.cn/open-apis/im/v1/messages', {
             method: 'POST',
@@ -31,8 +55,8 @@ export class FeishuApiClient {
             },
             body: JSON.stringify({
                 receive_id: openId,
-                msg_type: 'text',
-                content: JSON.stringify({ text: trimmedText }),
+                msg_type: msgType,
+                content: JSON.stringify(content),
             }),
         }, {
             receive_id_type: 'open_id'

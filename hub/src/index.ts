@@ -182,6 +182,10 @@ async function main() {
     const notificationChannels: NotificationChannel[] = [
         new PushNotificationChannel(pushService, sseManager, visibilityTracker, config.publicUrl)
     ]
+    const feishuNotificationChannel = feishuIntegration.getNotificationChannel()
+    if (feishuNotificationChannel) {
+        notificationChannels.push(feishuNotificationChannel)
+    }
 
     notificationHub = new NotificationHub(syncEngine, notificationChannels)
 
@@ -198,6 +202,7 @@ async function main() {
         relayMode: relayFlag.enabled,
         officialWebUrl,
         getFeishuStatus: () => feishuIntegration?.getStatus() ?? null,
+        getFeishuCardActionHandler: () => feishuIntegration?.getCardActionHandler() ?? null,
     })
 
     await feishuIntegration.start()

@@ -1,6 +1,6 @@
 # 飞书接入
 
-AgentChat 0.0.3 当前支持**飞书私聊机器人**。
+AgentChat 0.0.4 当前支持**飞书私聊机器人**。
 
 这一版的推荐思路是：**先走最小接入**。
 
@@ -22,15 +22,18 @@ AgentChat 0.0.3 当前支持**飞书私聊机器人**。
 - `/new` 新建会话
 - `/model` 查看/切换当前会话模型
 - `/pwd`、`/status`、`/web`
+- `/permissions`、`/approve`、`/deny`、`/abort`
 - 普通文本直接转发到当前 active 会话或群组
-- 菜单事件：帮助、会话列表、当前进展
+- 菜单事件：帮助、会话列表、当前进展、当前请求快捷审批
+- 权限请求卡片通知
+- 飞书卡片按钮审批
 
 ### 暂不支持
 
 - 飞书群聊绑定
 - 文件 / 图片消息
 - OAuth 账号绑定流程
-- 复杂交互卡片
+- 问答型权限请求的结构化回答（仍建议转 Web）
 
 ## 接入前提
 
@@ -52,6 +55,8 @@ AgentChat 0.0.3 当前支持**飞书私聊机器人**。
    - 帮助
    - 最近目标
    - 当前进展
+   - 同意当前请求
+   - 拒绝当前请求
 
 说明：
 
@@ -101,6 +106,16 @@ FEISHU_REPLY_TIMEOUT_MS=90000
 
 # 可选：如果需要生成外链，设置你对外可访问的基础地址
 FEISHU_BASE_URL=https://agentchat.example.com
+
+# 可选：启用飞书卡片回调安全校验
+FEISHU_CARD_VERIFICATION_TOKEN=
+FEISHU_CARD_ENCRYPT_KEY=
+```
+
+如果你启用卡片按钮审批，需要把飞书开放平台里的卡片回调地址指到：
+
+```text
+https://你的Hub地址/feishu/card
 ```
 
 ## 第三步：理解默认 namespace 行为
@@ -148,6 +163,9 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 4. 再发送一条普通文本，例如“帮我看下当前项目状态”
 5. 发送 `/progress`
 6. 发送 `/web` 看能否拿到当前会话的 Web 链接
+7. 触发一个权限请求，确认：
+   - 飞书收到审批卡片
+   - 菜单按钮 `agentchat_permission_approve / agentchat_permission_deny` 可工作
 
 ## 常用命令
 
@@ -166,6 +184,13 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 /pwd
 /status
 /web
+/permissions
+/approve 1
+/approve current
+/approve 1 session
+/approve 1 edits
+/deny 1
+/abort 1
 ```
 
 ### `/new` 示例
@@ -184,13 +209,28 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 
 菜单是可选项。
 
-推荐给飞书机器人配置三个菜单入口：
+推荐给飞书机器人至少配置下面几个菜单入口：
 
-- 帮助
-- 最近目标
-- 当前进展
+- `agentchat_help`：帮助
+- `agentchat_sessions`：最近目标
+- `agentchat_progress`：当前进展
+- `agentchat_permission_approve`：同意当前请求
+- `agentchat_permission_deny`：拒绝当前请求
 
-这样最符合 AgentChat 当前能力边界，也最稳定。
+其中：
+
+- `agentchat_permission_approve` 等价 `/approve current`
+- `agentchat_permission_deny` 等价 `/deny current`
+
+这两个快捷菜单会作用于**当前 active 目标下最新一条 pending request**。
+
+如果你更习惯显式确认，也可以保留文本命令流：
+
+```text
+/permissions
+/approve 1
+/deny 1
+```
 
 ## 常见问题
 
@@ -217,6 +257,14 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 ### Provider 错误直接回到了飞书
 
 这是预期行为。AgentChat 会把 provider/runtime 错误直接返回给用户，便于排查，而不是吞掉错误。
+
+### 飞书卡片按钮点了没反应
+
+优先检查：
+
+- 飞书开放平台里的卡片回调地址是否指向 `/feishu/card`
+- `FEISHU_BASE_URL` / 对外域名是否可访问
+- 如果启用了安全校验，`FEISHU_CARD_VERIFICATION_TOKEN`、`FEISHU_CARD_ENCRYPT_KEY` 是否与飞书侧一致
 
 ### 菜单点击重复触发
 

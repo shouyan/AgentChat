@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import type { DecryptedMessage, ModelMode, Session } from '@agentchat/protocol/types'
 import { testProjectPath } from '@agentchat/protocol/testPaths'
+import { FeishuCardActionHandler } from './cardActionHandler'
 import { routeFeishuCommand } from './commandRouter'
 import { FeishuInboundHandler, parseFeishuIncomingTextMessage, parseFeishuMenuEvent } from './inbound'
+import { FeishuNotificationChannel } from './notificationChannel'
 import { FeishuSessionBridge } from './sessionBridge'
 import type { FeishuApiMessageClient, FeishuRepositoryLike } from './types'
 
@@ -93,6 +95,21 @@ class MemoryFeishuRepository implements FeishuRepositoryLike {
         return this.sessionState.get(openId) ?? null
     }
 
+    listOpenIdsByNamespace(namespace: string): string[] {
+        const openIds = new Set<string>()
+        for (const [openId, boundNamespace] of Object.entries(this.bindings)) {
+            if (boundNamespace === namespace) {
+                openIds.add(openId)
+            }
+        }
+        for (const state of this.sessionState.values()) {
+            if (state.namespace === namespace) {
+                openIds.add(state.openId)
+            }
+        }
+        return Array.from(openIds)
+    }
+
     setSessionState(input: {
         openId: string
         namespace: string
@@ -141,6 +158,19 @@ class FakeEngine {
     spawnError: string | null = null
     lastSpawnRequest: { machineId: string; directory: string; agent?: string; model?: string } | null = null
     lastSessionConfig: { sessionId: string; config: { modelMode?: ModelMode; model?: string } } | null = null
+    approvedPermissions: Array<{
+        sessionId: string
+        requestId: string
+        mode?: string
+        allowTools?: string[]
+        decision?: 'approved' | 'approved_for_session' | 'denied' | 'abort'
+        answers?: Record<string, string[]> | Record<string, { answers: string[] }>
+    }> = []
+    deniedPermissions: Array<{
+        sessionId: string
+        requestId: string
+        decision?: 'approved' | 'approved_for_session' | 'denied' | 'abort'
+    }> = []
 
     subscribe(listener: (event: { type: string; sessionId?: string; message?: DecryptedMessage }) => void): () => void {
         this.listeners.add(listener)
@@ -310,6 +340,54 @@ class FakeEngine {
                 ...session.metadata,
                 model: config.model,
             }
+        }
+    }
+
+    async approvePermission(
+        sessionId: string,
+        requestId: string,
+        mode?: string,
+        allowTools?: string[],
+        decision?: 'approved' | 'approved_for_session' | 'denied' | 'abort',
+        answers?: Record<string, string[]> | Record<string, { answers: string[] }>
+    ): Promise<void> {
+        this.approvedPermissions.push({
+            sessionId,
+            requestId,
+            mode,
+            allowTools,
+            decision,
+            answers,
+        })
+
+        const session = this.sessions.get(sessionId)
+        if (!session?.agentState?.requests?.[requestId]) {
+            return
+        }
+        const nextRequests = { ...(session.agentState.requests ?? {}) }
+        delete nextRequests[requestId]
+        session.agentState = {
+            ...session.agentState,
+            requests: nextRequests,
+        }
+    }
+
+    async denyPermission(
+        sessionId: string,
+        requestId: string,
+        decision?: 'approved' | 'approved_for_session' | 'denied' | 'abort'
+    ): Promise<void> {
+        this.deniedPermissions.push({ sessionId, requestId, decision })
+
+        const session = this.sessions.get(sessionId)
+        if (!session?.agentState?.requests?.[requestId]) {
+            return
+        }
+        const nextRequests = { ...(session.agentState.requests ?? {}) }
+        delete nextRequests[requestId]
+        session.agentState = {
+            ...session.agentState,
+            requests: nextRequests,
         }
     }
 }
@@ -949,6 +1027,301 @@ describe('routeFeishuCommand', () => {
         expect(result.response).toContain('当前群组：War Room')
         expect(result.response).toContain('最近回复：更近的群组回复：已经完成部署。')
     })
+
+    it('lists and approves pending permission requests from the active session', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            agentState: {
+                requests: {
+                    'req-1': {
+                        tool: 'Bash',
+                        arguments: { command: 'npm test' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+
+        const listResult = await routeFeishuCommand(commandDeps(engine, repository), {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/permissions', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(listResult.handled).toBe(true)
+        if (!listResult.handled) throw new Error('expected handled result')
+        expect(listResult.response).toContain('待审批请求：')
+        expect(listResult.response).toContain('Bash')
+        expect(listResult.response).toContain('npm test')
+
+        const approveResult = await routeFeishuCommand(commandDeps(engine, repository), {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/approve 1', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(approveResult.handled).toBe(true)
+        if (!approveResult.handled) throw new Error('expected handled result')
+        expect(approveResult.response).toContain('已同意')
+        expect(engine.approvedPermissions).toEqual([{
+            sessionId: 'session-1',
+            requestId: 'req-1',
+            mode: undefined,
+            allowTools: undefined,
+            decision: undefined,
+            answers: undefined,
+        }])
+    })
+
+    it('supports session-level permission approval commands', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            metadata: {
+                path: testProjectPath('project'),
+                host: 'test-host',
+                machineId: 'machine-1',
+                flavor: 'codex',
+                name: 'Codex session',
+            },
+            agentState: {
+                requests: {
+                    'req-2': {
+                        tool: 'Bash',
+                        arguments: { command: 'pnpm lint' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+
+        const result = await routeFeishuCommand(commandDeps(engine, repository), {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/approve 1 session', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(result.handled).toBe(true)
+        if (!result.handled) throw new Error('expected handled result')
+        expect(result.response).toContain('本会话放行')
+        expect(engine.approvedPermissions.at(-1)).toEqual({
+            sessionId: 'session-1',
+            requestId: 'req-2',
+            mode: undefined,
+            allowTools: undefined,
+            decision: 'approved_for_session',
+            answers: undefined,
+        })
+    })
+
+    it('supports edit approval mode in text commands', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            agentState: {
+                requests: {
+                    'req-3': {
+                        tool: 'Edit',
+                        arguments: { file_path: '/tmp/test.txt' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+
+        const result = await routeFeishuCommand(commandDeps(engine, repository), {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/approve 1 edits', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(result.handled).toBe(true)
+        if (!result.handled) throw new Error('expected handled result')
+        expect(engine.approvedPermissions.at(-1)).toEqual({
+            sessionId: 'session-1',
+            requestId: 'req-3',
+            mode: 'acceptEdits',
+            allowTools: undefined,
+            decision: undefined,
+            answers: undefined,
+        })
+    })
+
+    it('supports approving the latest pending request via /approve current', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            agentState: {
+                requests: {
+                    'req-old': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test:old' },
+                        createdAt: Date.now() - 5_000,
+                    },
+                    'req-new': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test:new' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+
+        const result = await routeFeishuCommand(commandDeps(engine, repository), {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/approve current', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(result.handled).toBe(true)
+        if (!result.handled) throw new Error('expected handled result')
+        expect(result.response).toContain('已同意')
+        expect(engine.approvedPermissions.at(-1)?.requestId).toBe('req-new')
+    })
+})
+
+describe('Feishu card approvals', () => {
+    it('sends permission cards to bound users', async () => {
+        const engine = new FakeEngine()
+        const session = createSession('session-1', 'default', {
+            agentState: {
+                requests: {
+                    'req-card': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        })
+        engine.sessions.set(session.id, session)
+        const repository = new MemoryFeishuRepository({ ou_1: 'default', ou_2: 'default' })
+        const sentCards: Array<{ openId: string; card: Record<string, unknown> }> = []
+        const channel = new FeishuNotificationChannel({
+            async sendText() {
+                return 'om_text'
+            },
+            async sendInteractiveCard(openId, card) {
+                sentCards.push({ openId, card: card as Record<string, unknown> })
+                return `om_card_${sentCards.length}`
+            }
+        }, repository, 'http://localhost:3217', 'test-token')
+
+        await channel.sendPermissionRequest(session as unknown as Parameters<FeishuNotificationChannel['sendPermissionRequest']>[0])
+
+        expect(sentCards).toHaveLength(2)
+        expect(sentCards[0]?.card.header).toBeTruthy()
+        expect(JSON.stringify(sentCards[0]?.card)).toContain('权限请求')
+        expect(JSON.stringify(sentCards[0]?.card)).toContain('req-card')
+    })
+
+    it('handles card approval callbacks and updates the card', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            agentState: {
+                requests: {
+                    'req-card': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        const handler = new FeishuCardActionHandler({
+            engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+            repository,
+            publicUrl: 'http://localhost:3217',
+            accessToken: 'test-token',
+        })
+
+        const result = await handler.handlePayload({
+            schema: '2.0',
+            header: {
+                event_type: 'card.action.trigger',
+            },
+            event: {
+                open_id: 'ou_1',
+                action: {
+                    value: {
+                        kind: 'permission_action',
+                        sessionId: 'session-1',
+                        requestId: 'req-card',
+                        action: 'approve',
+                    }
+                }
+            }
+        }, {})
+
+        expect(result.status).toBe(200)
+        expect(engine.approvedPermissions.at(-1)).toEqual({
+            sessionId: 'session-1',
+            requestId: 'req-card',
+            mode: undefined,
+            allowTools: undefined,
+            decision: undefined,
+            answers: undefined,
+        })
+        expect(JSON.stringify(result.body)).toContain('已批准')
+    })
+
+    it('returns challenge payloads for card callback verification', async () => {
+        const handler = new FeishuCardActionHandler({
+            engine: new FakeEngine() as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+            repository: new MemoryFeishuRepository({ ou_1: 'default' }),
+            publicUrl: 'http://localhost:3217',
+            accessToken: 'test-token',
+        })
+
+        const result = await handler.handlePayload({
+            type: 'url_verification',
+            challenge: 'challenge-token',
+        }, {})
+
+        expect(result).toEqual({
+            status: 200,
+            body: {
+                challenge: 'challenge-token',
+            }
+        })
+    })
 })
 
 describe('FeishuInboundHandler + FeishuSessionBridge', () => {
@@ -1481,5 +1854,158 @@ describe('FeishuInboundHandler + FeishuSessionBridge', () => {
         expect(sentTexts).toHaveLength(1)
         expect(sentTexts[0]).toContain('当前会话：Current progress session')
         expect(sentTexts[0]).toContain('最近回复：最近回复：Room 协调任务已完成。')
+    })
+
+    it('handles menu push event for approving the current permission request', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            metadata: {
+                path: testProjectPath('project'),
+                host: 'test-host',
+                machineId: 'machine-1',
+                flavor: 'claude',
+                name: 'Approval target',
+            },
+            agentState: {
+                requests: {
+                    'req-old': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test:old' },
+                        createdAt: Date.now() - 5_000,
+                    },
+                    'req-new': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test:new' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+        const sentTexts: string[] = []
+        const apiClient: FeishuApiMessageClient = {
+            async sendText(_openId, text) {
+                sentTexts.push(text)
+                return 'om_1'
+            }
+        }
+        const bridge = new FeishuSessionBridge({
+            engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+            repository,
+            apiClient,
+            publicUrl: 'http://localhost:3217',
+            accessToken: 'test-token',
+            replyTimeoutMs: 200,
+            spawnStrategy: {
+                autoCreateSession: true,
+                defaultMachineId: null,
+            }
+        })
+        const inbound = new FeishuInboundHandler({
+            repository,
+            apiClient,
+            bridge,
+            commandDeps: {
+                engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+                repository,
+                publicUrl: 'http://localhost:3217',
+                accessToken: 'test-token',
+                autoCreateSession: true,
+                defaultMachineId: null,
+            }
+        })
+
+        await inbound.handleMenuEvent({
+            event_id: 'evt_permission_approve_1',
+            event_key: 'agentchat_permission_approve',
+            operator: {
+                operator_id: { open_id: 'ou_1' }
+            }
+        })
+
+        expect(engine.approvedPermissions.at(-1)?.requestId).toBe('req-new')
+        expect(sentTexts).toHaveLength(1)
+        expect(sentTexts[0]).toContain('已同意')
+    })
+
+    it('handles menu push event for denying the current permission request', async () => {
+        const engine = new FakeEngine()
+        engine.sessions.set('session-1', createSession('session-1', 'default', {
+            metadata: {
+                path: testProjectPath('project'),
+                host: 'test-host',
+                machineId: 'machine-1',
+                flavor: 'claude',
+                name: 'Deny target',
+            },
+            agentState: {
+                requests: {
+                    'req-deny': {
+                        tool: 'Bash',
+                        arguments: { command: 'bun test:deny' },
+                        createdAt: Date.now() - 1_000,
+                    }
+                },
+                completedRequests: {}
+            }
+        }))
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeTargetType: 'session',
+        })
+        const sentTexts: string[] = []
+        const apiClient: FeishuApiMessageClient = {
+            async sendText(_openId, text) {
+                sentTexts.push(text)
+                return 'om_1'
+            }
+        }
+        const bridge = new FeishuSessionBridge({
+            engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+            repository,
+            apiClient,
+            publicUrl: 'http://localhost:3217',
+            accessToken: 'test-token',
+            replyTimeoutMs: 200,
+            spawnStrategy: {
+                autoCreateSession: true,
+                defaultMachineId: null,
+            }
+        })
+        const inbound = new FeishuInboundHandler({
+            repository,
+            apiClient,
+            bridge,
+            commandDeps: {
+                engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+                repository,
+                publicUrl: 'http://localhost:3217',
+                accessToken: 'test-token',
+                autoCreateSession: true,
+                defaultMachineId: null,
+            }
+        })
+
+        await inbound.handleMenuEvent({
+            event_id: 'evt_permission_deny_1',
+            event_key: 'agentchat_permission_deny',
+            operator: {
+                operator_id: { open_id: 'ou_1' }
+            }
+        })
+
+        expect(engine.deniedPermissions.at(-1)?.requestId).toBe('req-deny')
+        expect(sentTexts).toHaveLength(1)
+        expect(sentTexts[0]).toContain('已拒绝')
     })
 })

@@ -20,6 +20,7 @@ import { createCliRoutes } from './routes/cli'
 import { createPushRoutes } from './routes/push'
 import { createTemplateRoutes } from './routes/templates'
 import { createVoiceRoutes } from './routes/voice'
+import { createFeishuRoutes } from './routes/feishu'
 import type { SSEManager } from '../sse/sseManager'
 import type { VisibilityTracker } from '../visibility/visibilityTracker'
 import type { Server as BunServer } from 'bun'
@@ -28,6 +29,7 @@ import type { WebSocketData } from '@socket.io/bun-engine'
 import { loadEmbeddedAssetMap, type EmbeddedWebAsset } from './embeddedAssets'
 import { isBunCompiled } from '../utils/bunCompiled'
 import type { Store } from '../store'
+import type { FeishuCardActionHandler } from '../integrations/feishu/cardActionHandler'
 import type { FeishuStatus } from '../integrations/feishu/types'
 
 function findWebappDistDir(): { distDir: string; indexHtmlPath: string } {
@@ -68,6 +70,7 @@ function createWebApp(options: {
     relayMode?: boolean
     officialWebUrl?: string
     getFeishuStatus?: () => FeishuStatus | null
+    getFeishuCardActionHandler?: () => FeishuCardActionHandler | null
 }): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
@@ -89,6 +92,7 @@ function createWebApp(options: {
     })
     app.use('/api/*', corsMiddleware)
     app.use('/cli/*', corsMiddleware)
+    app.route('/feishu', createFeishuRoutes(() => options.getFeishuCardActionHandler?.() ?? null))
 
     app.route('/cli', createCliRoutes(options.getSyncEngine))
 
@@ -221,6 +225,7 @@ export async function startWebServer(options: {
     relayMode?: boolean
     officialWebUrl?: string
     getFeishuStatus?: () => FeishuStatus | null
+    getFeishuCardActionHandler?: () => FeishuCardActionHandler | null
 }): Promise<BunServer<WebSocketData>> {
     const isCompiled = isBunCompiled()
     const embeddedAssetMap = isCompiled ? await loadEmbeddedAssetMap() : null
@@ -236,6 +241,7 @@ export async function startWebServer(options: {
         relayMode: options.relayMode,
         officialWebUrl: options.officialWebUrl,
         getFeishuStatus: options.getFeishuStatus,
+        getFeishuCardActionHandler: options.getFeishuCardActionHandler,
     })
 
     const socketHandler = options.socketEngine.handler()

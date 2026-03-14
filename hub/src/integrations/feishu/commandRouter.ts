@@ -2,6 +2,17 @@ import path from 'node:path'
 import type { ModelMode } from '@agentchat/protocol/types'
 import { listSortedSessions } from '../../domains/sessions/queries'
 import { extractReadableTextFromMessage, formatFeishuHelpText } from './formatter'
+import {
+    applyPermissionAction,
+    formatPendingPermissionsText,
+    isEditPermissionRequest,
+    isQuestionPermissionRequest,
+    listPendingPermissionsForNamespace,
+    listPendingPermissionsForRoom,
+    listPendingPermissionsForSession,
+    resolvePendingPermission,
+    type FeishuPermissionActionName,
+} from './permissions'
 import type { FeishuAgentFlavor, FeishuCommandContext, FeishuCommandDependencies, FeishuCommandResult, FeishuSessionCreateInput } from './types'
 
 const CLAUDE_MODEL_MODES: readonly ModelMode[] = ['default', 'sonnet', 'opus'] as const
@@ -384,6 +395,132 @@ function formatWorkingDirectory(session: NonNullable<ReturnType<FeishuCommandDep
     return session.metadata?.path?.trim() || '(unknown)'
 }
 
+type FeishuPermissionCommandArgs = {
+    target: string | null
+    modifier: 'session' | 'edits' | null
+    error?: string
+}
+
+function parsePermissionCommandArgs(args: string): FeishuPermissionCommandArgs {
+    const tokens = args.split(/\s+/).map((token) => token.trim()).filter(Boolean)
+    if (tokens.length === 0) {
+        return { target: null, modifier: null }
+    }
+
+    let target: string | null = null
+    let modifier: 'session' | 'edits' | null = null
+
+    for (const token of tokens) {
+        const normalized = token.toLowerCase()
+        if (normalized === 'session' || normalized === 'always') {
+            if (modifier && modifier !== 'session') {
+                return { target: null, modifier: null, error: '同一条命令只能带一个审批模式。' }
+            }
+            modifier = 'session'
+            continue
+        }
+        if (normalized === 'edits' || normalized === 'edit' || normalized === 'write') {
+            if (modifier && modifier !== 'edits') {
+                return { target: null, modifier: null, error: '同一条命令只能带一个审批模式。' }
+            }
+            modifier = 'edits'
+            continue
+        }
+        if (target) {
+            return { target: null, modifier: null, error: '用法：/approve <编号|requestId> [session|edits]' }
+        }
+        target = token
+    }
+
+    return { target, modifier }
+}
+
+function listPendingPermissionsForCommandScope(
+    deps: FeishuCommandDependencies,
+    context: FeishuCommandContext,
+    state: ReturnType<FeishuCommandDependencies['repository']['getSessionState']>,
+    scope: 'active' | 'all' = 'active'
+) {
+    if (scope === 'all') {
+        return listPendingPermissionsForNamespace(deps.engine, context.namespace)
+    }
+
+    if (state?.activeTargetType === 'room' && state.activeRoomId) {
+        return listPendingPermissionsForRoom(deps.engine, state.activeRoomId, context.namespace)
+    }
+
+    if (state?.activeSessionId) {
+        const session = deps.engine.getSessionByNamespace(state.activeSessionId, context.namespace)
+        return session ? listPendingPermissionsForSession(session) : []
+    }
+
+    return listPendingPermissionsForNamespace(deps.engine, context.namespace)
+}
+
+function formatNoPendingPermissionText(
+    state: ReturnType<FeishuCommandDependencies['repository']['getSessionState']>,
+    scope: 'active' | 'all'
+): string {
+    if (scope === 'all') {
+        return '当前 namespace 没有待审批请求。'
+    }
+    if (state?.activeTargetType === 'room' && state.activeRoomId) {
+        return '当前群组没有待审批请求。发送 /permissions all 可查看整个 namespace。'
+    }
+    if (state?.activeSessionId) {
+        return '当前会话没有待审批请求。发送 /permissions all 可查看整个 namespace。'
+    }
+    return '当前 namespace 没有待审批请求。'
+}
+
+function resolvePermissionActionName(
+    command: '/approve' | '/deny' | '/abort',
+    modifier: FeishuPermissionCommandArgs['modifier']
+): { actionName: FeishuPermissionActionName | null; error?: string } {
+    if (command === '/deny') {
+        return {
+            actionName: modifier ? null : 'deny',
+            error: modifier ? '用法：/deny <编号|requestId>' : undefined
+        }
+    }
+    if (command === '/abort') {
+        return {
+            actionName: modifier ? null : 'abort',
+            error: modifier ? '用法：/abort <编号|requestId>' : undefined
+        }
+    }
+    if (modifier === 'session') {
+        return { actionName: 'approve_for_session' }
+    }
+    if (modifier === 'edits') {
+        return { actionName: 'approve_all_edits' }
+    }
+    return { actionName: 'approve' }
+}
+
+function formatPermissionActionSuccess(
+    actionName: FeishuPermissionActionName,
+    request: ReturnType<typeof resolvePendingPermission>['pending']
+): string {
+    const requestLabel = request
+        ? `${request.request.tool} · ${request.sessionName} (${request.sessionId.slice(0, 8)})`
+        : '请求'
+
+    if (actionName === 'approve') {
+        return `已同意：${requestLabel}`
+    }
+    if (actionName === 'approve_for_session') {
+        return `已按“本会话放行”处理：${requestLabel}`
+    }
+    if (actionName === 'approve_all_edits') {
+        return `已允许后续编辑：${requestLabel}`
+    }
+    if (actionName === 'abort') {
+        return `已中止：${requestLabel}`
+    }
+    return `已拒绝：${requestLabel}`
+}
+
 export async function routeFeishuCommand(
     deps: FeishuCommandDependencies,
     context: FeishuCommandContext,
@@ -632,6 +769,58 @@ export async function routeFeishuCommand(
 
     if (command === '/groups') {
         return await routeFeishuCommand(deps, context, '/sessions', helpers)
+    }
+
+    if (command === '/permissions') {
+        const scope = args.trim().toLowerCase() === 'all' ? 'all' : 'active'
+        const pending = listPendingPermissionsForCommandScope(deps, context, state, scope)
+        return {
+            handled: true,
+            response: pending.length > 0
+                ? formatPendingPermissionsText(pending)
+                : formatNoPendingPermissionText(state, scope)
+        }
+    }
+
+    if (command === '/approve' || command === '/deny' || command === '/abort') {
+        const parsedPermissionArgs = parsePermissionCommandArgs(args)
+        if (parsedPermissionArgs.error) {
+            return { handled: true, response: parsedPermissionArgs.error }
+        }
+
+        const resolvedAction = resolvePermissionActionName(command, parsedPermissionArgs.modifier)
+        if (resolvedAction.error || !resolvedAction.actionName) {
+            return { handled: true, response: resolvedAction.error ?? '无法解析审批动作。' }
+        }
+
+        const pending = listPendingPermissionsForCommandScope(deps, context, state, 'active')
+        if (pending.length === 0) {
+            return { handled: true, response: formatNoPendingPermissionText(state, 'active') }
+        }
+
+        const resolvedPending = resolvePendingPermission(pending, parsedPermissionArgs.target)
+        if (!resolvedPending.pending) {
+            return { handled: true, response: resolvedPending.error ?? '找不到待审批请求。' }
+        }
+
+        if (isQuestionPermissionRequest(resolvedPending.pending.request)) {
+            return { handled: true, response: '该请求需要结构化回答，暂时不能直接在飞书文本命令内完成；请改用 Web 端。' }
+        }
+        if (resolvedAction.actionName === 'approve_all_edits' && !isEditPermissionRequest(resolvedPending.pending.request)) {
+            return { handled: true, response: '只有编辑类请求才支持 /approve <编号> edits。' }
+        }
+
+        try {
+            await applyPermissionAction(deps.engine, resolvedPending.pending, resolvedAction.actionName)
+            return {
+                handled: true,
+                response: formatPermissionActionSuccess(resolvedAction.actionName, resolvedPending.pending),
+                sessionId: resolvedPending.pending.sessionId,
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : '审批失败'
+            return { handled: true, response: `审批失败：${message}` }
+        }
     }
 
     if (command === '/use') {

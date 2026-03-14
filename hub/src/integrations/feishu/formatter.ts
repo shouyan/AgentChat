@@ -155,6 +155,7 @@ export function formatFeishuHelpText(): string {
         '- 查看/切换最近目标（会话 + 群组）',
         '- 查看当前进展',
         '- 新建会话',
+        '- 处理权限审批请求',
         '',
         '常用命令：',
         '/help - 查看帮助说明',
@@ -168,6 +169,13 @@ export function formatFeishuHelpText(): string {
         '/model - 查看当前会话模型',
         '/model list - 查看当前 agent 推荐模型',
         '/model <值> - 切换当前会话模型',
+        '/permissions - 查看当前目标的待审批请求',
+        '/permissions all - 查看整个 namespace 的待审批请求',
+        '/approve 1 - 同意第 1 个请求',
+        '/approve 1 session - 会话级放行',
+        '/approve 1 edits - 编辑类连续放行',
+        '/deny 1 - 拒绝第 1 个请求',
+        '/abort 1 - 中止第 1 个请求',
         '/pwd - 查看当前会话目录',
         '/status - 查看当前会话状态',
         '/web - 返回当前会话 Web 链接',
@@ -194,6 +202,8 @@ export function formatFeishuHelpText(): string {
         '- 如果当前没有 active session，系统会自动创建一个新会话',
         '- /new 只负责创建会话；模型如需调整，请用 /model',
         '- /pwd 可查看当前 active 会话目录',
+        '- 飞书卡片支持直接审批常规权限请求；复杂问答型请求请改用 Web',
+        '- 飞书菜单可配置快捷审批：agentchat_permission_approve / agentchat_permission_deny',
     ].join('\n')
 }
 

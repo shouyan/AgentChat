@@ -3,6 +3,7 @@ import type { StoredFeishuEventReceipt, StoredFeishuMessageLink, StoredFeishuSes
 import {
     addFeishuEventReceipt,
     addFeishuMessageLink,
+    getFeishuSessionStatesByNamespace,
     getFeishuSessionState,
     hasFeishuEventReceipt,
     hasFeishuMessageLink,
@@ -18,6 +19,10 @@ export class FeishuStore {
 
     getSessionState(openId: string): StoredFeishuSessionState | null {
         return getFeishuSessionState(this.db, openId)
+    }
+
+    getSessionStatesByNamespace(namespace: string): StoredFeishuSessionState[] {
+        return getFeishuSessionStatesByNamespace(this.db, namespace)
     }
 
     upsertSessionState(input: {
