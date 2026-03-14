@@ -233,6 +233,12 @@ function formatProgressResponse(session: FeishuSessionListLike, deps: FeishuComm
     ].join('\n')
 }
 
+function formatDetachResponse(autoCreateSession: boolean): string {
+    return autoCreateSession
+        ? '已脱离当前目标。后续直接发送普通文本时会自动创建新会话；也可以先发送 /sessions 或 /new。'
+        : '已脱离当前目标。发送 /sessions 重新绑定目标，或发送 /new 创建会话。'
+}
+
 function formatRoomProgressResponse(room: FeishuRoomListLike, deps: FeishuCommandDependencies, namespace: string): string {
     const latestReply = formatLatestRoomMessagePreview(room.id, deps, namespace, {
         senderTypes: ['session'],
@@ -861,6 +867,20 @@ export async function routeFeishuCommand(
 
     if (command === '/use-group') {
         return await routeFeishuCommand(deps, context, `/use ${args}`, helpers)
+    }
+
+    if (command === '/detach') {
+        deps.repository.setSessionState({
+            openId: context.openId,
+            namespace: context.namespace,
+            activeSessionId: null,
+            activeRoomId: null,
+            activeTargetType: null,
+        })
+        return {
+            handled: true,
+            response: formatDetachResponse(deps.autoCreateSession),
+        }
     }
 
     if (command === '/new') {

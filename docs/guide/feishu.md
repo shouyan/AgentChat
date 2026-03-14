@@ -1,6 +1,6 @@
 # 飞书接入
 
-AgentChat 0.0.4 当前支持**飞书私聊机器人**。
+AgentChat 0.0.5 当前支持**飞书私聊机器人**。
 
 这一版的推荐思路是：**先走最小接入**。
 
@@ -18,7 +18,7 @@ AgentChat 0.0.4 当前支持**飞书私聊机器人**。
 ### 已支持
 
 - 飞书私聊文本消息
-- `/help`、`/sessions`、`/use`、`/progress`
+- `/help`、`/sessions`、`/use`、`/detach`、`/progress`
 - `/new` 新建会话
 - `/model` 查看/切换当前会话模型
 - `/pwd`、`/status`、`/web`
@@ -174,6 +174,7 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 /progress
 /sessions
 /use 1
+/detach
 /new
 /new codex
 /new gemini
@@ -192,6 +193,22 @@ CLI_API_TOKEN=your-strong-token AGENTCHAT_API_URL=http://127.0.0.1:3217 agentcha
 /deny 1
 /abort 1
 ```
+
+### `/detach`
+
+`/detach` 会清空当前飞书私聊绑定的 active 目标：
+
+- `activeSessionId`
+- `activeRoomId`
+- `activeTargetType`
+
+它**不会中断**原来的会话或群组本身，只是让当前飞书聊天窗口不再继续把普通文本发到那个目标。
+
+发送完 `/detach` 之后：
+
+- 可以用 `/sessions` + `/use` 重新切换到别的目标
+- 可以用 `/new` 新建一个会话
+- 如果启用了 `FEISHU_AUTO_CREATE_SESSION=true`，直接发送普通文本也会自动创建新会话
 
 ### `/new` 示例
 

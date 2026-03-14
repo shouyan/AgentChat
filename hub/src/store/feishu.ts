@@ -34,6 +34,23 @@ type DbFeishuEventReceiptRow = {
     created_at: number
 }
 
+function resolveUpsertValue<
+    TInput extends Record<string, unknown>,
+    TKey extends keyof TInput,
+>(
+    input: TInput,
+    key: TKey,
+    existingValue: TInput[TKey] | null | undefined,
+): Exclude<TInput[TKey], undefined> | null {
+    if (Object.prototype.hasOwnProperty.call(input, key)) {
+        const nextValue = input[key]
+        return nextValue === undefined
+            ? ((existingValue ?? null) as Exclude<TInput[TKey], undefined> | null)
+            : (nextValue as Exclude<TInput[TKey], undefined> | null)
+    }
+    return (existingValue ?? null) as Exclude<TInput[TKey], undefined> | null
+}
+
 function toStoredFeishuSessionState(row: DbFeishuSessionStateRow): StoredFeishuSessionState {
     return {
         openId: row.open_id,
@@ -130,13 +147,13 @@ export function upsertFeishuSessionState(
     `).run(
         input.openId,
         input.namespace,
-        input.activeSessionId ?? existing?.activeSessionId ?? null,
-        input.activeRoomId ?? existing?.activeRoomId ?? null,
-        input.activeTargetType ?? existing?.activeTargetType ?? null,
-        input.activeMachineId ?? existing?.activeMachineId ?? null,
-        input.lastInboundMessageId ?? existing?.lastInboundMessageId ?? null,
-        input.lastInboundAt ?? existing?.lastInboundAt ?? null,
-        input.lastOutboundAt ?? existing?.lastOutboundAt ?? null,
+        resolveUpsertValue(input, 'activeSessionId', existing?.activeSessionId),
+        resolveUpsertValue(input, 'activeRoomId', existing?.activeRoomId),
+        resolveUpsertValue(input, 'activeTargetType', existing?.activeTargetType),
+        resolveUpsertValue(input, 'activeMachineId', existing?.activeMachineId),
+        resolveUpsertValue(input, 'lastInboundMessageId', existing?.lastInboundMessageId),
+        resolveUpsertValue(input, 'lastInboundAt', existing?.lastInboundAt),
+        resolveUpsertValue(input, 'lastOutboundAt', existing?.lastOutboundAt),
         existing?.createdAt ?? now,
         now
     )

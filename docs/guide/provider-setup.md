@@ -1,6 +1,6 @@
 # Provider 配置
 
-AgentChat 0.0.4 使用**机器级** `runner.env` 作为 provider 配置的事实来源。
+AgentChat 0.0.5 使用**机器级** `runner.env` 作为 provider 配置的事实来源。
 
 但这份配置是**可选的**，不是启动 AgentChat 的前置必填项。
 

@@ -122,10 +122,18 @@ class MemoryFeishuRepository implements FeishuRepositoryLike {
         this.sessionState.set(input.openId, {
             openId: input.openId,
             namespace: input.namespace,
-            activeSessionId: input.activeSessionId ?? existing?.activeSessionId ?? null,
-            activeRoomId: input.activeRoomId ?? existing?.activeRoomId ?? null,
-            activeTargetType: input.activeTargetType ?? existing?.activeTargetType ?? null,
-            activeMachineId: input.activeMachineId ?? existing?.activeMachineId ?? null,
+            activeSessionId: Object.prototype.hasOwnProperty.call(input, 'activeSessionId')
+                ? (input.activeSessionId === undefined ? (existing?.activeSessionId ?? null) : input.activeSessionId)
+                : (existing?.activeSessionId ?? null),
+            activeRoomId: Object.prototype.hasOwnProperty.call(input, 'activeRoomId')
+                ? (input.activeRoomId === undefined ? (existing?.activeRoomId ?? null) : input.activeRoomId)
+                : (existing?.activeRoomId ?? null),
+            activeTargetType: Object.prototype.hasOwnProperty.call(input, 'activeTargetType')
+                ? (input.activeTargetType === undefined ? (existing?.activeTargetType ?? null) : input.activeTargetType)
+                : (existing?.activeTargetType ?? null),
+            activeMachineId: Object.prototype.hasOwnProperty.call(input, 'activeMachineId')
+                ? (input.activeMachineId === undefined ? (existing?.activeMachineId ?? null) : input.activeMachineId)
+                : (existing?.activeMachineId ?? null),
         })
     }
 }
@@ -965,6 +973,43 @@ describe('routeFeishuCommand', () => {
         expect(switchResult.response).toContain('最近一条消息：最新群组进展：设计稿已确认。')
         expect(repository.getSessionState('ou_1')?.activeRoomId).toBe('room-1')
         expect(repository.getSessionState('ou_1')?.activeTargetType).toBe('room')
+    })
+
+    it('detaches current active target via /detach', async () => {
+        const engine = new FakeEngine()
+        const repository = new MemoryFeishuRepository({ ou_1: 'default' })
+        repository.setSessionState({
+            openId: 'ou_1',
+            namespace: 'default',
+            activeSessionId: 'session-1',
+            activeRoomId: 'room-1',
+            activeTargetType: 'room',
+            activeMachineId: 'machine-1',
+        })
+
+        const result = await routeFeishuCommand({
+            engine: engine as unknown as Parameters<typeof routeFeishuCommand>[0]['engine'],
+            repository,
+            publicUrl: 'http://localhost:3217',
+            accessToken: 'test-token',
+            autoCreateSession: true,
+            defaultMachineId: null,
+        }, {
+            openId: 'ou_1',
+            namespace: 'default',
+        }, '/detach', {
+            createSession: async () => ({ sessionId: 'unused', machineId: null })
+        })
+
+        expect(result.handled).toBe(true)
+        if (!result.handled) throw new Error('expected handled result')
+        expect(result.response).toContain('已脱离当前目标')
+        expect(repository.getSessionState('ou_1')).toMatchObject({
+            activeSessionId: null,
+            activeRoomId: null,
+            activeTargetType: null,
+            activeMachineId: 'machine-1',
+        })
     })
 
     it('returns room progress when room reply is newer than session reply', async () => {
